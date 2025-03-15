@@ -1,28 +1,41 @@
-version: '3.8'
 
 services:
-  myql:
-    container_name: nhts-store-mysql
-    image: mysql:8.0
-    command: mysqld --authentication_policy=caching_sha2_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
-      MYSQL_ROOT_PASSWORD: Nhts!123
-      MYSQL_DATABASE: nhts_store
-      #      MYSQL_USER: user
-      #      MYSQL_PASSWORD: passpass
-#      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Nhts!123456
+      - MSSQL_PID=Developer
     ports:
-      - '33006:3306'
+      - 14303:1433
     volumes:
-      - ./docker/db/data:/var/lib/mysql
-#      - ./docker/db/my.cnf:/etc/mysql/conf.d/my.cnf
+      - mssql_data:/var/opt/mssql
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P Nhts!123456 -C -Q 'SELECT 1'"]
+      interval: 10s
+      retries: 10
+      start_period: 10s
+      timeout: 3s
+  sqlserver.configurator:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    volumes:
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init.sql
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    command: >
+      bash -c '
+      /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P Nhts!123456 -C -d master -i docker-entrypoint-initdb.d/init.sql;
+      echo "Init script executed";
+      '
 
 
-
-
+volumes:
+  mssql_data:
 
 networks:
-  default:
-    name: nhts-store-network
+  nhts-store-network:
+    driver: bridge
 
 
