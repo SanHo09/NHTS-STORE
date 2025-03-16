@@ -4,12 +4,10 @@ import com.nhom4.nhtsstore.entities.Product;
 import com.nhom4.nhtsstore.entities.Supplier;
 import com.nhom4.nhtsstore.repositories.SupplierRepository;
 import jakarta.annotation.PostConstruct;
-
 import org.springframework.stereotype.Component;
-
+import org.springframework.stereotype.Component;
 import javax.swing.*;
-
-
+import lombok.RequiredArgsConstructor;
 
 @Component
 public class MainFrame extends JFrame {
@@ -29,9 +27,11 @@ public class MainFrame extends JFrame {
 
         supplierRepository.save(supplier);
         setTitle("NHTS Store");
-        setSize(500, 400);
+        setSize(1200,720);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         add(mainPanel);
+
+        
     }
 }

@@ -16,10 +16,10 @@ public class NhtsStoreApplication {
                 .headless(false)
                 .run(args);
 
-
         SwingUtilities.invokeLater(() -> {
             MainFrame mainFrame = context.getBean(MainFrame.class);
             mainFrame.setVisible(true);
         });
+
     }
 }

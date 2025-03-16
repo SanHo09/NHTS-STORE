@@ -37,4 +37,9 @@ build/
 *.sock.lock
 docker/db/data/*
 
+### Eclipse ###
+.metadata/
+./.classpath
+./.project
+
 
