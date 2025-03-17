@@ -13,6 +13,7 @@ import java.util.Set;
 public class Permission {
 
     @Id
+    @Column
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer permissionId;
 

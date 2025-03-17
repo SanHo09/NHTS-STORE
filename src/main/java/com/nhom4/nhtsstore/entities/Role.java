@@ -13,6 +13,7 @@ import java.util.Set;
 public class Role {
 
     @Id
+    @Column
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer roleId;
 

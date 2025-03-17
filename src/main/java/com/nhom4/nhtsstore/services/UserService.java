@@ -1,32 +1,31 @@
 package com.nhom4.nhtsstore.services;
 
 import com.nhom4.nhtsstore.entities.User;
+import com.nhom4.nhtsstore.mappers.IUserMapper;
 import com.nhom4.nhtsstore.repositories.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.nhom4.nhtsstore.viewmodel.user.UserSessionVm;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
 
 @Service
-public class UserService implements IUserRepository, UserDetailsService {
+@RequiredArgsConstructor
+public class UserService implements IUserService, UserDetailsService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-
-    @Autowired
-    UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
+    private final IUserMapper userMapper;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username)
+        User user = userRepository.findByUsernameWithRolesAndPermissions(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         Collection<SimpleGrantedAuthority> authorities = user.getRoles().stream()
@@ -40,7 +39,7 @@ public class UserService implements IUserRepository, UserDetailsService {
                 authorities
         );
     }
-
+    @Override
     public boolean authenticate(String username, String password) {
         try {
             UserDetails userDetails = loadUserByUsername(username);
@@ -48,5 +47,11 @@ public class UserService implements IUserRepository, UserDetailsService {
         } catch (UsernameNotFoundException e) {
             return false;
         }
+    }
+
+    @Override
+    public UserSessionVm findByUsername(String username) {
+        return userMapper.toUserSessionVm(userRepository.findByUsernameWithRolesAndPermissions(username).orElse(null));
+
     }
 }

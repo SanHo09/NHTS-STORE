@@ -1,35 +1,31 @@
 package com.nhom4.nhtsstore.utils;
 
-import lombok.Setter;
+import com.nhom4.nhtsstore.ui.ApplicationState;
 import org.springframework.stereotype.Component;
-import javax.swing.*;
+
+import javax.swing.JPanel;
 import java.util.HashMap;
 import java.util.Map;
 
 @Component
 public class PanelManager {
-    private final Map<String, JPanel> panelCache = new HashMap<>();
-    @Setter
-    private JPanel mainContainer;
+    private final Map<String, JPanel> panels = new HashMap<>();
+    private final ApplicationState state;
 
-    public void navigateTo(String route, JPanel panel) {
-        if (mainContainer == null) {
-            throw new IllegalStateException("Main container not set");
-        }
-
-        mainContainer.removeAll();
-        mainContainer.add(panel);
-        mainContainer.revalidate();
-        mainContainer.repaint();
-
-        panelCache.put(route, panel);
+    public PanelManager(ApplicationState state) {
+        this.state = state;
     }
 
-    public JPanel getPanel(String route) {
-        return panelCache.get(route);
+    public void navigateTo(String viewName, JPanel panel) {
+        panels.put(viewName, panel);
+        state.currentViewProperty().set(viewName);
     }
 
-    public void clearCache() {
-        panelCache.clear();
+    public JPanel getPanel(String viewName) {
+        return panels.get(viewName);
+    }
+
+    public JPanel getCurrentPanel() {
+        return panels.get(state.currentViewProperty().get());
     }
 }

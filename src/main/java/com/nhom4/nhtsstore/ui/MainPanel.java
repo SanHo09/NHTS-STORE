@@ -27,7 +27,7 @@ public class MainPanel extends javax.swing.JPanel {
         this.panelManager = panelManager;
         initComponents();
         this.jPanel2.setLayout(new BorderLayout());
-        panelManager.setMainContainer(jPanel2);
+
     }
     
 

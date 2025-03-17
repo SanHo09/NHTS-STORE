@@ -1,6 +1,7 @@
 package com.nhom4.nhtsstore.entities;
 
 
+import com.nhom4.nhtsstore.entities.audit.AbstractAuditEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -10,9 +11,10 @@ import java.util.Set;
 @Entity
 @Table(name = "users")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor
-public class User {
+public class User extends AbstractAuditEntity {
 
     @Id
+    @Column
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer userId;
 
@@ -28,11 +30,7 @@ public class User {
     @Column(length = 100)
     private String fullName;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    private java.util.Date createdAt = new java.util.Date();
 
-    @Temporal(TemporalType.TIMESTAMP)
-    private java.util.Date updatedAt = new java.util.Date();
 
     @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinTable(
