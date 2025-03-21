@@ -6,6 +6,7 @@ import com.nhom4.nhtsstore.utils.MsgBox;
 import io.github.palexdev.materialfx.beans.Alignment;
 import io.github.palexdev.materialfx.controls.*;
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.HPos;
@@ -154,4 +155,6 @@ public class LoginPanelController extends StackPane implements Initializable {
     private void enableLoginButton() {
         loginButton.setDisable(usernameField.getText().isEmpty() || passwordField.getText().isEmpty());
     }
+
+
 }

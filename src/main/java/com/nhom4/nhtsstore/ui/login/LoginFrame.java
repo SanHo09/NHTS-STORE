@@ -11,12 +11,13 @@ import javax.swing.*;
 import com.nhom4.nhtsstore.utils.JavaFxSwing;
 import jakarta.annotation.PostConstruct;
 import javafx.embed.swing.JFXPanel;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 import raven.modal.Toast;
 
 import java.awt.*;
 
-@Controller
+@Component
 public class LoginFrame extends javax.swing.JFrame {
 
     private final ApplicationState appState;
