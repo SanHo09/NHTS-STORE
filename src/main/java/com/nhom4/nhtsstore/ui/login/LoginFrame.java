@@ -1,44 +1,61 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
+ */
 package com.nhom4.nhtsstore.ui.login;
 
+import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.nhom4.nhtsstore.ui.ApplicationState;
-import jakarta.annotation.PostConstruct;
-import org.springframework.stereotype.Component;
 import javax.swing.*;
+
+import com.nhom4.nhtsstore.utils.JavaFxSwing;
+import jakarta.annotation.PostConstruct;
+import javafx.embed.swing.JFXPanel;
+import org.springframework.stereotype.Controller;
+import raven.modal.Toast;
+
 import java.awt.*;
 
-@Component
-public class LoginFrame extends JFrame {
-    private final LoginPanel loginPanel;
+@Controller
+public class LoginFrame extends javax.swing.JFrame {
+
     private final ApplicationState appState;
 
-    LoginFrame(LoginPanel loginPanel, ApplicationState appState) {
-        this.loginPanel = loginPanel;
-        this.appState = appState;
-
+    public LoginFrame(ApplicationState appState) {
+        this.appState=appState;
 
     }
     @PostConstruct
-    private void initDialog() {
+    private void initComponent(){
         setTitle("Login to NHTS Store");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(400, 250);
+        //set the size maxsize state
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
+        // Optional: Use these if you need more control over maximized window bounds
+         GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+         setMaximizedBounds(ge.getMaximumWindowBounds());
         setLocationRelativeTo(null);
         setResizable(false);
-        add(loginPanel, BorderLayout.CENTER);
 
-        // Listen for authentication state changes
+        // Use the utility class to create the JFXPanel with controller access
+        JFXPanel jfxLoginPanel = JavaFxSwing.createJFXPanelWithController(
+                "/fxml/LoginPanel.fxml",
+                appState.getApplicationContext(),
+                (LoginPanelController controller) -> {
+
+
+                });
+        getContentPane().add(jfxLoginPanel);
+        Toast.show(this, Toast.Type.INFO, "Logging in...");
         appState.authenticatedProperty().addListener((obs, wasAuthenticated, isAuthenticated) -> {
             SwingUtilities.invokeLater(() -> {
                 if (isAuthenticated) {
                     setVisible(false);
                     dispose();
-
                 }
             });
         });
     }
 
-    public void showLogin() {
-        setVisible(true);
-    }
+
 }

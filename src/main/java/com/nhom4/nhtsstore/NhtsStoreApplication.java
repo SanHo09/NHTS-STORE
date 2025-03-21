@@ -6,15 +6,15 @@ import com.nhom4.nhtsstore.entities.Role;
 import com.nhom4.nhtsstore.entities.User;
 import com.nhom4.nhtsstore.repositories.UserRepository;
 import com.nhom4.nhtsstore.ui.MainFrame;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.nhom4.nhtsstore.ui.login.LoginFrame;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import javax.swing.*;
 import java.util.Set;
 
 @SpringBootApplication
@@ -25,11 +25,9 @@ public class NhtsStoreApplication {
         ConfigurableApplicationContext context = new SpringApplicationBuilder(NhtsStoreApplication.class)
                 .headless(false)
                 .run(args);
-
-
     }
     @Bean
-    public CommandLineRunner startUI(MainFrame mainFrame, UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public CommandLineRunner startUI(MainFrame mainFrame ,UserRepository userRepository, PasswordEncoder passwordEncoder) {
         if (userRepository.findByUsernameWithRolesAndPermissions("admin").isEmpty()) {
             // Create test admin user
             User testAdmin = new User();
@@ -47,11 +45,10 @@ public class NhtsStoreApplication {
             role.setPermissions(Set.of(permission));
             testAdmin.setRoles(Set.of(role));
 
-
             userRepository.save(testAdmin);
-
         }
         return args -> {
+            // Show login frame first
 
         };
     }

@@ -2,6 +2,8 @@
 package com.nhom4.nhtsstore.ui;
 import com.nhom4.nhtsstore.viewmodel.user.UserSessionVm;
 import javafx.beans.property.*;
+import lombok.Getter;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import com.nhom4.nhtsstore.entities.User;
 
@@ -17,6 +19,13 @@ public class ApplicationState {
 
     // Application data state
     private final MapProperty<String, Object> cachedData = new SimpleMapProperty<>();
+    // Spring application context
+    @Getter
+    private final ApplicationContext applicationContext;
+
+    public ApplicationState(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
+    }
 
     // Getters for properties
     public BooleanProperty authenticatedProperty() {

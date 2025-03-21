@@ -8,11 +8,12 @@ import java.util.Set;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserSessionVm {
-    Integer userId;
+public class UserCreatVm {
     String username;
-    String fullName;
+    String password;
     String email;
+    String fullName;
     Set<String> roles;
     Set<String> permissions;
+
 }

@@ -29,8 +29,7 @@ public class MainPanel extends javax.swing.JPanel {
         this.jPanel2.setLayout(new BorderLayout());
 
     }
-    
-
+   
     
     /**
      * Creates new form MainPanel

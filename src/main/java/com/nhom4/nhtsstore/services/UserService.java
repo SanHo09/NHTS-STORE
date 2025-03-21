@@ -3,26 +3,34 @@ package com.nhom4.nhtsstore.services;
 import com.nhom4.nhtsstore.entities.User;
 import com.nhom4.nhtsstore.mappers.IUserMapper;
 import com.nhom4.nhtsstore.repositories.UserRepository;
+import com.nhom4.nhtsstore.viewmodel.user.UserCreatVm;
+import com.nhom4.nhtsstore.viewmodel.user.UserRecordVm;
 import com.nhom4.nhtsstore.viewmodel.user.UserSessionVm;
-import lombok.RequiredArgsConstructor;
+import com.nhom4.nhtsstore.viewmodel.user.UserUpdateVm;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
+
 public class UserService implements IUserService, UserDetailsService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final IUserMapper userMapper;
 
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, IUserMapper userMapper) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.userMapper = userMapper;
+    }
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsernameWithRolesAndPermissions(username)
@@ -39,6 +47,7 @@ public class UserService implements IUserService, UserDetailsService {
                 authorities
         );
     }
+
     @Override
     public boolean authenticate(String username, String password) {
         try {
@@ -54,4 +63,37 @@ public class UserService implements IUserService, UserDetailsService {
         return userMapper.toUserSessionVm(userRepository.findByUsernameWithRolesAndPermissions(username).orElse(null));
 
     }
+
+    @Override
+    public UserRecordVm createUser(UserCreatVm userCreatVm) {
+        return null;
+    }
+
+    @Override
+    public UserRecordVm updateUser(UserUpdateVm userUpdateVm) {
+        return null;
+    }
+
+    @Override
+    public void deleteUser(int userId) {
+
+    }
+
+
+    @Override
+    public Page<UserRecordVm> findUsersPage(Pageable pageable) {
+        return userRepository.findAll(pageable).map(userMapper::toUserRecord);
+    }
+
+    @Override
+    public UserRecordVm findUserRecordById(int userId) {
+        return null;
+    }
+
+    @Override
+    public Page<UserRecordVm> filterUser(String keyword, Pageable pageable) {
+        return null;
+    }
+
+
 }
