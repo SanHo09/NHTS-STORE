@@ -46,7 +46,6 @@ public class LoginFrame extends javax.swing.JFrame {
 
                 });
         getContentPane().add(jfxLoginPanel);
-        Toast.show(this, Toast.Type.INFO, "Logging in...");
         appState.authenticatedProperty().addListener((obs, wasAuthenticated, isAuthenticated) -> {
             SwingUtilities.invokeLater(() -> {
                 if (isAuthenticated) {
