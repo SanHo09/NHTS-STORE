@@ -14,7 +14,7 @@ import javafx.geometry.VPos;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import lombok.SneakyThrows;
-import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Component;
 import raven.modal.Toast;
 import raven.modal.toast.option.ToastLocation;
 
@@ -25,7 +25,7 @@ import java.util.concurrent.CompletableFuture;
 
 import static com.nhom4.nhtsstore.utils.JavaFxSwing.createFxImageViewFromSvg;
 
-@Controller
+@Component
 public class LoginPanelController extends StackPane implements Initializable {
     @FXML public MFXTextField usernameField;
     @FXML public MFXPasswordField passwordField;
