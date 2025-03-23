@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.GenericGenerator;
 
 import java.util.List;
 
@@ -14,7 +15,7 @@ import java.util.List;
 public class Category {
     @Id
     @Column
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @GenericGenerator(name="autoGenerate" , strategy="increment")
     private Long Id;
 
     @Column(nullable = false)
