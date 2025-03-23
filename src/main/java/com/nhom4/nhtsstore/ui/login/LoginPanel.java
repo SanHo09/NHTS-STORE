@@ -14,34 +14,25 @@ import org.springframework.stereotype.Controller;
 
 @Controller
 public class LoginPanel extends JPanel {
-
     private final ApplicationState appState;
+    private LoginPanelController controller;
 
     public LoginPanel(ApplicationState appState) {
-        this.appState=appState;
-
-    }
-    @PostConstruct
-    private void initComponent(){
-        setVisible(true);
-        // Use the utility class to create the JFXPanel with controller access
+        this.appState = appState;
         JFXPanel jfxLoginPanel = JavaFxSwing.createJFXPanelWithController(
                 "/fxml/LoginPanel.fxml",
                 appState.getApplicationContext(),
-                (LoginPanelController controller) -> {
-
-
+                (LoginPanelController c) -> {
+                    this.controller = c;
                 });
         add(jfxLoginPanel);
-        appState.authenticatedProperty().addListener((obs, wasAuthenticated, isAuthenticated) -> {
-            SwingUtilities.invokeLater(() -> {
-                if (isAuthenticated) {
-                    setVisible(false);
-                    removeAll();
-                }
-            });
-        });
     }
 
-
+    public void resetFields() {
+        if (controller != null) {
+            javafx.application.Platform.runLater(() -> {
+                controller.resetFields();
+            });
+        }
+    }
 }

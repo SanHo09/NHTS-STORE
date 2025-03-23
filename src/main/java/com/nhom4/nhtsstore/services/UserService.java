@@ -59,8 +59,11 @@ public class UserService implements IUserService, UserDetailsService {
 
     @Override
     public boolean authenticate(String username, String password) {
+        System.out.println("Authenticating user: " + username);
+        System.out.println("Password: " + password);
         try {
             UserDetails userDetails = loadUserByUsername(username);
+            System.out.println("User details: " + userDetails);
             return passwordEncoder.matches(password, userDetails.getPassword());
         } catch (UsernameNotFoundException e) {
             return false;

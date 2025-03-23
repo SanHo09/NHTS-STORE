@@ -58,6 +58,7 @@ public class ApplicationState {
 
     // Methods to modify state
     public void login(UserSessionVm user) {
+        assert user != null;
         currentUser.set(user);
         authenticated.set(true);
     }

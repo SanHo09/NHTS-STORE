@@ -31,15 +31,15 @@ public class NhtsStoreApplication {
     public CommandLineRunner startUI(MainFrame mainFrame , UserService userService, PasswordEncoder passwordEncoder) {
 
         return args -> {
-            if (userService.findByUsername("admin") == null) {
+            if (userService.findByUsername("phamduyhuy") == null) {
                 // Create an admin user
                 UserCreateVm adminUser = new UserCreateVm();
-                adminUser.setUsername("admin");
-                adminUser.setPassword(passwordEncoder.encode("admin123")); // Securely encode password
+                adminUser.setUsername("phamduyhuy");
+                adminUser.setPassword("admin123"); // Securely encode password
                 adminUser.setEmail("admin@example.com");
                 adminUser.setFullName("Administrator");
-                adminUser.setRoles(Set.of("ROLE_ADMIN"));
-
+                adminUser.setRoles(Set.of("ROLE_SUPER_ADMIN"));
+                adminUser.setPermissions(Set.of("FULL_ACCESS"));
 
                 userService.createUser(adminUser);
 

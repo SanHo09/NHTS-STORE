@@ -4,22 +4,30 @@ import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.nhom4.nhtsstore.repositories.SupplierRepository;
 import com.nhom4.nhtsstore.ui.login.LoginPanel;
 import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.stereotype.Controller;
+
 import javax.swing.*;
 import java.awt.*;
 
 @Controller
 public class MainFrame extends JFrame {
-    private final MainPanel mainPanel;
     private final SupplierRepository supplierRepository;
     private final ApplicationState appState;
+    private final ObjectFactory<MainPanel> mainPanelFactory;
     private final LoginPanel loginPanel;
 
-    MainFrame(MainPanel mainPanel, SupplierRepository supplierRepository,
-              ApplicationState appState, LoginPanel loginPanel) {
-        this.mainPanel = mainPanel;
+    private CardLayout cardLayout;
+    private JPanel cardContainer;
+    private MainPanel mainPanel;
+
+    MainFrame(SupplierRepository supplierRepository,
+              ApplicationState appState,
+              ObjectFactory<MainPanel> mainPanelFactory,
+              LoginPanel loginPanel) {
         this.supplierRepository = supplierRepository;
         this.appState = appState;
+        this.mainPanelFactory = mainPanelFactory;
         this.loginPanel = loginPanel;
     }
 
@@ -29,33 +37,46 @@ public class MainFrame extends JFrame {
         setSize(1200, 720);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
-//        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-//        setMaximizedBounds(ge.getMaximumWindowBounds());
-//        setLocationRelativeTo(null);
-        // Start hidden initially
 
+        // Initialize UI
+        FlatIntelliJLaf.setup();
 
-        // This is like watcher in Vue.js or useEffect in React - it listens for changes in the authentication state
-        // If the user is authenticated, the main frame is shown
-        appState.authenticatedProperty().addListener((obs, wasAuthenticated, isAuthenticated) -> {
+        // Create card layout for switching between login and main screen
+        cardLayout = new CardLayout();
+        cardContainer = new JPanel(cardLayout);
+        getContentPane().add(cardContainer);
+
+        // Add login panel
+        cardContainer.add(loginPanel, "login");
+
+        // Show login initially
+        cardLayout.show(cardContainer, "login");
+
+        // Listen for authentication changes
+        appState.authenticatedProperty().addListener((observable, oldValue, isAuthenticated) -> {
             SwingUtilities.invokeLater(() -> {
-                setupLayout();
-                setVisible(isAuthenticated);
-
+                if (isAuthenticated) {
+                    if (mainPanel == null) {
+                        // Create a fresh MainPanel instance when needed
+                        mainPanel = mainPanelFactory.getObject();
+                        cardContainer.add(mainPanel, "main");
+                    }
+                    cardLayout.show(cardContainer, "main");
+                } else {
+                    // Remove and clear mainPanel on logout
+                    if (mainPanel != null) {
+                        cardContainer.remove(mainPanel);
+                        mainPanel = null;
+                    }
+                    // Reset login fields before showing login panel
+                    loginPanel.resetFields();
+                    cardLayout.show(cardContainer, "login");
+                }
+                cardContainer.revalidate();
+                cardContainer.repaint();
             });
         });
 
-        // Show login frame first
-        SwingUtilities.invokeLater(() -> {
-            FlatIntelliJLaf.setup();
-            loginPanel.setVisible(true);
-
-        });
-        add(mainPanel, BorderLayout.CENTER);
         setVisible(true);
-    }
-    private void setupLayout() {
-        setLayout(new BorderLayout());
-        add(mainPanel, BorderLayout.CENTER);
     }
 }
