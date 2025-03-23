@@ -7,6 +7,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import com.nhom4.nhtsstore.entities.User;
 
+import javax.swing.*;
+
 @Service
 public class ApplicationState {
     // Authentication state
@@ -14,7 +16,7 @@ public class ApplicationState {
     private final ObjectProperty<UserSessionVm> currentUser = new SimpleObjectProperty<>();
 
     // UI state
-    private final StringProperty currentView = new SimpleStringProperty("login");
+    private final ObjectProperty<ViewName> currentView = new SimpleObjectProperty<>(ViewName.DASHBOARD_VIEW);
     private final BooleanProperty loading = new SimpleBooleanProperty(false);
 
     // Application data state
@@ -26,9 +28,13 @@ public class ApplicationState {
     public ApplicationState(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
     }
+    public JPanel getViewPanelByBean(Class<?> beanClass) {
+        return (JPanel) applicationContext.getBean(beanClass);
+    }
 
     // Getters for properties
     public BooleanProperty authenticatedProperty() {
+
         return authenticated;
     }
     public boolean isAuthenticated() {
@@ -42,7 +48,7 @@ public class ApplicationState {
         return currentUser.getValue();
     }
 
-    public StringProperty currentViewProperty() {
+    public ObjectProperty<ViewName> currentViewProperty() {
         return currentView;
     }
 
@@ -59,7 +65,7 @@ public class ApplicationState {
     public void logout() {
         currentUser.set(null);
         authenticated.set(false);
-        currentView.set("login");
+        currentView.set(ViewName.LOGIN_VIEW);
         cachedData.clear();
     }
 

@@ -2,28 +2,25 @@ package com.nhom4.nhtsstore.ui;
 
 import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.nhom4.nhtsstore.repositories.SupplierRepository;
-import com.nhom4.nhtsstore.ui.login.LoginFrame;
+import com.nhom4.nhtsstore.ui.login.LoginPanel;
 import jakarta.annotation.PostConstruct;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
-import raven.modal.Toast;
-
 import javax.swing.*;
+import java.awt.*;
 
 @Controller
 public class MainFrame extends JFrame {
     private final MainPanel mainPanel;
     private final SupplierRepository supplierRepository;
     private final ApplicationState appState;
-    private final LoginFrame loginFrame;
+    private final LoginPanel loginPanel;
 
     MainFrame(MainPanel mainPanel, SupplierRepository supplierRepository,
-              ApplicationState appState, LoginFrame loginFrame) {
+              ApplicationState appState, LoginPanel loginPanel) {
         this.mainPanel = mainPanel;
         this.supplierRepository = supplierRepository;
         this.appState = appState;
-        this.loginFrame = loginFrame;
+        this.loginPanel = loginPanel;
     }
 
     @PostConstruct
@@ -31,15 +28,18 @@ public class MainFrame extends JFrame {
         setTitle("NHTS Store");
         setSize(1200, 720);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
-        add(mainPanel);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
+//        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+//        setMaximizedBounds(ge.getMaximumWindowBounds());
+//        setLocationRelativeTo(null);
         // Start hidden initially
-        setVisible(false);
+
 
         // This is like watcher in Vue.js or useEffect in React - it listens for changes in the authentication state
         // If the user is authenticated, the main frame is shown
         appState.authenticatedProperty().addListener((obs, wasAuthenticated, isAuthenticated) -> {
             SwingUtilities.invokeLater(() -> {
+                setupLayout();
                 setVisible(isAuthenticated);
 
             });
@@ -48,9 +48,14 @@ public class MainFrame extends JFrame {
         // Show login frame first
         SwingUtilities.invokeLater(() -> {
             FlatIntelliJLaf.setup();
-            loginFrame.setVisible(true);
+            loginPanel.setVisible(true);
 
         });
-
+        add(mainPanel, BorderLayout.CENTER);
+        setVisible(true);
+    }
+    private void setupLayout() {
+        setLayout(new BorderLayout());
+        add(mainPanel, BorderLayout.CENTER);
     }
 }

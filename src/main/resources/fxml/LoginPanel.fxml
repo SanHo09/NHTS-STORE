@@ -10,9 +10,7 @@
 
 <VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="663.0" prefWidth="597.0" spacing="15.0" stylesheets="@../css/Global.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.nhom4.nhtsstore.ui.login.LoginPanelController">
     <children>
-
-
-        <MFXTextField fx:id="usernameField" floatMode="BORDER" floatingText="Email" graphicTextGap="1.0" prefHeight="50.0" prefWidth="402.0" />
+        <MFXTextField fx:id="usernameField" floatMode="BORDER" floatingText="Username" graphicTextGap="1.0" prefHeight="50.0" prefWidth="402.0" />
         <MFXPasswordField fx:id="passwordField" alignment="TOP_LEFT" borderGap="5.0" cache="true" floatMode="BORDER" floatingText="Password" graphicTextGap="1.0" measureUnitGap="1.0" prefHeight="50.0" prefWidth="402.0">
             <opaqueInsets>
                 <Insets />

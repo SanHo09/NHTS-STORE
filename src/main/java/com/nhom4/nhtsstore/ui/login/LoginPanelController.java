@@ -6,7 +6,6 @@ import com.nhom4.nhtsstore.utils.MsgBox;
 import io.github.palexdev.materialfx.beans.Alignment;
 import io.github.palexdev.materialfx.controls.*;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.HPos;
@@ -36,12 +35,12 @@ public class LoginPanelController extends StackPane implements Initializable {
     private boolean isLoading = false;
     private final UserService userService;
     private final ApplicationState applicationState;
-    private final LoginFrame loginFrame;
+    private final LoginPanel loginPanel;
 
     public LoginPanelController(UserService userService, ApplicationState applicationState) {
         this.userService = userService;
         this.applicationState = applicationState;
-        this.loginFrame = applicationState.getApplicationContext().getBean(LoginFrame.class);
+        this.loginPanel = applicationState.getApplicationContext().getBean(LoginPanel.class);
     }
 
     @SneakyThrows
@@ -53,9 +52,10 @@ public class LoginPanelController extends StackPane implements Initializable {
     }
 
     private void setupFields() {
-        usernameField.setLeadingIcon(createFxImageViewFromSvg("/icons/HugeiconsMail02.svg", 24, 24, null));
+        usernameField.setLeadingIcon(createFxImageViewFromSvg(
+                "/icons/HugeiconsMail02.svg", 24, 24, color -> Color.decode("#A280FF")));
         passwordField.setLeadingIcon(createFxImageViewFromSvg(
-                "/icons/ArcticonsPassword.svg", 24, 24, color -> Color.BLACK));
+                "/icons/MaterialSymbolsLockOutline.svg", 24, 24, color ->  Color.decode("#A280FF")));
     }
 
     private void setupTooltips() {
@@ -85,11 +85,8 @@ public class LoginPanelController extends StackPane implements Initializable {
         if (!validateInputs()) return;
 
         startLoadingState();
-
-        // Run authentication in background
         CompletableFuture.runAsync(() -> {
             try {
-                Thread.sleep(500); // Simulating delay for testing
                 var username = usernameField.getText().trim();
                 var password = passwordField.getText();
                 var userSession = userService.authenticate(username, password);
@@ -97,10 +94,10 @@ public class LoginPanelController extends StackPane implements Initializable {
                 Platform.runLater(() -> {
                     if (userSession) {
                         applicationState.login(userService.findByUsername(username));
-                        Toast.show(loginFrame, Toast.Type.SUCCESS, "Login successful");
+                        Toast.show(loginPanel, Toast.Type.SUCCESS, "Login successful");
                     } else {
-                        Toast.show(loginFrame, Toast.Type.WARNING,
-                                "Invalid username or password", ToastLocation.BOTTOM_CENTER);
+                        Toast.show(loginPanel, Toast.Type.WARNING,
+                                "Invalid username or password", ToastLocation.TOP_CENTER);
                     }
                     stopLoadingState();
                 });
