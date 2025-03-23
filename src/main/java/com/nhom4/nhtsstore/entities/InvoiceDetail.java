@@ -11,7 +11,7 @@ import lombok.Setter;
 public class InvoiceDetail {
     @Id
     @Column
-    @GeneratedValue(strategy= GenerationType.AUTO)
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long Id;
 
     @ManyToOne

@@ -42,4 +42,8 @@ public class Product {
     @ManyToOne
     @JoinColumn(name = "supplier_id", nullable = false)
     private Supplier Supplier;
+
+    @ManyToOne
+    @JoinColumn(name = "category_id", nullable = false)
+    private Category Category;
 }

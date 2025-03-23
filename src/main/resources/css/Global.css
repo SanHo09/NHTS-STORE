@@ -1,0 +1,7 @@
+.mfx-button{
+    -fx-background-color:  #007AFF;
+}
+.mfx-button:hover {
+    -fx-background-color: #10a7e2;
+
+}

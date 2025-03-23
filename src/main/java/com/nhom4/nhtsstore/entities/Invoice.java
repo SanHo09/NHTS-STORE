@@ -14,7 +14,7 @@ import java.util.List;
 public class Invoice {
     @Id
     @Column
-    @GeneratedValue(strategy= GenerationType.AUTO)
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long Id;
 
     @Temporal(TemporalType.DATE)

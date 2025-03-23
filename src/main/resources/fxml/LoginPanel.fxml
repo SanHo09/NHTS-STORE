@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import io.github.palexdev.materialfx.controls.MFXButton?>
+<?import io.github.palexdev.materialfx.controls.MFXPasswordField?>
+<?import io.github.palexdev.materialfx.controls.MFXTextField?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="663.0" prefWidth="597.0" spacing="15.0" stylesheets="@../css/Global.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.nhom4.nhtsstore.ui.login.LoginPanelController">
+    <children>
+
+
+        <MFXTextField fx:id="usernameField" floatMode="BORDER" floatingText="Email" graphicTextGap="1.0" prefHeight="50.0" prefWidth="402.0" />
+        <MFXPasswordField fx:id="passwordField" alignment="TOP_LEFT" borderGap="5.0" cache="true" floatMode="BORDER" floatingText="Password" graphicTextGap="1.0" measureUnitGap="1.0" prefHeight="50.0" prefWidth="402.0">
+            <opaqueInsets>
+                <Insets />
+            </opaqueInsets>
+        </MFXPasswordField>
+      <MFXButton fx:id="loginButton" depthLevel="LEVEL5" onMousePressed="#submitLogin" prefHeight="50.0" prefWidth="402.0" rippleColor="#2cc0e1" rippleRadius="2.0" style="-fx-background-radius: 15;" text="Continue" textAlignment="CENTER" textFill="WHITE" wrapText="true">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font>
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor>
+      </MFXButton>
+    </children>
+</VBox>

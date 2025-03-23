@@ -1,14 +1,14 @@
 CREATE TABLE invoice
 (
-    id          BIGINT NOT NULL,
-    create_date date   NOT NULL,
-    total_amount DOUBLE NOT NULL,
+    id          BIGINT IDENTITY(1,1) NOT NULL,
+    create_date DATE   NOT NULL,
+    total_amount FLOAT NOT NULL,
     CONSTRAINT pk_invoice PRIMARY KEY (id)
 );
 
 CREATE TABLE invoice_detail
 (
-    id         BIGINT NOT NULL,
+    id         BIGINT IDENTITY(1,1) NOT NULL,
     invoice_id BIGINT NOT NULL,
     product_id BIGINT NOT NULL,
     CONSTRAINT pk_invoicedetail PRIMARY KEY (id)
@@ -16,20 +16,20 @@ CREATE TABLE invoice_detail
 
 CREATE TABLE product
 (
-    id               BIGINT       NOT NULL,
+    id               BIGINT IDENTITY(1,1) NOT NULL,
     name             VARCHAR(255) NOT NULL,
-    sale_price DOUBLE NOT NULL,
-    purchase_price DOUBLE NULL,
-    manufacture_date date NULL,
-    expiry_date      date NULL,
+    sale_price FLOAT NOT NULL,
+    purchase_price FLOAT NULL,
+    manufacture_date DATE NULL,
+    expiry_date      DATE NULL,
     quantity         INT NULL,
-    supplier_id      BIGINT       NOT NULL,
+    supplier_id      BIGINT NOT NULL,
     CONSTRAINT pk_product PRIMARY KEY (id)
 );
 
 CREATE TABLE supplier
 (
-    id      BIGINT       NOT NULL,
+    id      BIGINT IDENTITY(1,1) NOT NULL,
     name    VARCHAR(255) NOT NULL,
     address VARCHAR(255) NOT NULL,
     CONSTRAINT pk_supplier PRIMARY KEY (id)
