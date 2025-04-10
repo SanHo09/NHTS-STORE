@@ -1,4 +1,4 @@
-package com.nhom4.nhtsstore.ui.dashboard;
+package com.nhom4.nhtsstore.ui.page.dashboard;
 
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;

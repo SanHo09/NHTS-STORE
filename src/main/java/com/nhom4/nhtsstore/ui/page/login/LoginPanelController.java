@@ -1,4 +1,4 @@
-package com.nhom4.nhtsstore.ui.login;
+package com.nhom4.nhtsstore.ui.page.login;
 
 import com.nhom4.nhtsstore.services.UserService;
 import com.nhom4.nhtsstore.ui.ApplicationState;

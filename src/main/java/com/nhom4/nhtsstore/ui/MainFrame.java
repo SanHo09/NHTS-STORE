@@ -2,7 +2,7 @@ package com.nhom4.nhtsstore.ui;
 
 import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.nhom4.nhtsstore.repositories.SupplierRepository;
-import com.nhom4.nhtsstore.ui.login.LoginPanel;
+import com.nhom4.nhtsstore.ui.page.login.LoginPanel;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.stereotype.Controller;
@@ -14,16 +14,16 @@ import java.awt.*;
 public class MainFrame extends JFrame {
     private final SupplierRepository supplierRepository;
     private final ApplicationState appState;
-    private final ObjectFactory<MainPanel> mainPanelFactory;
+    private final ObjectFactory<MainPanelTest> mainPanelFactory;
     private final LoginPanel loginPanel;
 
     private CardLayout cardLayout;
     private JPanel cardContainer;
-    private MainPanel mainPanel;
+    private MainPanelTest mainPanel;
 
     MainFrame(SupplierRepository supplierRepository,
               ApplicationState appState,
-              ObjectFactory<MainPanel> mainPanelFactory,
+              ObjectFactory<MainPanelTest> mainPanelFactory,
               LoginPanel loginPanel) {
         this.supplierRepository = supplierRepository;
         this.appState = appState;

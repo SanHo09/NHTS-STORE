@@ -1,4 +1,4 @@
-package com.nhom4.nhtsstore.ui.user;
+package com.nhom4.nhtsstore.ui.page.user;
 
 import com.nhom4.nhtsstore.ui.ViewName;
 import org.springframework.stereotype.Component;
