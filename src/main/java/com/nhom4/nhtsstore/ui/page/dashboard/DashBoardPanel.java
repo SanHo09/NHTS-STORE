@@ -1,6 +1,5 @@
 package com.nhom4.nhtsstore.ui.page.dashboard;
 
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 
 import javax.swing.*;
@@ -8,7 +7,13 @@ import javax.swing.*;
 @Controller
 public class DashBoardPanel extends JPanel {
     public DashBoardPanel() {
-        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        add(new JLabel("Dashboard"));
+        initComponents();
+    }
+
+    private void initComponents() {
+        setVisible(true);
+        // Add your dashboard components here
+        JLabel label = new JLabel("Dashboard");
+        add(label);
     }
 }

@@ -4,10 +4,13 @@
  */
 package com.nhom4.nhtsstore.ui;
 
+import org.springframework.stereotype.Controller;
+
 /**
  *
  * @author Admin
  */
+@Controller
 public class Form_1 extends javax.swing.JPanel {
 
     /**

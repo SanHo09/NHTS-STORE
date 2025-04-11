@@ -16,7 +16,7 @@ public class ApplicationState {
     private final ObjectProperty<UserSessionVm> currentUser = new SimpleObjectProperty<>();
 
     // UI state
-    private final ObjectProperty<ViewName> currentView = new SimpleObjectProperty<>(ViewName.DASHBOARD_VIEW);
+    private final ObjectProperty<ViewName> currentView = new SimpleObjectProperty<>(ViewName.LOGIN_VIEW);
     private final BooleanProperty loading = new SimpleBooleanProperty(false);
 
     // Application data state
@@ -28,13 +28,9 @@ public class ApplicationState {
     public ApplicationState(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
     }
-    public JPanel getViewPanelByBean(Class<?> beanClass) {
-        return (JPanel) applicationContext.getBean(beanClass);
-    }
 
     // Getters for properties
     public BooleanProperty authenticatedProperty() {
-
         return authenticated;
     }
     public boolean isAuthenticated() {
@@ -58,7 +54,6 @@ public class ApplicationState {
 
     // Methods to modify state
     public void login(UserSessionVm user) {
-        assert user != null;
         currentUser.set(user);
         authenticated.set(true);
     }
@@ -77,5 +72,17 @@ public class ApplicationState {
 
     public Object getCachedData(String key) {
         return cachedData.get(key);
+    }
+
+    public JPanel getViewPanelByBean(Class<? extends JPanel> panelClass) {
+        if (panelClass == null) {
+            return null;
+        }
+        Object bean = applicationContext.getBean(panelClass);
+        if (bean instanceof JPanel) {
+            return (JPanel) bean;
+        } else {
+            throw new IllegalArgumentException("Bean is not a JPanel: " + panelClass);
+        }
     }
 }

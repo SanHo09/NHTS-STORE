@@ -1,6 +1,7 @@
 package com.nhom4.nhtsstore;
 
 
+import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.nhom4.nhtsstore.entities.Permission;
 import com.nhom4.nhtsstore.entities.Role;
 import com.nhom4.nhtsstore.entities.User;
@@ -15,6 +16,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import javax.swing.*;
 import java.util.Set;
 
 @SpringBootApplication
@@ -25,10 +27,11 @@ public class NhtsStoreApplication {
         ConfigurableApplicationContext context = new SpringApplicationBuilder(NhtsStoreApplication.class)
                 .headless(false)
                 .run(args);
+
     }
 
     @Bean
-    public CommandLineRunner startUI(MainFrame mainFrame , UserService userService, PasswordEncoder passwordEncoder) {
+    public CommandLineRunner startUI(MainFrame mainFrame,UserService userService, PasswordEncoder passwordEncoder) {
 
         return args -> {
             if (userService.findByUsername("phamduyhuy") == null) {
@@ -47,6 +50,7 @@ public class NhtsStoreApplication {
             } else {
                 System.out.println("Admin user already exists.");
             }
+
 
         };
     }
