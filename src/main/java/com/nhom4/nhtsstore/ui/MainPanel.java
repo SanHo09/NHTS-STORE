@@ -22,13 +22,13 @@ public class MainPanel extends JPanel {
 	private JPanel mainContentPanel;
 
 	public MainPanel(ApplicationState applicationState, PanelManager panelManager,
-                     PagePanel pagePanel, Menu menu, Header header) {
+					 PagePanel pagePanel, Menu menu, Header header) {
 		this.applicationState = applicationState;
 		this.panelManager = panelManager;
 		this.pagePanel = pagePanel;
 		this.menu = menu;
 		this.header = header;
-        setLayout(new BorderLayout());
+		setLayout(new BorderLayout());
 		menu.initMoving(this);
 		menu.addEventMenuSelected(index -> {
 			ViewName[] viewNames = ViewName.values();
