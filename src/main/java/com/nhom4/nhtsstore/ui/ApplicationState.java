@@ -7,6 +7,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import com.nhom4.nhtsstore.entities.User;
 
+import javax.swing.*;
+
 @Service
 public class ApplicationState {
     // Authentication state
@@ -14,7 +16,7 @@ public class ApplicationState {
     private final ObjectProperty<UserSessionVm> currentUser = new SimpleObjectProperty<>();
 
     // UI state
-    private final StringProperty currentView = new SimpleStringProperty("login");
+    private final ObjectProperty<ViewName> currentView = new SimpleObjectProperty<>(ViewName.LOGIN_VIEW);
     private final BooleanProperty loading = new SimpleBooleanProperty(false);
 
     // Application data state
@@ -42,7 +44,7 @@ public class ApplicationState {
         return currentUser.getValue();
     }
 
-    public StringProperty currentViewProperty() {
+    public ObjectProperty<ViewName> currentViewProperty() {
         return currentView;
     }
 
@@ -59,7 +61,7 @@ public class ApplicationState {
     public void logout() {
         currentUser.set(null);
         authenticated.set(false);
-        currentView.set("login");
+        currentView.set(ViewName.LOGIN_VIEW);
         cachedData.clear();
     }
 
@@ -70,5 +72,17 @@ public class ApplicationState {
 
     public Object getCachedData(String key) {
         return cachedData.get(key);
+    }
+
+    public JPanel getViewPanelByBean(Class<? extends JPanel> panelClass) {
+        if (panelClass == null) {
+            return null;
+        }
+        Object bean = applicationContext.getBean(panelClass);
+        if (bean instanceof JPanel) {
+            return (JPanel) bean;
+        } else {
+            throw new IllegalArgumentException("Bean is not a JPanel: " + panelClass);
+        }
     }
 }

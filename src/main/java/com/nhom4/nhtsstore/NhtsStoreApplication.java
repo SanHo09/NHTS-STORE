@@ -1,12 +1,14 @@
 package com.nhom4.nhtsstore;
 
 
+import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.nhom4.nhtsstore.entities.Permission;
 import com.nhom4.nhtsstore.entities.Role;
 import com.nhom4.nhtsstore.entities.User;
 import com.nhom4.nhtsstore.repositories.UserRepository;
+import com.nhom4.nhtsstore.services.UserService;
 import com.nhom4.nhtsstore.ui.MainFrame;
-import com.nhom4.nhtsstore.ui.login.LoginFrame;
+import com.nhom4.nhtsstore.viewmodel.user.UserCreateVm;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -25,30 +27,30 @@ public class NhtsStoreApplication {
         ConfigurableApplicationContext context = new SpringApplicationBuilder(NhtsStoreApplication.class)
                 .headless(false)
                 .run(args);
-    }
-    @Bean
-    public CommandLineRunner startUI(MainFrame mainFrame ,UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        if (userRepository.findByUsernameWithRolesAndPermissions("admin").isEmpty()) {
-            // Create test admin user
-            User testAdmin = new User();
-            testAdmin.setUsername("admin");
-            testAdmin.setPassword(passwordEncoder.encode("admin123"));
-            testAdmin.setFullName("Test Administrator");
-            testAdmin.setEmail("admin@example.com");
-            // Create roles for test admin user
-            Role role = new Role();
-            role.setRoleName("ROLE_ADMIN");
-            role.setDescription("Administrator role");
-            Permission permission = new Permission();
-            permission.setPermissionName("CREATE_USER");
-            permission.setDescription("Create user permission");
-            role.setPermissions(Set.of(permission));
-            testAdmin.setRoles(Set.of(role));
 
-            userRepository.save(testAdmin);
-        }
+    }
+
+    @Bean
+    public CommandLineRunner startUI(MainFrame mainFrame,UserService userService, PasswordEncoder passwordEncoder) {
+
         return args -> {
-            // Show login frame first
+            if (userService.findByUsername("phamduyhuy") == null) {
+                // Create an admin user
+                UserCreateVm adminUser = new UserCreateVm();
+                adminUser.setUsername("phamduyhuy");
+                adminUser.setPassword("admin123"); // Securely encode password
+                adminUser.setEmail("admin@example.com");
+                adminUser.setFullName("Administrator");
+                adminUser.setRoles(Set.of("ROLE_SUPER_ADMIN"));
+                adminUser.setPermissions(Set.of("FULL_ACCESS"));
+
+                userService.createUser(adminUser);
+
+                System.out.println("Admin user created successfully!");
+            } else {
+                System.out.println("Admin user already exists.");
+            }
+
 
         };
     }

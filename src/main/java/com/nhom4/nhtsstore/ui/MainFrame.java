@@ -1,29 +1,30 @@
 package com.nhom4.nhtsstore.ui;
 
 import com.formdev.flatlaf.FlatIntelliJLaf;
-import com.nhom4.nhtsstore.repositories.SupplierRepository;
-import com.nhom4.nhtsstore.ui.login.LoginFrame;
+import com.nhom4.nhtsstore.ui.page.login.LoginPanel;
 import jakarta.annotation.PostConstruct;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
+import javafx.application.Platform;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.stereotype.Controller;
-import raven.modal.Toast;
 
 import javax.swing.*;
+import java.awt.*;
 
 @Controller
 public class MainFrame extends JFrame {
-    private final MainPanel mainPanel;
-    private final SupplierRepository supplierRepository;
     private final ApplicationState appState;
-    private final LoginFrame loginFrame;
+    private final ObjectFactory<MainPanel> mainPanelFactory;
+    private final LoginPanel loginPanel;
 
-    MainFrame(MainPanel mainPanel, SupplierRepository supplierRepository,
-              ApplicationState appState, LoginFrame loginFrame) {
-        this.mainPanel = mainPanel;
-        this.supplierRepository = supplierRepository;
+    private final MainPanel mainPanel;
+
+    MainFrame(ApplicationState appState,
+              ObjectFactory<MainPanel> mainPanelFactory,
+              LoginPanel loginPanel, MainPanel mainPanel) {
         this.appState = appState;
-        this.loginFrame = loginFrame;
+        this.mainPanelFactory = mainPanelFactory;
+        this.loginPanel = loginPanel;
+        this.mainPanel = mainPanel;
     }
 
     @PostConstruct
@@ -31,26 +32,26 @@ public class MainFrame extends JFrame {
         setTitle("NHTS Store");
         setSize(1200, 720);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
-        add(mainPanel);
-        // Start hidden initially
-        setVisible(false);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
+        CardLayout cardLayout = new CardLayout();
 
-        // This is like watcher in Vue.js or useEffect in React - it listens for changes in the authentication state
-        // If the user is authenticated, the main frame is shown
-        appState.authenticatedProperty().addListener((obs, wasAuthenticated, isAuthenticated) -> {
-            SwingUtilities.invokeLater(() -> {
-                setVisible(isAuthenticated);
+        JPanel cardContainer = new JPanel(cardLayout);
+        cardContainer.add(loginPanel, "login");
 
-            });
+        appState.authenticatedProperty().addListener((obs, old, isAuthenticated) -> {
+            if (isAuthenticated) {
+                cardContainer.add(mainPanel, "main");
+                cardLayout.show(cardContainer, "main");
+            } else {
+                cardLayout.show(cardContainer, "login");
+
+            }
         });
-
-        // Show login frame first
-        SwingUtilities.invokeLater(() -> {
+        cardLayout.show(cardContainer,"login");
+        add(cardContainer, BorderLayout.CENTER);
+        Platform.runLater(() -> {
             FlatIntelliJLaf.setup();
-            loginFrame.setVisible(true);
-
+            setVisible(true);
         });
-
     }
 }
