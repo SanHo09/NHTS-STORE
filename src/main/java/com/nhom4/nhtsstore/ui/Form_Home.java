@@ -2,11 +2,13 @@ package com.nhom4.nhtsstore.ui;
 
 import com.nhom4.nhtsstore.ui.shared.components.sidebar.Model_Card;
 import com.nhom4.nhtsstore.ui.shared.components.sidebar.ScrollBar;
+import org.springframework.stereotype.Controller;
+
 import java.awt.Color;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-
+@Controller
 public class Form_Home extends javax.swing.JPanel {
 
     public Form_Home() {

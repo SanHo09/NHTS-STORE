@@ -4,7 +4,7 @@ package com.nhom4.nhtsstore.mappers;
 import com.nhom4.nhtsstore.entities.Permission;
 import com.nhom4.nhtsstore.entities.Role;
 import com.nhom4.nhtsstore.entities.User;
-import com.nhom4.nhtsstore.viewmodel.user.UserCreatVm;
+import com.nhom4.nhtsstore.viewmodel.user.UserCreateVm;
 import com.nhom4.nhtsstore.viewmodel.user.UserRecordVm;
 import com.nhom4.nhtsstore.viewmodel.user.UserSessionVm;
 import org.mapstruct.Mapper;
@@ -25,7 +25,7 @@ public interface IUserMapper {
     UserSessionVm toUserSessionVm(User user);
 
     @Mapping(source = "roles", target = "roles", qualifiedByName = "roleNamesToRoles")
-    void createUser(@MappingTarget User user, UserCreatVm userCreatVm);
+    void createUser(@MappingTarget User user, UserCreateVm userCreateVm);
 
     void updateUser(@MappingTarget User user, UserRecordVm userRecordVm);
 

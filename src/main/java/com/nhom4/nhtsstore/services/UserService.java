@@ -3,7 +3,7 @@ package com.nhom4.nhtsstore.services;
 import com.nhom4.nhtsstore.entities.User;
 import com.nhom4.nhtsstore.mappers.IUserMapper;
 import com.nhom4.nhtsstore.repositories.UserRepository;
-import com.nhom4.nhtsstore.viewmodel.user.UserCreatVm;
+import com.nhom4.nhtsstore.viewmodel.user.UserCreateVm;
 import com.nhom4.nhtsstore.viewmodel.user.UserRecordVm;
 import com.nhom4.nhtsstore.viewmodel.user.UserSessionVm;
 import com.nhom4.nhtsstore.viewmodel.user.UserUpdateVm;
@@ -65,7 +65,7 @@ public class UserService implements IUserService, UserDetailsService {
     }
 
     @Override
-    public UserRecordVm createUser(UserCreatVm userCreatVm) {
+    public UserRecordVm createUser(UserCreateVm userCreateVm) {
         return null;
     }
 

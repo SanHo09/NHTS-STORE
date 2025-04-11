@@ -8,7 +8,7 @@ import java.util.Set;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserCreatVm {
+public class UserCreateVm {
     String username;
     String password;
     String email;
