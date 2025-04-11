@@ -1,7 +1,10 @@
 package com.nhom4.nhtsstore.services;
 
+import com.nhom4.nhtsstore.entities.Role;
 import com.nhom4.nhtsstore.entities.User;
 import com.nhom4.nhtsstore.mappers.IUserMapper;
+import com.nhom4.nhtsstore.repositories.PermissionRepository;
+import com.nhom4.nhtsstore.repositories.RoleRepository;
 import com.nhom4.nhtsstore.repositories.UserRepository;
 import com.nhom4.nhtsstore.viewmodel.user.UserCreateVm;
 import com.nhom4.nhtsstore.viewmodel.user.UserRecordVm;
@@ -15,19 +18,25 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 
 public class UserService implements IUserService, UserDetailsService {
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final PermissionRepository permissionRepository;
     private final PasswordEncoder passwordEncoder;
     private final IUserMapper userMapper;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, IUserMapper userMapper) {
+    public UserService(UserRepository userRepository, RoleRepository roleRepository, PermissionRepository permissionRepository, PasswordEncoder passwordEncoder, IUserMapper userMapper) {
         this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.permissionRepository = permissionRepository;
         this.passwordEncoder = passwordEncoder;
         this.userMapper = userMapper;
     }
@@ -65,8 +74,23 @@ public class UserService implements IUserService, UserDetailsService {
     }
 
     @Override
+    @Transactional
     public UserRecordVm createUser(UserCreateVm userCreateVm) {
-        return null;
+        // Convert UserCreateVm to User entity
+        User user = userMapper.toUser(userCreateVm);
+
+        // Encrypt password before saving
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+        // Retrieve roles from the database instead of creating new ones
+        Set<Role> roles = roleRepository.findByRoleNameIn(userCreateVm.getRoles());
+        user.setRoles(roles);
+
+        // Save User entity
+        User savedUser = userRepository.save(user);
+
+        // Convert User entity to UserRecordVm
+        return userMapper.toUserRecord(savedUser);
     }
 
     @Override
