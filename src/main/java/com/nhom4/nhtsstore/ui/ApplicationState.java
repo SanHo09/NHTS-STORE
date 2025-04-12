@@ -16,7 +16,7 @@ public class ApplicationState {
     private final ObjectProperty<UserSessionVm> currentUser = new SimpleObjectProperty<>();
 
     // UI state
-    private final ObjectProperty<ViewName> currentView = new SimpleObjectProperty<>(ViewName.LOGIN_VIEW);
+//    private final ObjectProperty<ViewName> currentView = new SimpleObjectProperty<>(ViewName.LOGIN);
     private final BooleanProperty loading = new SimpleBooleanProperty(false);
 
     // Application data state
@@ -44,9 +44,9 @@ public class ApplicationState {
         return currentUser.getValue();
     }
 
-    public ObjectProperty<ViewName> currentViewProperty() {
-        return currentView;
-    }
+//    public ObjectProperty<ViewName> currentViewProperty() {
+//        return currentView;
+//    }
 
     public BooleanProperty loadingProperty() {
         return loading;
@@ -61,7 +61,6 @@ public class ApplicationState {
     public void logout() {
         currentUser.set(null);
         authenticated.set(false);
-        currentView.set(ViewName.LOGIN_VIEW);
         cachedData.clear();
     }
 

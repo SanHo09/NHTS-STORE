@@ -12,7 +12,6 @@ public class DashBoardPanel extends JPanel {
 
     private void initComponents() {
         setVisible(true);
-        // Add your dashboard components here
         JLabel label = new JLabel("Dashboard");
         add(label);
     }

@@ -1,7 +1,9 @@
 package com.nhom4.nhtsstore.ui;
 
 import com.formdev.flatlaf.FlatIntelliJLaf;
+import com.nhom4.nhtsstore.ui.layout.WindowLayout;
 import com.nhom4.nhtsstore.ui.page.login.LoginPanel;
+import com.nhom4.nhtsstore.utils.JavaFxSwing;
 import jakarta.annotation.PostConstruct;
 import javafx.application.Platform;
 import org.springframework.beans.factory.ObjectFactory;
@@ -15,7 +17,6 @@ public class MainFrame extends JFrame {
     private final ApplicationState appState;
     private final ObjectFactory<MainPanel> mainPanelFactory;
     private final LoginPanel loginPanel;
-
     private final MainPanel mainPanel;
 
     MainFrame(ApplicationState appState,
@@ -30,28 +31,33 @@ public class MainFrame extends JFrame {
     @PostConstruct
     private void init() {
         setTitle("NHTS Store");
-        setSize(1200, 720);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
+        add(JavaFxSwing.createJFXPanelWithController("/fxml/WindowLayout.fxml",appState.getApplicationContext(),
+                        false,
+                        (WindowLayout controller) -> {
+                            controller.setMainFrame(this);
+                        }
+                )
+            ,BorderLayout.NORTH
+        );
         CardLayout cardLayout = new CardLayout();
-
+        setUndecorated(true);
         JPanel cardContainer = new JPanel(cardLayout);
         cardContainer.add(loginPanel, "login");
-
+        cardContainer.add(mainPanel, "main");
         appState.authenticatedProperty().addListener((obs, old, isAuthenticated) -> {
-            if (isAuthenticated) {
-                cardContainer.add(mainPanel, "main");
-                cardLayout.show(cardContainer, "main");
-            } else {
-                cardLayout.show(cardContainer, "login");
+            SwingUtilities.invokeLater(() -> {
+                cardLayout.show(cardContainer, isAuthenticated ? "main" : "login");
 
-            }
+            });
         });
-        cardLayout.show(cardContainer,"login");
+
         add(cardContainer, BorderLayout.CENTER);
-        Platform.runLater(() -> {
+        SwingUtilities.invokeLater(() -> {
             FlatIntelliJLaf.setup();
             setVisible(true);
         });
     }
+
 }

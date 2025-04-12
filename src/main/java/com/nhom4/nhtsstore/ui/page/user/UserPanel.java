@@ -1,7 +1,5 @@
 package com.nhom4.nhtsstore.ui.page.user;
 
-import com.nhom4.nhtsstore.ui.ViewName;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 
 import javax.swing.JPanel;

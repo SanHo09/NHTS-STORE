@@ -1,5 +1,6 @@
 package com.nhom4.nhtsstore.services;
 
+import com.nhom4.nhtsstore.entities.User;
 import com.nhom4.nhtsstore.viewmodel.user.UserCreateVm;
 import com.nhom4.nhtsstore.viewmodel.user.UserRecordVm;
 import com.nhom4.nhtsstore.viewmodel.user.UserSessionVm;

@@ -25,7 +25,7 @@ import java.util.concurrent.CompletableFuture;
 import static com.nhom4.nhtsstore.utils.JavaFxSwing.createFxImageViewFromSvg;
 
 @Component
-public class LoginPanelController extends StackPane implements Initializable {
+public class LoginPanelController  implements Initializable {
     @FXML public MFXTextField usernameField;
     @FXML public MFXPasswordField passwordField;
     @FXML public MFXButton loginButton;

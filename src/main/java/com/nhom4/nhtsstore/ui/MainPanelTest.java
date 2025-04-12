@@ -33,7 +33,7 @@ public class MainPanelTest extends JPanel {
     private void initializeComponents() {
         // Set default view when panel is created
         SwingUtilities.invokeLater(() -> {
-            panelManager.navigateTo(ViewName.DASHBOARD_VIEW,
+            panelManager.navigateTo(AppView.DASHBOARD,
                     applicationState.getViewPanelByBean(DashBoardPanel.class));
         });
     }
