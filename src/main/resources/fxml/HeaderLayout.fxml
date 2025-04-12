@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.CustomMenuItem?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+
+
+<FlowPane alignment="CENTER_RIGHT" stylesheets="@../css/Global.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.nhom4.nhtsstore.ui.layout.Header">
+   <children>
+      <MenuButton fx:id="dropDownMenu" mnemonicParsing="false" prefHeight="32.0" prefWidth="171.0" text="MenuButton">
+         <graphic>
+            <ImageView fx:id="userAvatarImage" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true" />
+         </graphic>
+         <items>
+            <CustomMenuItem fx:id="menuItemProfile" mnemonicParsing="false" onAction="#onActionMenuItemProfile" text="Profile">
+               <content>
+                  <HBox alignment="CENTER_LEFT" prefWidth="169.0" spacing="9.0">
+                     <children>
+                        <ImageView fx:id="profileIcon" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true" />
+                        <Label text="Profile" />
+                     </children>
+                  </HBox>
+               </content>
+            </CustomMenuItem>
+            <CustomMenuItem fx:id="menuItemLogout" mnemonicParsing="false" onAction="#onActionMenuItemLogout" text="Logout">
+               <content>
+                  <HBox alignment="CENTER_LEFT" prefWidth="169.0" spacing="9.0">
+                     <children>
+                        <ImageView fx:id="logoutIcon" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true" />
+                        <Label text="Logout" />
+                     </children>
+                  </HBox>
+               </content>
+            </CustomMenuItem>
+         </items>
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor>
+      </MenuButton>
+   </children>
+   <padding>
+      <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+   </padding>
+</FlowPane>

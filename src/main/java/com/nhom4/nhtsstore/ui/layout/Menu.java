@@ -1,6 +1,6 @@
 package com.nhom4.nhtsstore.ui.layout;
 
-import com.nhom4.nhtsstore.ui.ViewName;
+import com.nhom4.nhtsstore.ui.AppView;
 import com.nhom4.nhtsstore.ui.shared.components.sidebar.EventMenuSelected;
 import com.nhom4.nhtsstore.ui.shared.components.sidebar.ListMenu;
 import com.nhom4.nhtsstore.ui.shared.components.sidebar.Model_Menu;
@@ -30,11 +30,11 @@ public class Menu extends javax.swing.JPanel {
         setOpaque(false);
         listMenu1.setOpaque(false);
         // add menu items by looping through the ViewName enum
-        for (ViewName viewName : ViewName.values()) {
-            if (viewName == ViewName.LOGIN_VIEW) {
+        for (AppView appView : AppView.values()) {
+            if (appView == AppView.LOGIN) {
                 continue;
             }
-            listMenu1.addItem(new Model_Menu(viewName.getIcon(), viewName.getName(), Model_Menu.MenuType.MENU));
+            listMenu1.addItem(new Model_Menu(appView.getIcon(), appView.getName(), Model_Menu.MenuType.MENU));
         }
     }
 

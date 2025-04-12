@@ -1,7 +1,40 @@
 .mfx-button{
-    -fx-background-color:  #007AFF;
+    -fx-background-color:  #0f156d;
 }
 .mfx-button:hover {
-    -fx-background-color: #10a7e2;
+    -fx-background-color: #f05502;
 
+}
+.window-control-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+}
+
+.window-control-button:hover {
+    -fx-background-color: #9e9e9e;
+}
+
+
+.menu-button {
+    -fx-background-color: rgba(49, 130, 200, 0.56);
+    -fx-background-radius: 5;
+}
+
+/* Style for the text part */
+
+
+/* Style for the arrow button */
+.menu-button .arrow-button {
+    -fx-background-color: transparent;
+}
+
+/* Style for the arrow itself */
+.menu-button .arrow-button .arrow {
+    -fx-background-color: white;
+    -fx-transition: -fx-rotate 0.2s ease-in-out;
+}
+
+/* Rotate arrow when menu is showing */
+.menu-button:showing .arrow-button .arrow {
+    -fx-rotate: 180;
 }

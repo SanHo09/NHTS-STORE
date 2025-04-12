@@ -1,59 +1,82 @@
 package com.nhom4.nhtsstore.ui.layout;
 
-import org.springframework.stereotype.Component;
+import com.nhom4.nhtsstore.ui.ApplicationState;
+import com.nhom4.nhtsstore.utils.PanelManager;
+import com.nhom4.nhtsstore.viewmodel.user.UserSessionVm;
+import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.MenuItem;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.StackPane;
+import org.springframework.stereotype.Controller;
+import java.net.URL;
+import java.util.ResourceBundle;
 
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
-@Component
-public class Header extends javax.swing.JPanel {
 
-    public Header() {
-        initComponents();
-        setOpaque(false);
+@Controller
+public class Header extends StackPane implements Initializable {
+    private final ApplicationState applicationState;
+    private final PanelManager panelManager;
+    @FXML
+    private MenuButton dropDownMenu;
+
+    @FXML
+    private ImageView userAvatarImage;
+
+    @FXML
+    private MenuItem menuItemProfile;
+
+    @FXML
+    private MenuItem menuItemLogout;
+
+    public Header(ApplicationState applicationState, PanelManager panelManager) {
+        this.applicationState = applicationState;
+        this.panelManager = panelManager;
+
     }
-
-    @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
-
-        jLabel2 = new javax.swing.JLabel();
-
-        setBackground(new java.awt.Color(255, 255, 255));
-        setForeground(new java.awt.Color(255, 255, 255));
-
-        jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/menu.png"))); // NOI18N
-        jLabel2.setBorder(javax.swing.BorderFactory.createEmptyBorder(5, 5, 5, 5));
-
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
-        this.setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap(434, Short.MAX_VALUE)
-                .addComponent(jLabel2)
-                .addContainerGap())
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 46, Short.MAX_VALUE)
-        );
-    }// </editor-fold>//GEN-END:initComponents
 
     @Override
-    protected void paintComponent(Graphics g) {
-        Graphics2D g2 = (Graphics2D) g;
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2.setBackground(getBackground());
-        g2.fillRoundRect(0, 0, getWidth(), getHeight(), 15, 15);
-        g2.fillRect(0, 0, 25, getHeight());
-        g2.fillRect(getWidth() - 25, getHeight() - 25, getWidth(), getHeight());
-        super.paintComponent(g);
+    public void initialize(URL location, ResourceBundle resources) {
+        // Existing icon setup code
+
+
+        applicationState.currentUserProperty().addListener((obs, oldValue, newValue) -> updateUserDisplay(newValue));
     }
 
-    
 
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel jLabel2;
-    // End of variables declaration//GEN-END:variables
+
+    private void updateUserDisplay(UserSessionVm user) {
+        if (user != null) {
+            // Update avatar or user display
+            String initial = user.getFullName();
+//            userAvatarImage.setImage(new Image(user.getAvatarUrl()));
+            dropDownMenu.setText(initial);
+        } else {
+            dropDownMenu.setText("User");
+        }
+    }
+
+    @FXML
+    private void onActionMenuItemProfile() {
+        navigateToProfile();
+    }
+
+    @FXML
+    private void onActionMenuItemLogout() {
+        logout();
+    }
+
+
+    private void navigateToProfile() {
+        // Navigate to the profile view
+//        panelManager.navigateTo(ViewName.PROFILE_VIEW,
+//                applicationState.getViewPanelByBean(ViewName.PROFILE_VIEW.getPanelClass()));
+    }
+
+    private void logout() {
+        // Perform logout and navigate to login view
+        applicationState.logout();
+
+    }
 }

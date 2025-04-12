@@ -29,8 +29,7 @@ public class User extends AbstractAuditEntity {
 
     @Column(length = 100)
     private String fullName;
-
-
+    
 
     @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinTable(

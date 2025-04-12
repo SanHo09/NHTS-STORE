@@ -4,9 +4,11 @@ import com.nhom4.nhtsstore.ui.layout.Header;
 import com.nhom4.nhtsstore.ui.layout.Menu;
 import com.nhom4.nhtsstore.ui.layout.PagePanel;
 import com.nhom4.nhtsstore.ui.page.dashboard.DashBoardPanel;
-import com.nhom4.nhtsstore.ui.shared.components.sidebar.EventMenuSelected;
+import com.nhom4.nhtsstore.utils.JavaFxSwing;
 import com.nhom4.nhtsstore.utils.PanelManager;
 import jakarta.annotation.PostConstruct;
+
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import javax.swing.*;
 import java.awt.*;
@@ -14,6 +16,7 @@ import java.awt.*;
 @Component
 public class MainPanel extends JPanel {
 	private final ApplicationState applicationState;
+	private final ApplicationContext applicationContext;
 	private final PanelManager panelManager;
 	private final PagePanel pagePanel;
 	private final Menu menu;
@@ -21,55 +24,72 @@ public class MainPanel extends JPanel {
 
 	private JPanel mainContentPanel;
 
-	public MainPanel(ApplicationState applicationState, PanelManager panelManager,
-					 PagePanel pagePanel, Menu menu, Header header) {
+	public MainPanel(ApplicationState applicationState, ApplicationContext applicationContext, PanelManager panelManager,
+                     PagePanel pagePanel, Menu menu, Header header) {
 		this.applicationState = applicationState;
-		this.panelManager = panelManager;
+        this.applicationContext = applicationContext;
+        this.panelManager = panelManager;
 		this.pagePanel = pagePanel;
 		this.menu = menu;
 		this.header = header;
 		setLayout(new BorderLayout());
 		menu.initMoving(this);
 		menu.addEventMenuSelected(index -> {
-			ViewName[] viewNames = ViewName.values();
+			AppView[] appViews = AppView.values();
 			int menuPosition = 0;
-			for (ViewName viewName : viewNames) {
-				// Skip LOGIN_VIEW as it's not in the menu
-				if (viewName == ViewName.LOGIN_VIEW) {
-					continue;
+			for (AppView appView : appViews) {
+				if (appView == AppView.LOGIN) {
+					continue; // Skip LOGIN
 				}
-				// Found the selected menu item
+				if (appView.getParent() != null) {
+					continue; // Skip submenu items for now
+				}
 				if (menuPosition == index) {
-					if (viewName.getPanelClass() != null) {
+					if (appView.getPanelClass() != null) {
 						panelManager.navigateTo(
-								viewName,
-								applicationState.getViewPanelByBean(viewName.getPanelClass())
+								appView,
+								applicationState.getViewPanelByBean(appView.getPanelClass())
 						);
 					}
 					break;
 				}
 				menuPosition++;
+				// Handle submenu items
+				for (AppView subView : appViews) {
+					if (subView.getParent() == appView) {
+						menuPosition++;
+						if (menuPosition == index && subView.getPanelClass() != null) {
+							panelManager.navigateTo(
+									subView,
+									applicationState.getViewPanelByBean(subView.getPanelClass())
+							);
+							break;
+						}
+					}
+				}
 			}
 		});
-		// Set the default view to DASHBOARD_VIEW
-		panelManager.navigateTo(ViewName.DASHBOARD_VIEW,
+		// Set the default view to DASHBOARD
+		panelManager.navigateTo(AppView.DASHBOARD,
 				applicationState.getViewPanelByBean(DashBoardPanel.class));
 
 	}
 
 	@PostConstruct
 	private void initializeComponents() {
-		add(menu, BorderLayout.WEST);
+		add(JavaFxSwing.createJFXPanelWithController(
+				"/fxml/HeaderLayout.fxml",
+				this.applicationContext,
+				true,
+				(Header header) -> {
+
+				}), BorderLayout.NORTH);
 		mainContentPanel = new JPanel(new BorderLayout());
-		mainContentPanel.add(header, BorderLayout.NORTH);
+		mainContentPanel.add(menu, BorderLayout.WEST);
+
 		mainContentPanel.add(pagePanel, BorderLayout.CENTER);
 		add(mainContentPanel, BorderLayout.CENTER);
-		// Set default view when authenticated
-		if (applicationState.isAuthenticated() &&
-				applicationState.currentViewProperty().get() == null) {
-			panelManager.navigateTo(ViewName.DASHBOARD_VIEW,
-					applicationState.getViewPanelByBean(DashBoardPanel.class));
-		}
+
 
 	}
 }

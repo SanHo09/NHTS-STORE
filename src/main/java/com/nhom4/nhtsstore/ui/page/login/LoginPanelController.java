@@ -25,7 +25,7 @@ import java.util.concurrent.CompletableFuture;
 import static com.nhom4.nhtsstore.utils.JavaFxSwing.createFxImageViewFromSvg;
 
 @Component
-public class LoginPanelController extends StackPane implements Initializable {
+public class LoginPanelController  implements Initializable {
     @FXML public MFXTextField usernameField;
     @FXML public MFXPasswordField passwordField;
     @FXML public MFXButton loginButton;
@@ -81,7 +81,7 @@ public class LoginPanelController extends StackPane implements Initializable {
     @FXML
     public void submitLogin(MouseEvent actionEvent) {
         if (isLoading) return;
-
+        System.out.println("Login button clicked");
         if (!validateInputs()) return;
 
         startLoadingState();
@@ -90,7 +90,7 @@ public class LoginPanelController extends StackPane implements Initializable {
                 var username = usernameField.getText().trim();
                 var password = passwordField.getText();
                 var userSession = userService.authenticate(username, password);
-
+                System.out.println("User session: " + userSession);
                 Platform.runLater(() -> {
                     if (userSession) {
                         applicationState.login(userService.findByUsername(username));
@@ -152,6 +152,14 @@ public class LoginPanelController extends StackPane implements Initializable {
     private void enableLoginButton() {
         loginButton.setDisable(usernameField.getText().isEmpty() || passwordField.getText().isEmpty());
     }
+    public void resetFields() {
+        usernameField.clear();
+        passwordField.clear();
 
+        usernameTooltip.hide();
+        passwordTooltip.hide();
+
+        stopLoadingState();
+    }
 
 }

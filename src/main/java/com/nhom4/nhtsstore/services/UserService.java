@@ -76,17 +76,14 @@ public class UserService implements IUserService, UserDetailsService {
     @Override
     @Transactional
     public UserRecordVm createUser(UserCreateVm userCreateVm) {
-        // Convert UserCreateVm to User entity
         User user = userMapper.toUser(userCreateVm);
 
-        // Encrypt password before saving
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        // Retrieve roles from the database instead of creating new ones
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         Set<Role> roles = roleRepository.findByRoleNameIn(userCreateVm.getRoles());
         user.setRoles(roles);
 
-        // Save User entity
+
         User savedUser = userRepository.save(user);
 
         // Convert User entity to UserRecordVm
@@ -101,6 +98,7 @@ public class UserService implements IUserService, UserDetailsService {
     @Override
     public void deleteUser(int userId) {
 
+        userRepository.deleteById(userId);
     }
 
 

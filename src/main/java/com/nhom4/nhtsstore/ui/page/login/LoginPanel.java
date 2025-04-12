@@ -23,24 +23,14 @@ public class LoginPanel extends JPanel {
     }
     @PostConstruct
     private void initComponent(){
-        setVisible(true);
-        // Use the utility class to create the JFXPanel with controller access
         JFXPanel jfxLoginPanel = JavaFxSwing.createJFXPanelWithController(
                 "/fxml/LoginPanel.fxml",
                 appState.getApplicationContext(),
                 (LoginPanelController controller) -> {
 
-
                 });
         add(jfxLoginPanel);
-        appState.authenticatedProperty().addListener((obs, wasAuthenticated, isAuthenticated) -> {
-            SwingUtilities.invokeLater(() -> {
-                if (isAuthenticated) {
-                    setVisible(false);
-                    removeAll();
-                }
-            });
-        });
+
     }
 
 
