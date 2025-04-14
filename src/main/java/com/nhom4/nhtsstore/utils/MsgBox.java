@@ -4,6 +4,7 @@ import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextInputDialog;
+import raven.modal.Toast;
 
 import javax.swing.*;
 import java.awt.*;
@@ -43,6 +44,7 @@ public class MsgBox {
             alert.setContentText(message);
             alert.showAndWait();
         });
+
     }
 
     public static boolean showConfirm(String message) {

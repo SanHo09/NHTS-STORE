@@ -69,7 +69,9 @@ public class UserService implements IUserService, UserDetailsService {
 
     @Override
     public UserSessionVm findByUsername(String username) {
-        return userMapper.toUserSessionVm(userRepository.findByUsernameWithRolesAndPermissions(username).orElse(null));
+        return userMapper.toUserSessionVm(userRepository
+                .findByUsernameWithRolesAndPermissions(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found")));
 
     }
 
@@ -82,8 +84,6 @@ public class UserService implements IUserService, UserDetailsService {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         Set<Role> roles = roleRepository.findByRoleNameIn(userCreateVm.getRoles());
         user.setRoles(roles);
-
-
         User savedUser = userRepository.save(user);
 
         // Convert User entity to UserRecordVm

@@ -34,67 +34,7 @@ import java.util.function.Function;
 @Slf4j
 
 public class JavaFxSwing {
-    /**
-     * Creates a JavaFX Image from an SVG with custom color filtering
-     * @param resourcePath the path to the SVG resource
-     * @param width the width of the image
-     * @param height the height of the image
-     * @param colorFilter custom color transformation function
-     * @return a JavaFX Image created from the SVG resource
-     */
-    @SneakyThrows
-    public static javafx.scene.image.Image createFxImageFromSvg(
-            String resourcePath,
-            int width,
-            int height,
-            java.util.function.Function<Color, Color> colorFilter) {
 
-        try {
-            FlatSVGIcon svgIcon = new FlatSVGIcon(JavaFxSwing.class.getResourceAsStream(resourcePath));
-
-            // Apply custom color filter if specified
-            if (colorFilter != null) {
-                svgIcon = svgIcon.setColorFilter(new FlatSVGIcon.ColorFilter(colorFilter));
-            }
-
-            // Create a derived icon with the specified dimensions
-            FlatSVGIcon sizedIcon = svgIcon.derive(width, height);
-
-            // Create buffered image
-            BufferedImage bufferedImage = new BufferedImage(
-                    width, height, BufferedImage.TYPE_INT_ARGB);
-            Graphics2D g2d = bufferedImage.createGraphics();
-            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            sizedIcon.paintIcon(null, g2d, 0, 0);
-            g2d.dispose();
-
-            // Convert to JavaFX image
-            return SwingFXUtils.toFXImage(bufferedImage, null);
-        } catch (Exception e) {
-            log.error("Failed to load SVG: {}", resourcePath, e);
-            return null;
-        }
-    }
-
-    /**
-     * Creates a JavaFX ImageView from an SVG resource with color customization
-     * @param resourcePath the path to the SVG resource
-     * @param width the width of the image
-     * @param height the height of the image
-     * @param colorFilter custom color transformation function
-     * @return a JavaFX ImageView created from the SVG resource
-     */
-    public static ImageView createFxImageViewFromSvg(String resourcePath, int width, int height, Function<Color, Color> colorFilter) {
-        Image fxImage = createFxImageFromSvg(resourcePath, width, height, colorFilter);
-        if (fxImage == null) {
-            return null;
-        }
-
-        ImageView imageView = new ImageView(fxImage);
-        imageView.setFitWidth(width);
-        imageView.setFitHeight(height);
-        return imageView;
-    }
     /**
      * Converts a Swing component to a JavaFX Node
      * @param swingComponent the Swing component to convert

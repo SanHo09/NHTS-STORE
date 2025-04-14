@@ -1,7 +1,12 @@
 package com.nhom4.nhtsstore.ui.shared.components.sidebar;
 
+import com.formdev.flatlaf.extras.FlatSVGIcon;
+import com.nhom4.nhtsstore.utils.IconUtil;
+import com.nhom4.nhtsstore.utils.JavaFxSwing;
+
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import java.awt.*;
 
 public class Model_Menu {
 
@@ -43,15 +48,18 @@ public class Model_Menu {
     private MenuType type;
     
     public Icon toIcon() {
-        String path = "/icons/" + icon + ".png";
+        String path = "/icons/" + icon ;
         java.net.URL location = getClass().getResource(path);
         if (location == null) {
             return new ImageIcon();
+        }
+        if (icon.endsWith(".svg")) {
+            return IconUtil.createSwingIconFromSvg(path,24,24, color -> Color.WHITE);
         }
         return new ImageIcon(location);
     }
     
     public static enum MenuType {
-        TITLE, MENU, EMPTY, SUBMENU
+        TITLE, MENU, EMPTY
     }
 }

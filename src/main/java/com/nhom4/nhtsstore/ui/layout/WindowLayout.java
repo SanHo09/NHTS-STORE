@@ -1,7 +1,6 @@
 package com.nhom4.nhtsstore.ui.layout;
 
-import com.nhom4.nhtsstore.ui.ApplicationState;
-import com.nhom4.nhtsstore.ui.MainFrame;
+
 import io.github.palexdev.materialfx.controls.MFXButton;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -10,7 +9,6 @@ import javafx.scene.image.ImageView;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.stereotype.Controller;
-
 import javax.swing.*;
 import java.awt.*;
 import java.net.URL;
@@ -58,6 +56,7 @@ public class WindowLayout implements Initializable {
     public MFXButton minimizeWindowButton;
     @FXML
     public MFXButton closeWindowButton;
+
     private void minimizeWindow() {
         Platform.runLater(() -> {
 
