@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.function.Function;
 @Slf4j
 public class IconUtil {
@@ -33,9 +34,8 @@ public class IconUtil {
             sizedIcon.paintIcon(null, g2d, 0, 0);
             g2d.dispose();
 
-            // Convert to JavaFX image
             return bufferedImage;
-        } catch (Exception e) {
+        } catch (IOException e) {
             log.error("Failed to load SVG: {}", resourcePath, e);
             return null;
         }
