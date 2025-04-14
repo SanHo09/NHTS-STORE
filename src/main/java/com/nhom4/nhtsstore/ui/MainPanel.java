@@ -51,14 +51,15 @@ public class MainPanel extends JPanel {
 					menuPosition++;
 				} else {
 					// Check for submenus
+					submenuPosition = menuPosition; // Start submenu indexing from the current menu position
 					for (AppView childView : appViews) {
 						if (childView.getParent() == parentView) {
-							if (menuPosition == index) {
+							if (submenuPosition == index) {
 								panelManager.navigateTo(childView,
 										applicationState.getViewPanelByBean(childView.getPanelClass()));
 								break;
 							}
-							menuPosition++;
+							submenuPosition++;
 						}
 					}
 				}
