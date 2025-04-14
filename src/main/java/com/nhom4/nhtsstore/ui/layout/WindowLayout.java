@@ -1,6 +1,7 @@
 package com.nhom4.nhtsstore.ui.layout;
 
 
+import com.nhom4.nhtsstore.utils.IconUtil;
 import io.github.palexdev.materialfx.controls.MFXButton;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -14,7 +15,6 @@ import java.awt.*;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-import static com.nhom4.nhtsstore.utils.JavaFxSwing.createFxImageViewFromSvg;
 @Controller
 public class WindowLayout implements Initializable {
     @Getter
@@ -28,8 +28,8 @@ public class WindowLayout implements Initializable {
         closeWindowButton.setText("");
         minimizeWindowButton.setText("");
 
-        ImageView minimizeIcon = createFxImageViewFromSvg("/icons/MingcuteMinimizeLine.svg", 24, 24, color -> Color.decode("#333333"));
-        ImageView closeIcon = createFxImageViewFromSvg("/icons/MaterialSymbolsCloseSmall.svg", 24, 24, color -> Color.decode("#333333"));
+        ImageView minimizeIcon = IconUtil.createFxImageViewFromSvg("/icons/MingcuteMinimizeLine.svg", 24, 24, color -> Color.decode("#333333"));
+        ImageView closeIcon = IconUtil.createFxImageViewFromSvg("/icons/MaterialSymbolsCloseSmall.svg", 24, 24, color -> Color.decode("#333333"));
 
         minimizeWindowButton.setGraphic(minimizeIcon);
         closeWindowButton.setGraphic(closeIcon);
@@ -40,11 +40,11 @@ public class WindowLayout implements Initializable {
 //
 //        // Add hover effect for close button
         closeWindowButton.setOnMouseEntered(e -> {
-            closeWindowButton.setGraphic(createFxImageViewFromSvg("/icons/MaterialSymbolsCloseSmall.svg", 24, 24, color -> Color.RED));
+            closeWindowButton.setGraphic(IconUtil.createFxImageViewFromSvg("/icons/MaterialSymbolsCloseSmall.svg", 24, 24, color -> Color.RED));
         });
 
         closeWindowButton.setOnMouseExited(e -> {
-            closeWindowButton.setGraphic(createFxImageViewFromSvg("/icons/MaterialSymbolsCloseSmall.svg", 24, 24, color -> Color.decode("#333333")));
+            closeWindowButton.setGraphic(IconUtil.createFxImageViewFromSvg("/icons/MaterialSymbolsCloseSmall.svg", 24, 24, color -> Color.decode("#333333")));
         });
 
         // Window control actions

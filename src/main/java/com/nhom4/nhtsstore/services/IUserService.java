@@ -20,7 +20,7 @@ public interface IUserService {
     // find user record page
     Page<UserRecordVm> findUsersPage(Pageable pageable);
     // find user record by id
-    UserRecordVm findUserRecordById(int userId);
+    UserRecordVm findUserById(int userId);
     // Filter user
     Page<UserRecordVm> filterUser(String keyword, Pageable pageable);
 

@@ -79,14 +79,11 @@ public class UserService implements IUserService, UserDetailsService {
     @Transactional
     public UserRecordVm createUser(UserCreateVm userCreateVm) {
         User user = userMapper.toUser(userCreateVm);
-
-
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         Set<Role> roles = roleRepository.findByRoleNameIn(userCreateVm.getRoles());
         user.setRoles(roles);
         User savedUser = userRepository.save(user);
 
-        // Convert User entity to UserRecordVm
         return userMapper.toUserRecord(savedUser);
     }
 
@@ -108,8 +105,9 @@ public class UserService implements IUserService, UserDetailsService {
     }
 
     @Override
-    public UserRecordVm findUserRecordById(int userId) {
-        return null;
+    public UserRecordVm findUserById(int userId) {
+        return userRepository.findById(userId).map(userMapper::toUserRecord)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
     @Override
