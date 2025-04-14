@@ -63,11 +63,17 @@ public class IconUtil {
             int width,
             int height,
             java.util.function.Function<Color, Color> colorFilter) {
-        BufferedImage bufferedImage = createSvgIcon(resourcePath, width, height, colorFilter);
-        if (bufferedImage == null) {
-            return null;
+        FlatSVGIcon svgIcon = null;
+        try {
+            svgIcon = new FlatSVGIcon(JavaFxSwing.class.getResourceAsStream(resourcePath));
+            if (colorFilter != null) {
+                svgIcon = svgIcon.setColorFilter(new FlatSVGIcon.ColorFilter(colorFilter));
+            }
+            return svgIcon.derive(width, height);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-        return new ImageIcon(bufferedImage);
+
     }
 
     /**
