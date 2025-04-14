@@ -30,12 +30,25 @@ public class Menu extends javax.swing.JPanel {
         setOpaque(false);
         listMenu1.setOpaque(false);
         // add menu items by looping through the ViewName enum
-        for (AppView appView : AppView.values()) {
-            if (appView == AppView.LOGIN) {
+        for (AppView parent : AppView.values()) {
+            if (parent == AppView.LOGIN) {
                 continue;
             }
-            listMenu1.addItem(new Model_Menu(appView.getIcon(), appView.getName(), Model_Menu.MenuType.MENU));
+
+            // Only add main menu items (those without parents)
+            if (parent.getParent() == null) {
+                listMenu1.addItem(new Model_Menu(parent.getIcon(), parent.getName(), Model_Menu.MenuType.MENU));
+
+                // Check for submenu items
+                for (AppView children : AppView.values()) {
+                    if (children.getParent() == parent) {
+                        // Add submenu items
+                        listMenu1.addItem(new Model_Menu(children.getIcon(), children.getName(), Model_Menu.MenuType.MENU));
+                    }
+                }
+            }
         }
+
     }
 
     @SuppressWarnings("unchecked")

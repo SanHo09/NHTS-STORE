@@ -2,6 +2,7 @@ package com.nhom4.nhtsstore.ui;
 
 import com.nhom4.nhtsstore.ui.page.dashboard.DashBoardPanel;
 import com.nhom4.nhtsstore.ui.page.login.LoginPanel;
+import com.nhom4.nhtsstore.ui.page.user.UserProfilePanel;
 import lombok.Getter;
 
 import javax.swing.*;
@@ -10,12 +11,13 @@ import javax.swing.*;
 public enum AppView {
     LOGIN("Login", "", null, LoginPanel.class),
     DASHBOARD("Dashboard", "", null, DashBoardPanel.class),
-    PRODUCT("Product", "category", null, Form_Home.class),
-    CATEGORY("Category", "category", PRODUCT, Form_Home.class),
+    PRODUCT("Product", "category.png", null, Form_Home.class),
+    CATEGORY("Category", "category.png", PRODUCT, Form_Home.class),
     SUPPLIER("Supplier", "", null, Form_1.class),
-    USER("User", "user", null, Form_2.class),
-    CUSTOMER("Customer", "user", USER, null),
-    SETTING("Setting", "hammer", null, null);
+    USER("User", "BiPersonBoundingBox.svg", null, Form_2.class),
+    USER_PROFILE("User Profile", "", USER, UserProfilePanel.class),
+    CUSTOMER("Customer", "user.png", USER, null),
+    SETTING("Setting", "hammer.png", null, null);
 
     private final String name;
     private final String icon;

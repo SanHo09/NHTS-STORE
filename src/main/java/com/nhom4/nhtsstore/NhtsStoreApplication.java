@@ -1,11 +1,5 @@
 package com.nhom4.nhtsstore;
 
-
-import com.formdev.flatlaf.FlatIntelliJLaf;
-import com.nhom4.nhtsstore.entities.Permission;
-import com.nhom4.nhtsstore.entities.Role;
-import com.nhom4.nhtsstore.entities.User;
-import com.nhom4.nhtsstore.repositories.UserRepository;
 import com.nhom4.nhtsstore.services.UserService;
 import com.nhom4.nhtsstore.ui.MainFrame;
 import com.nhom4.nhtsstore.viewmodel.user.UserCreateVm;
@@ -15,8 +9,6 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import javax.swing.*;
 import java.util.Set;
 
 @SpringBootApplication

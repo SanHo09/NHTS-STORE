@@ -37,33 +37,29 @@ public class MainPanel extends JPanel {
 		menu.addEventMenuSelected(index -> {
 			AppView[] appViews = AppView.values();
 			int menuPosition = 0;
-			for (AppView appView : appViews) {
-				if (appView == AppView.LOGIN) {
+			for (AppView parentView : appViews) {
+				if (parentView == AppView.LOGIN) {
 					continue; // Skip LOGIN
 				}
-				if (appView.getParent() != null) {
-					continue; // Skip submenu items for now
-				}
-				if (menuPosition == index) {
-					if (appView.getPanelClass() != null) {
-						panelManager.navigateTo(
-								appView,
-								applicationState.getViewPanelByBean(appView.getPanelClass())
-						);
+				if(parentView.getParent() == null) {
+					if (menuPosition == index) {
+						// Navigate to the selected view
+						panelManager.navigateTo(parentView,
+								applicationState.getViewPanelByBean(parentView.getPanelClass()));
+						break;
 					}
-					break;
-				}
-				menuPosition++;
-				// Handle submenu items
-				for (AppView subView : appViews) {
-					if (subView.getParent() == appView) {
-						menuPosition++;
-						if (menuPosition == index && subView.getPanelClass() != null) {
-							panelManager.navigateTo(
-									subView,
-									applicationState.getViewPanelByBean(subView.getPanelClass())
-							);
-							break;
+					menuPosition++;
+				} else {
+					// Check for submenus
+					submenuPosition = menuPosition; // Start submenu indexing from the current menu position
+					for (AppView childView : appViews) {
+						if (childView.getParent() == parentView) {
+							if (submenuPosition == index) {
+								panelManager.navigateTo(childView,
+										applicationState.getViewPanelByBean(childView.getPanelClass()));
+								break;
+							}
+							submenuPosition++;
 						}
 					}
 				}

@@ -2,6 +2,7 @@ package com.nhom4.nhtsstore.ui.page.login;
 
 import com.nhom4.nhtsstore.services.UserService;
 import com.nhom4.nhtsstore.ui.ApplicationState;
+import com.nhom4.nhtsstore.utils.IconUtil;
 import com.nhom4.nhtsstore.utils.MsgBox;
 import io.github.palexdev.materialfx.beans.Alignment;
 import io.github.palexdev.materialfx.controls.*;
@@ -21,9 +22,6 @@ import java.awt.Color;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
-
-import static com.nhom4.nhtsstore.utils.JavaFxSwing.createFxImageViewFromSvg;
-
 @Component
 public class LoginPanelController  implements Initializable {
     @FXML public MFXTextField usernameField;
@@ -52,9 +50,9 @@ public class LoginPanelController  implements Initializable {
     }
 
     private void setupFields() {
-        usernameField.setLeadingIcon(createFxImageViewFromSvg(
+        usernameField.setLeadingIcon(IconUtil.createFxImageViewFromSvg(
                 "/icons/HugeiconsMail02.svg", 24, 24, color -> Color.decode("#A280FF")));
-        passwordField.setLeadingIcon(createFxImageViewFromSvg(
+        passwordField.setLeadingIcon(IconUtil.createFxImageViewFromSvg(
                 "/icons/MaterialSymbolsLockOutline.svg", 24, 24, color ->  Color.decode("#A280FF")));
     }
 
@@ -73,7 +71,7 @@ public class LoginPanelController  implements Initializable {
         MFXTooltip tooltip = new MFXTooltip(field);
         tooltip.setContent(field);
         tooltip.setText(text);
-        tooltip.setIcon(createFxImageViewFromSvg(
+        tooltip.setIcon(IconUtil.createFxImageViewFromSvg(
                 "/icons/TdesignErrorCircleFilled.svg", 24, 24, color -> iconColor));
         return tooltip;
     }

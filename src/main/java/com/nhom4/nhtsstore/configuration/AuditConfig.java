@@ -1,4 +1,4 @@
-package com.nhom4.nhtsstore.configurations;
+package com.nhom4.nhtsstore.configuration;
 
 import com.nhom4.nhtsstore.ui.ApplicationState;
 import org.springframework.context.annotation.Bean;
