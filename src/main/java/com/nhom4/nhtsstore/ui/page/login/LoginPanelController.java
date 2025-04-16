@@ -46,7 +46,7 @@ public class LoginPanelController  implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         setupFields();
         setupTooltips();
-        setupListeners();
+//        setupListeners();
     }
 
     private void setupFields() {
@@ -62,10 +62,10 @@ public class LoginPanelController  implements Initializable {
         passwordTooltip = createTooltip(passwordField, "Password is required", errorColor);
     }
 
-    private void setupListeners() {
-        usernameField.textProperty().addListener((o, old, n) -> enableLoginButton());
-        passwordField.textProperty().addListener((o, old, n) -> enableLoginButton());
-    }
+//    private void setupListeners() {
+//        usernameField.textProperty().addListener((o, old, n) -> enableLoginButton());
+//        passwordField.textProperty().addListener((o, old, n) -> enableLoginButton());
+//    }
 
     private MFXTooltip createTooltip(MFXTextField field, String text, Color iconColor) {
         MFXTooltip tooltip = new MFXTooltip(field);
@@ -147,9 +147,9 @@ public class LoginPanelController  implements Initializable {
         loginButton.setGraphic(null);
     }
 
-    private void enableLoginButton() {
-        loginButton.setDisable(usernameField.getText().isEmpty() || passwordField.getText().isEmpty());
-    }
+//    private void enableLoginButton() {
+//        loginButton.setDisable(usernameField.getText().isEmpty() || passwordField.getText().isEmpty());
+//    }
     public void resetFields() {
         usernameField.clear();
         passwordField.clear();

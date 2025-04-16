@@ -29,8 +29,12 @@ public class User extends AbstractAuditEntity {
 
     @Column(length = 100)
     private String fullName;
-    
-
+    @Column(nullable = false)
+    private Boolean isActive = true;
+    @Column(nullable = false)
+    private Boolean isDeleted = false;
+    @Column
+    private String avatar;
     @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinTable(
             name = "user_roles",

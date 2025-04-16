@@ -22,10 +22,10 @@
 .menu-button .arrow-button {
     -fx-background-color: transparent;
 }
-/*.menu-button .arrow-button .arrow {*/
-/*    -fx-background-color: white;*/
-/*    -fx-transition: -fx-rotate 0.2s ease-in-out;*/
-/*}*/
-/*.menu-button:showing .arrow-button .arrow {*/
-/*    -fx-rotate: 180;*/
-/*}*/
+.menu-button .arrow-button .arrow {
+    -fx-background-color: white;
+    -fx-transition: -fx-rotate 0.2s ease-in-out;
+}
+.menu-button:showing .arrow-button .arrow {
+    -fx-rotate: 180;
+}
