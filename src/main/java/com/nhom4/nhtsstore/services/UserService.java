@@ -70,8 +70,7 @@ public class UserService implements IUserService, UserDetailsService {
     @Override
     public UserSessionVm findByUsername(String username) {
         return userMapper.toUserSessionVm(userRepository
-                .findByUsernameWithRolesAndPermissions(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found")));
+                .findByUsernameWithRolesAndPermissions(username).orElse(null));
 
     }
 
