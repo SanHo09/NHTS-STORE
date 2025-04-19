@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Nationalized;
 
 import java.util.List;
 
@@ -19,9 +20,11 @@ public class Supplier {
     private Long Id;
 
     @Column(nullable = false)
+    @Nationalized
     private String Name;
 
     @Column(nullable = false)
+    @Nationalized
     private String Address;
 
     @JsonIgnore

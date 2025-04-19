@@ -7,7 +7,6 @@ import com.nhom4.nhtsstore.ui.page.dashboard.DashBoardPanel;
 import com.nhom4.nhtsstore.utils.JavaFxSwing;
 import com.nhom4.nhtsstore.utils.PanelManager;
 import jakarta.annotation.PostConstruct;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import javax.swing.*;
@@ -49,7 +48,8 @@ public class MainPanel extends JPanel {
 						break;
 					}
 					menuPosition++;
-				} else {
+				}
+				else {
 					for (AppView childView : appViews) {
 						if (childView.getParent() == parentView) {
 							if (menuPosition == index) {
@@ -81,7 +81,6 @@ public class MainPanel extends JPanel {
 				}), BorderLayout.NORTH);
 		mainContentPanel = new JPanel(new BorderLayout());
 		mainContentPanel.add(menu, BorderLayout.WEST);
-
 		mainContentPanel.add(pagePanel, BorderLayout.CENTER);
 		add(mainContentPanel, BorderLayout.CENTER);
 

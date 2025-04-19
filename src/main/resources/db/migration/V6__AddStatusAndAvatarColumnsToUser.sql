@@ -1,8 +1,10 @@
-ALTER TABLE users
-    add is_active bit NOT NULL DEFAULT 1
 GO
 ALTER TABLE users
-    add is_deleted bit NOT NULL DEFAULT 0
+    ADD status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE';
+-- Add enum constraint
 GO
 ALTER TABLE users
-    add avatar varchar(255) NULL
+    ADD CONSTRAINT chk_user_status CHECK (status IN ('NONE', 'ACTIVE', 'INACTIVE'));
+GO
+ALTER TABLE users
+    ADD avatar VARCHAR(255);

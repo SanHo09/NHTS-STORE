@@ -14,6 +14,8 @@ import javafx.geometry.VPos;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import lombok.SneakyThrows;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import raven.modal.Toast;
 import raven.modal.toast.option.ToastLocation;
@@ -87,11 +89,11 @@ public class LoginPanelController  implements Initializable {
             try {
                 var username = usernameField.getText().trim();
                 var password = passwordField.getText();
-                var userSession = userService.authenticate(username, password);
-                System.out.println("User session: " + userSession);
+                var userSessionVm = userService.authenticate(username, password);
                 Platform.runLater(() -> {
-                    if (userSession) {
-                        applicationState.login(userService.findByUsername(username));
+                    if (userSessionVm!=null) {
+                        System.out.println("Login user: " + SecurityContextHolder.getContext().getAuthentication().toString());
+                        applicationState.login(userSessionVm);
                         Toast.show(loginPanel, Toast.Type.SUCCESS, "Login successful");
                     } else {
                         Toast.show(loginPanel, Toast.Type.WARNING,
@@ -100,6 +102,7 @@ public class LoginPanelController  implements Initializable {
                     stopLoadingState();
                 });
             } catch (Exception e) {
+                e.printStackTrace();
                 Platform.runLater(() -> {
                     MsgBox.showError("Login Error", e.getMessage());
                     stopLoadingState();
