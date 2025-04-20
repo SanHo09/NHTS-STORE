@@ -1,16 +1,20 @@
 package com.nhom4.nhtsstore.services;
 
 import com.nhom4.nhtsstore.common.PageResponse;
+import com.nhom4.nhtsstore.common.UserStatus;
 import com.nhom4.nhtsstore.entities.rbac.Role;
 import com.nhom4.nhtsstore.entities.rbac.User;
 import com.nhom4.nhtsstore.entities.rbac.UserHasRole;
 import com.nhom4.nhtsstore.mappers.user.IUserCreateMapper;
 import com.nhom4.nhtsstore.mappers.user.IUserMapper;
+import com.nhom4.nhtsstore.mappers.user.IUserUpdateMapper;
 import com.nhom4.nhtsstore.repositories.UserRepository;
 import com.nhom4.nhtsstore.repositories.specification.SpecSearchCriteria;
 import com.nhom4.nhtsstore.repositories.specification.UserSpecification;
 import com.nhom4.nhtsstore.utils.PageResponseHelper;
 import com.nhom4.nhtsstore.viewmodel.user.*;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -33,12 +37,14 @@ public class UserService implements IUserService {
     private final PasswordEncoder passwordEncoder;
     private final IUserMapper userMapper;
     private final IUserCreateMapper userCreateUpdateMapper;
+    private final IUserUpdateMapper userUpdateMapper;
     private final AuthenticationManager authenticationManager;
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, IUserMapper userMapper, IUserCreateMapper userCreateUpdateMapper, AuthenticationManager authenticationManager) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, IUserMapper userMapper, IUserCreateMapper userCreateUpdateMapper, IUserUpdateMapper userUpdateMapper, AuthenticationManager authenticationManager) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.userMapper = userMapper;
         this.userCreateUpdateMapper = userCreateUpdateMapper;
+        this.userUpdateMapper = userUpdateMapper;
         this.authenticationManager = authenticationManager;
     }
 
@@ -58,7 +64,8 @@ public class UserService implements IUserService {
             return null;
         }
     }
-    
+
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public UserRecordVm createUser(UserCreateVm userCreateVm) {
@@ -73,15 +80,28 @@ public class UserService implements IUserService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public UserRecordVm updateUser(UserUpdateVm userUpdateVm) {
-        return null;
-    }
+        User existingUser = userRepository.findById(userUpdateVm.getUserId())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
+        // Map the update VM to the existing user entity
+        User updatedUser = userUpdateMapper.toModel(userUpdateVm);
+
+        // Save the updated user
+        User savedUser = userRepository.save(updatedUser);
+
+        return userMapper.toVm(savedUser);
+    }
     @Override
     public void deleteUser(int userId) {
-
-        userRepository.deleteById(userId);
+        try {
+            userRepository.deleteById(userId);
+        } catch (DataAccessException e) {
+            User existingUser = userRepository.findById(userId)
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+            existingUser.setStatus(UserStatus.INACTIVE);
+            userRepository.save(existingUser);
+        }
     }
-
     @Override
     @Transactional(rollbackFor = Exception.class)
     public UserDetailVm editProfile(UserUpdateVm profileVm) {
