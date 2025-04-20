@@ -10,7 +10,7 @@ public interface IUserService {
     UserSessionVm authenticate(String username, String password);
 
     @PreAuthorize("hasAnyAuthority('SUPER_ADMIN')")
-    UserRecordVm createUser(UserCreateVm userCreateVm);
+    UserDetailVm createUser(UserCreateVm userCreateVm);
 
     @PreAuthorize("hasAnyAuthority('SUPER_ADMIN')")
     UserRecordVm updateUser(UserUpdateVm userUpdateVm);

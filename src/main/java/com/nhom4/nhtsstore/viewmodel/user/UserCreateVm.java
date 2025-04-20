@@ -1,6 +1,7 @@
 package com.nhom4.nhtsstore.viewmodel.user;
 
 import com.nhom4.nhtsstore.common.UserStatus;
+import com.nhom4.nhtsstore.viewmodel.role.RoleVm;
 import com.nhom4.nhtsstore.viewmodel.role.RoleWithPermissionVm;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -19,5 +20,5 @@ public class UserCreateVm {
     String fullName;
     String avatar;
     UserStatus status;
-    Set<RoleWithPermissionVm> roles;
+    Set<RoleVm> roles;
 }

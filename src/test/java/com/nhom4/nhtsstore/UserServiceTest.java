@@ -1,22 +1,29 @@
 package com.nhom4.nhtsstore;
 import com.nhom4.nhtsstore.common.PageResponse;
 import com.nhom4.nhtsstore.common.UserStatus;
+import com.nhom4.nhtsstore.entities.rbac.Role;
 import com.nhom4.nhtsstore.entities.rbac.User;
+import com.nhom4.nhtsstore.entities.rbac.UserHasRole;
 import com.nhom4.nhtsstore.mappers.user.IUserCreateMapper;
 import com.nhom4.nhtsstore.mappers.user.IUserMapper;
 import com.nhom4.nhtsstore.mappers.user.IUserUpdateMapper;
+import com.nhom4.nhtsstore.repositories.RoleRepository;
 import com.nhom4.nhtsstore.repositories.UserRepository;
 import com.nhom4.nhtsstore.repositories.specification.SearchOperation;
 import com.nhom4.nhtsstore.repositories.specification.SpecSearchCriteria;
 import com.nhom4.nhtsstore.services.UserService;
 import com.nhom4.nhtsstore.utils.PageResponseHelper;
+import com.nhom4.nhtsstore.viewmodel.role.RoleVm;
+import com.nhom4.nhtsstore.viewmodel.role.RoleWithPermissionVm;
 import com.nhom4.nhtsstore.viewmodel.user.UserCreateVm;
+import com.nhom4.nhtsstore.viewmodel.user.UserDetailVm;
 import com.nhom4.nhtsstore.viewmodel.user.UserRecordVm;
 import com.nhom4.nhtsstore.viewmodel.user.UserUpdateVm;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -24,12 +31,16 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -40,6 +51,8 @@ public class UserServiceTest {
 
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private RoleRepository roleRepository;
     @Mock
     private PasswordEncoder passwordEncoder;
     @Mock
@@ -52,6 +65,7 @@ public class UserServiceTest {
     private AuthenticationManager authenticationManager;
     @InjectMocks
     private UserService userService;
+
 
 
     @Test
@@ -113,34 +127,105 @@ public class UserServiceTest {
     @Test
     public void testCreateUser() {
         // Arrange
-        UserCreateVm userCreateVm = new UserCreateVm();
-        userCreateVm.setUsername("testUser");
-        userCreateVm.setPassword("password");
+        UserCreateVm userCreateVm = UserCreateVm.builder()
+                .username("testUser")
+                .password("password")
+                .email("testUser@email.com")
+                .status(UserStatus.ACTIVE)
+                .fullName("Test User")
+                .build();
 
         User user = new User();
-        user.setUsername("testUser");
         user.setUserId(1);
+        user.setUsername("testUser");
+        user.setEmail("testUser@email.com");
+        user.setFullName("Test User");
 
-        UserRecordVm userRecordVm = new UserRecordVm();
-        userRecordVm.setUserId(1);
-        userRecordVm.setUsername("testUser");
+        UserDetailVm userDetailVm = UserDetailVm.builder()
+                .userId(1)
+                .username("testUser")
+                .email("testUser@email.com")
+                .fullName("Test User")
+                .status(UserStatus.ACTIVE)
+                .roles(Collections.emptySet())
+                .build();
 
         when(userCreateUpdateMapper.toModel(userCreateVm)).thenReturn(user);
-//        when(passwordEncoder.encode(userCreateVm.getPassword())).thenReturn(passwordEncoder.encode(userCreateVm.getPassword()));
+//        when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
         when(userRepository.save(any(User.class))).thenReturn(user);
-        when(userMapper.toVm(user)).thenReturn(userRecordVm);
+        when(userMapper.toUserDetailVm(any(User.class))).thenReturn(userDetailVm);
 
         // Act
-        UserRecordVm result = userService.createUser(userCreateVm);
+        UserDetailVm result = userService.createUser(userCreateVm);
 
         // Assert
+        assertNotNull(result);
         assertEquals(1, result.getUserId());
         assertEquals("testUser", result.getUsername());
+        assertEquals("testUser@email.com", result.getEmail());
 
-        verify(userCreateUpdateMapper, times(1)).toModel(userCreateVm);
-//        verify(passwordEncoder, times(1)).encode("password");
-        verify(userRepository, times(1)).save(any(User.class));
-        verify(userMapper, times(1)).toVm(user);
+        verify(userCreateUpdateMapper).toModel(userCreateVm);
+//        verify(passwordEncoder).encode(anyString());
+        verify(userRepository).save(any(User.class));
+        verify(userMapper).toUserDetailVm(any(User.class));
+    }
+    @Test
+    public void testCreateUserWithNonExistingRole() {
+        // Arrange
+        Set<RoleVm> roleVms = Set.of(RoleVm.builder()
+                .roleId(999) // Non-existing role ID
+                .roleName("NON_EXISTING_ROLE")
+                .description("Role that doesn't exist")
+                .build());
+
+        UserCreateVm userCreateVm = UserCreateVm.builder()
+                .username("testUser")
+                .password("password")
+                .email("testUser@email.com")
+                .status(UserStatus.ACTIVE)
+                .fullName("testUser")
+                .roles(roleVms)
+                .build();
+
+        // Create user that would be returned by mapper
+        User user = new User();
+        user.setUserId(1);
+        user.setUsername("testUser");
+        // Add role information to the user
+        Set<UserHasRole> userRoles = mock(Set.class);
+        user.setRoles(userRoles);
+
+        // Create result to return
+        UserDetailVm userDetailVm = UserDetailVm.builder()
+                .userId(1)
+                .username("testUser")
+                .roles(Set.of(RoleWithPermissionVm.builder()
+                        .id(999)
+                        .roleName("NON_EXISTING_ROLE")
+                        .permissions(Collections.emptySet())
+                        .build()))
+                .build();
+
+        // Mock the mapper behavior
+        when(userCreateUpdateMapper.toModel(userCreateVm)).thenReturn(user);
+//        when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
+        when(userRepository.save(any(User.class))).thenReturn(user);
+        when(userMapper.toUserDetailVm(any(User.class))).thenReturn(userDetailVm);
+
+        // Act
+        UserDetailVm result = userService.createUser(userCreateVm);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.getUserId());
+        assertEquals("testUser", result.getUsername());
+        assertEquals(1, result.getRoles().size());
+        assertEquals("NON_EXISTING_ROLE", result.getRoles().iterator().next().getRoleName());
+
+        verify(userCreateUpdateMapper).toModel(userCreateVm);
+//        verify(passwordEncoder).encode(anyString());
+        verify(userRepository).save(any(User.class));
+        verify(userMapper).toUserDetailVm(any(User.class));
     }
 
     @Test
@@ -211,5 +296,137 @@ public class UserServiceTest {
         verify(userUpdateMapper, times(1)).toModel(eq(userUpdateVm));
         verify(userRepository, times(1)).save(any(User.class));
         verify(userMapper, times(1)).toVm(updatedUser);
+    }
+    @Test
+    public void editProfileWithoutPasswordChange() {
+        // Arrange
+        String username = "testUser";
+
+        Authentication authentication = mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        try (MockedStatic<SecurityContextHolder> securityContextHolderMock = mockStatic(SecurityContextHolder.class)) {
+            securityContextHolderMock.when(SecurityContextHolder::getContext).thenReturn(securityContext);
+            when(authentication.getPrincipal()).thenReturn(username);
+
+            // Setup existing user
+            User existingUser = new User();
+            existingUser.setUserId(1);
+            existingUser.setUsername(username);
+            existingUser.setEmail("old@example.com");
+            existingUser.setFullName("Old Name");
+
+            // Setup profile update request
+            UserUpdateVm profileVm = new UserUpdateVm();
+            profileVm.setUserId(1);
+            profileVm.setEmail("new@example.com");
+            profileVm.setFullName("New Name");
+            profileVm.setAvatar("new-avatar.jpg");
+
+            // Setup return values
+            UserDetailVm userDetailVm = UserDetailVm.builder()
+                    .userId(1)
+                    .username(username)
+                    .email("new@example.com")
+                    .fullName("New Name")
+                    .avatar("new-avatar.jpg")
+                    .build();
+
+            when(userRepository.findByUsername(username)).thenReturn(Optional.of(existingUser));
+            when(userRepository.save(any(User.class))).thenReturn(existingUser);
+            when(userMapper.toUserDetailVm(any(User.class))).thenReturn(userDetailVm);
+
+            // Act
+            UserDetailVm result = userService.editProfile(profileVm);
+
+            // Assert
+            assertNotNull(result);
+            assertEquals("new@example.com", result.getEmail());
+            assertEquals("New Name", result.getFullName());
+            assertEquals("new-avatar.jpg", result.getAvatar());
+
+            verify(userRepository).findByUsername(username);
+            verify(userRepository).save(any(User.class));
+        }
+    }
+
+    @Test
+    public void editProfileWithPasswordChange() {
+        // Arrange
+        String username = "testUser";
+        String currentPassword = "currentPassword";
+        String encodedCurrentPassword = "encodedCurrentPassword";
+        String newPassword = "newPassword";
+
+        Authentication authentication = mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        try (MockedStatic<SecurityContextHolder> securityContextHolderMock = mockStatic(SecurityContextHolder.class)) {
+            securityContextHolderMock.when(SecurityContextHolder::getContext).thenReturn(securityContext);
+            when(authentication.getPrincipal()).thenReturn(username);
+
+            User existingUser = new User();
+            existingUser.setUserId(1);
+            existingUser.setUsername(username);
+            existingUser.setPassword(encodedCurrentPassword);
+
+            UserUpdateVm profileVm = new UserUpdateVm();
+            profileVm.setUserId(1);
+            profileVm.setPassword(currentPassword);
+            profileVm.setNewPassword(newPassword);
+            profileVm.setConfirmPassword(newPassword);
+
+            UserDetailVm userDetailVm = UserDetailVm.builder().userId(1).username(username).build();
+
+            when(userRepository.findByUsername(username)).thenReturn(Optional.of(existingUser));
+            when(passwordEncoder.matches(currentPassword, encodedCurrentPassword)).thenReturn(true);
+            when(passwordEncoder.encode(newPassword)).thenReturn("encodedNewPassword");
+            when(userRepository.save(any(User.class))).thenReturn(existingUser);
+            when(userMapper.toUserDetailVm(any(User.class))).thenReturn(userDetailVm);
+
+            // Act
+            UserDetailVm result = userService.editProfile(profileVm);
+
+            // Assert
+            verify(passwordEncoder).matches(currentPassword, encodedCurrentPassword);
+            verify(passwordEncoder).encode(newPassword);
+            verify(userRepository).save(any(User.class));
+        }
+    }
+
+    @Test
+    public void editProfileWithIncorrectPassword() {
+        // Arrange
+        String username = "testUser";
+        String wrongPassword = "wrongPassword";
+        String encodedCurrentPassword = "encodedCurrentPassword";
+
+        Authentication authentication = mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        try (MockedStatic<SecurityContextHolder> securityContextHolderMock = mockStatic(SecurityContextHolder.class)) {
+            securityContextHolderMock.when(SecurityContextHolder::getContext).thenReturn(securityContext);
+            when(authentication.getPrincipal()).thenReturn(username);
+
+            User existingUser = new User();
+            existingUser.setUserId(1);
+            existingUser.setUsername(username);
+            existingUser.setPassword(encodedCurrentPassword);
+
+            UserUpdateVm profileVm = new UserUpdateVm();
+            profileVm.setUserId(1);
+            profileVm.setPassword(wrongPassword);
+            profileVm.setNewPassword("newPassword");
+            profileVm.setConfirmPassword("newPassword");
+
+            when(userRepository.findByUsername(username)).thenReturn(Optional.of(existingUser));
+            when(passwordEncoder.matches(wrongPassword, encodedCurrentPassword)).thenReturn(false);
+
+            // Act & Assert
+            assertThrows(IllegalArgumentException.class, () -> userService.editProfile(profileVm));
+
+            verify(passwordEncoder).matches(wrongPassword, encodedCurrentPassword);
+            verify(userRepository, never()).save(any(User.class));
+        }
     }
 }

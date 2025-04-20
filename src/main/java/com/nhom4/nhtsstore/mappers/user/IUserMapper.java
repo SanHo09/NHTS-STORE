@@ -66,7 +66,7 @@ public interface IUserMapper extends BaseMapper<User, UserRecordVm> {
                 .map(userHasRole -> RoleWithPermissionVm.builder()
                         .id(userHasRole.getRole().getRoleId())
                         .roleName(userHasRole.getRole().getRoleName())
-                        .permissions(userHasRole.getRole().getRoles().stream()
+                        .permissions(userHasRole.getRole().getRolePermissions().stream()
                                 .map(roleHasPermission ->
                                                 PermissionVm.builder()
                                                         .id(roleHasPermission.getPermission().getPermissionId())
@@ -90,7 +90,7 @@ public interface IUserMapper extends BaseMapper<User, UserRecordVm> {
 
         return userHasRoles.stream()
                 .map(UserHasRole::getRole)
-                .flatMap(role -> role.getRoles().stream()) // Get RoleHasPermission objects
+                .flatMap(role -> role.getRolePermissions().stream()) // Get RoleHasPermission objects
                 .map(roleHasPermission -> roleHasPermission.getPermission().getPermissionName())
                 .collect(Collectors.toSet());
     }

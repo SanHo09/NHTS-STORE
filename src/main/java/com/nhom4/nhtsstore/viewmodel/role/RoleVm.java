@@ -11,4 +11,5 @@ import lombok.experimental.FieldDefaults;
 public class RoleVm {
     Integer roleId;
     String roleName;
+    String description;
 }

@@ -29,6 +29,6 @@ public class Role  {
 
 
     @OneToMany(mappedBy = "role",fetch = FetchType.EAGER)
-    private Set<RoleHasPermission> roles = new HashSet<>();
+    private Set<RoleHasPermission> rolePermissions = new HashSet<>();
 }
 

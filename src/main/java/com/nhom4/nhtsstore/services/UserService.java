@@ -68,13 +68,11 @@ public class UserService implements IUserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public UserRecordVm createUser(UserCreateVm userCreateVm) {
+    public UserDetailVm createUser(UserCreateVm userCreateVm) {
         User user = userCreateUpdateMapper.toModel(userCreateVm);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-
         User savedUser = userRepository.save(user);
-
-        return userMapper.toVm(savedUser);
+        return userMapper.toUserDetailVm(savedUser);
     }
 
     @Override
@@ -105,8 +103,8 @@ public class UserService implements IUserService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public UserDetailVm editProfile(UserUpdateVm profileVm) {
-        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication();
-        User user = userRepository.findById(currentUser.getUserId())
+        String username = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         // Handle password change
