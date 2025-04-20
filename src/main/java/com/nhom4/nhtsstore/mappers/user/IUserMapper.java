@@ -1,8 +1,9 @@
-package com.nhom4.nhtsstore.mappers;
+package com.nhom4.nhtsstore.mappers.user;
 
 
 import com.nhom4.nhtsstore.entities.rbac.User;
 import com.nhom4.nhtsstore.entities.rbac.UserHasRole;
+import com.nhom4.nhtsstore.mappers.BaseMapper;
 import com.nhom4.nhtsstore.viewmodel.permission.PermissionVm;
 import com.nhom4.nhtsstore.viewmodel.role.RoleWithPermissionVm;
 import com.nhom4.nhtsstore.viewmodel.user.UserDetailVm;

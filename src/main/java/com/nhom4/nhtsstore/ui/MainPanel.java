@@ -19,18 +19,15 @@ public class MainPanel extends JPanel {
 	private final PanelManager panelManager;
 	private final PagePanel pagePanel;
 	private final Menu menu;
-	private final Header header;
-
 	private JPanel mainContentPanel;
 
 	public MainPanel(ApplicationState applicationState, ApplicationContext applicationContext, PanelManager panelManager,
-                     PagePanel pagePanel, Menu menu, Header header) {
+                     PagePanel pagePanel, Menu menu) {
 		this.applicationState = applicationState;
         this.applicationContext = applicationContext;
         this.panelManager = panelManager;
 		this.pagePanel = pagePanel;
 		this.menu = menu;
-		this.header = header;
 		setLayout(new BorderLayout());
 		menu.initMoving(this);
 		menu.addEventMenuSelected(index -> {
@@ -64,9 +61,6 @@ public class MainPanel extends JPanel {
 				}
 			}
 		});
-		// Set the default view to DASHBOARD
-		panelManager.navigateTo(AppView.DASHBOARD,
-				applicationState.getViewPanelByBean(DashBoardPanel.class));
 
 	}
 
@@ -84,6 +78,9 @@ public class MainPanel extends JPanel {
 		mainContentPanel.add(pagePanel, BorderLayout.CENTER);
 		add(mainContentPanel, BorderLayout.CENTER);
 
+		// Set the default view to DASHBOARD
+		panelManager.navigateTo(AppView.DASHBOARD,
+				applicationState.getViewPanelByBean(DashBoardPanel.class));
 
 	}
 }

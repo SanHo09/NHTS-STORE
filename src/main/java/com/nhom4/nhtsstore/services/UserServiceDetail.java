@@ -10,14 +10,7 @@ import org.springframework.stereotype.Service;
 public record UserServiceDetail(UserRepository userRepository) {
 
     public UserDetailsService userDetailsService() {
-        return username -> {
-            User user = userRepository.findByUsername(username)
+        return username -> userRepository.findByUsername(username)
                     .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-            return new org.springframework.security.core.userdetails.User(
-                    user.getUsername(),
-                    user.getPassword(),
-                    user.getAuthorities()
-            );
-        };
     }
 }

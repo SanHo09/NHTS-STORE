@@ -1,13 +1,19 @@
 package com.nhom4.nhtsstore.services;
 
 import com.nhom4.nhtsstore.common.PageResponse;
+import com.nhom4.nhtsstore.entities.rbac.Role;
 import com.nhom4.nhtsstore.entities.rbac.User;
-import com.nhom4.nhtsstore.mappers.IUserCreateUpdateMapper;
-import com.nhom4.nhtsstore.mappers.IUserMapper;
+import com.nhom4.nhtsstore.entities.rbac.UserHasRole;
+import com.nhom4.nhtsstore.mappers.user.IUserCreateMapper;
+import com.nhom4.nhtsstore.mappers.user.IUserMapper;
 import com.nhom4.nhtsstore.repositories.UserRepository;
+import com.nhom4.nhtsstore.repositories.specification.SpecSearchCriteria;
+import com.nhom4.nhtsstore.repositories.specification.UserSpecification;
 import com.nhom4.nhtsstore.utils.PageResponseHelper;
 import com.nhom4.nhtsstore.viewmodel.user.*;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -18,14 +24,17 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 @Service
 public class UserService implements IUserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final IUserMapper userMapper;
-    private final IUserCreateUpdateMapper userCreateUpdateMapper;
+    private final IUserCreateMapper userCreateUpdateMapper;
     private final AuthenticationManager authenticationManager;
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, IUserMapper userMapper, IUserCreateUpdateMapper userCreateUpdateMapper, AuthenticationManager authenticationManager) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, IUserMapper userMapper, IUserCreateMapper userCreateUpdateMapper, AuthenticationManager authenticationManager) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.userMapper = userMapper;
@@ -51,7 +60,7 @@ public class UserService implements IUserService {
     }
     
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public UserRecordVm createUser(UserCreateVm userCreateVm) {
         User user = userCreateUpdateMapper.toModel(userCreateVm);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -62,6 +71,7 @@ public class UserService implements IUserService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public UserRecordVm updateUser(UserUpdateVm userUpdateVm) {
         return null;
     }
@@ -70,6 +80,32 @@ public class UserService implements IUserService {
     public void deleteUser(int userId) {
 
         userRepository.deleteById(userId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public UserDetailVm editProfile(UserUpdateVm profileVm) {
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication();
+        User user = userRepository.findById(currentUser.getUserId())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        // Handle password change
+        if (profileVm.getPassword() != null && profileVm.getNewPassword() != null && profileVm.getConfirmPassword() != null) {
+            if (passwordEncoder.matches(profileVm.getPassword(), user.getPassword())) {
+                if (profileVm.getNewPassword().equals(profileVm.getConfirmPassword())) {
+                    user.setPassword(passwordEncoder.encode(profileVm.getNewPassword()));
+                } else {
+                    throw new IllegalArgumentException("New password and confirm password do not match");
+                }
+            } else {
+                throw new IllegalArgumentException("Current password is incorrect");
+            }
+        }
+        user.setAvatar(profileVm.getAvatar());
+        user.setEmail(profileVm.getEmail());
+        user.setFullName(profileVm.getFullName());
+        User savedUser = userRepository.save(user);
+        return userMapper.toUserDetailVm(savedUser);
     }
 
     @Override
@@ -89,6 +125,14 @@ public class UserService implements IUserService {
     }
 
 
+    @Override
+    public PageResponse<UserRecordVm> searchUsers(SpecSearchCriteria criteria, int page, int size, String sortBy, String sortDir) {
+        Pageable pageable = PageResponseHelper.createPageable(page, size, sortBy, sortDir);
+        Specification<User> spec = new UserSpecification(criteria);
+        Page<User> userPage = userRepository.findAll(spec, pageable);
+        Page<UserRecordVm> userRecordPage = userPage.map(userMapper::toVm);
+        return PageResponseHelper.createPageResponse(userRecordPage);
+    }
 
 
 }

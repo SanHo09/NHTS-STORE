@@ -1,5 +1,6 @@
 package com.nhom4.nhtsstore.ui.page.login;
 
+import com.nhom4.nhtsstore.entities.rbac.User;
 import com.nhom4.nhtsstore.services.UserService;
 import com.nhom4.nhtsstore.ui.ApplicationState;
 import com.nhom4.nhtsstore.utils.IconUtil;
@@ -26,9 +27,9 @@ import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 @Component
 public class LoginPanelController  implements Initializable {
-    @FXML public MFXTextField usernameField;
-    @FXML public MFXPasswordField passwordField;
-    @FXML public MFXButton loginButton;
+    @FXML private MFXTextField usernameField;
+    @FXML private MFXPasswordField passwordField;
+    @FXML private MFXButton loginButton;
 
     private MFXTooltip usernameTooltip;
     private MFXTooltip passwordTooltip;
@@ -81,7 +82,6 @@ public class LoginPanelController  implements Initializable {
     @FXML
     public void submitLogin(MouseEvent actionEvent) {
         if (isLoading) return;
-        System.out.println("Login button clicked");
         if (!validateInputs()) return;
 
         startLoadingState();
@@ -92,7 +92,6 @@ public class LoginPanelController  implements Initializable {
                 var userSessionVm = userService.authenticate(username, password);
                 Platform.runLater(() -> {
                     if (userSessionVm!=null) {
-                        System.out.println("Login user: " + SecurityContextHolder.getContext().getAuthentication().toString());
                         applicationState.login(userSessionVm);
                         Toast.show(loginPanel, Toast.Type.SUCCESS, "Login successful");
                     } else {
@@ -102,7 +101,6 @@ public class LoginPanelController  implements Initializable {
                     stopLoadingState();
                 });
             } catch (Exception e) {
-                e.printStackTrace();
                 Platform.runLater(() -> {
                     MsgBox.showError("Login Error", e.getMessage());
                     stopLoadingState();

@@ -1,9 +1,10 @@
-package com.nhom4.nhtsstore.mappers;
+package com.nhom4.nhtsstore.mappers.user;
 
 import com.nhom4.nhtsstore.entities.rbac.Permission;
 import com.nhom4.nhtsstore.entities.rbac.Role;
 import com.nhom4.nhtsstore.entities.rbac.User;
 import com.nhom4.nhtsstore.entities.rbac.UserHasRole;
+import com.nhom4.nhtsstore.mappers.EntityCreateUpdateMapper;
 import com.nhom4.nhtsstore.viewmodel.permission.PermissionVm;
 import com.nhom4.nhtsstore.viewmodel.role.RoleWithPermissionVm;
 import com.nhom4.nhtsstore.viewmodel.user.UserCreateVm;
@@ -18,20 +19,13 @@ import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
 @Component
-public interface IUserCreateUpdateMapper extends EntityCreateUpdateMapper<User, UserCreateVm, UserRecordVm> {
+public interface IUserCreateMapper extends EntityCreateUpdateMapper<User, UserCreateVm, UserRecordVm> {
 
-    /**
-     * Converts UserCreateVm to User entity
-     * Note: Roles relationship needs special handling
-     */
     @Override
     @Mapping(target = "userId", ignore = true)
-    @Mapping(target = "roles", ignore = true)
     User toModel(UserCreateVm userCreateVm);
 
-    /**
-     * After mapping, handle the roles relationship
-     */
+
     @AfterMapping
     default void mapRoles(UserCreateVm source, @MappingTarget User target) {
         if (source.getRoles() != null) {
@@ -54,24 +48,15 @@ public interface IUserCreateUpdateMapper extends EntityCreateUpdateMapper<User, 
         }
     }
 
-    /**
-     * Converts User entity to UserCreateVm
-     */
     @Override
     @Mapping(target = "roles", source = "roles", qualifiedByName = "mapUserRolesToVm")
     UserCreateVm toVm(User user);
 
-    /**
-     * Maps User entity to UserResponseVm for API responses
-     */
+
     @Override
-    @Mapping(source = "userId", target = "id")
-    @Mapping(source = "status", target = "status")
     UserRecordVm toVmResponse(User user);
 
-    /**
-     * Helper method to map UserHasRole to RoleWithPermissionVm
-     */
+
     @Named("mapUserRolesToVm")
     default Set<RoleWithPermissionVm> mapUserRolesToVm(Set<UserHasRole> roles) {
         if (roles == null) {

@@ -1,9 +1,11 @@
 
 package com.nhom4.nhtsstore.ui;
+import com.nhom4.nhtsstore.entities.rbac.User;
 import com.nhom4.nhtsstore.viewmodel.user.UserSessionVm;
 import javafx.beans.property.*;
 import lombok.Getter;
 import org.springframework.context.ApplicationContext;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 

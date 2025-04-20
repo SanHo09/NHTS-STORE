@@ -10,12 +10,11 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @Builder
 public class UserRecordVm {
-    Integer id;
+    Integer userId;
     String username;
     String email;
     String fullName;
     String avatar;
     UserStatus status;
-
 
 }
