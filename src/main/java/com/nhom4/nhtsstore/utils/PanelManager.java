@@ -21,18 +21,22 @@ public class PanelManager {
 
 
     public void navigateTo(AppView appView, JPanel panel) {
-        if(panel == null) {
-            return;
-        }
-        if (panels.containsKey(appView)) {
-            contentContainer.showPanel(panels.get(appView));
-            return;
-        }
+        if (appView == null) {
+            contentContainer.showPanel(panel);
+        } else {
+            if(panel == null) {
+                return;
+            }
+            if (panels.containsKey(appView)) {
+                contentContainer.showPanel(panels.get(appView));
+                return;
+            }
 
-        panels.put(appView, panel);
+            panels.put(appView, panel);
 
-//        state.currentViewProperty().set(viewName);
-        contentContainer.showPanel(panel);
+    //        state.currentViewProperty().set(viewName);
+            contentContainer.showPanel(panel);
+            }
     }
 
 
