@@ -1,5 +1,6 @@
 .mfx-button{
     -fx-background-color:  #0f156d;
+    -fx-text-fill: white;
 }
 .mfx-button:hover {
     -fx-background-color: #f05502;

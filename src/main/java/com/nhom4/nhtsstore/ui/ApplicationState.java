@@ -1,11 +1,13 @@
 
 package com.nhom4.nhtsstore.ui;
+import com.nhom4.nhtsstore.entities.rbac.User;
 import com.nhom4.nhtsstore.viewmodel.user.UserSessionVm;
 import javafx.beans.property.*;
 import lombok.Getter;
 import org.springframework.context.ApplicationContext;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import com.nhom4.nhtsstore.entities.User;
 
 import javax.swing.*;
 
@@ -14,14 +16,7 @@ public class ApplicationState {
     // Authentication state
     private final BooleanProperty authenticated = new SimpleBooleanProperty(false);
     private final ObjectProperty<UserSessionVm> currentUser = new SimpleObjectProperty<>();
-
-    // UI state
-//    private final ObjectProperty<ViewName> currentView = new SimpleObjectProperty<>(ViewName.LOGIN);
-    private final BooleanProperty loading = new SimpleBooleanProperty(false);
-
-    // Application data state
     private final MapProperty<String, Object> cachedData = new SimpleMapProperty<>();
-    // Spring application context
     @Getter
     private final ApplicationContext applicationContext;
 
@@ -29,14 +24,12 @@ public class ApplicationState {
         this.applicationContext = applicationContext;
     }
 
-    // Getters for properties
     public BooleanProperty authenticatedProperty() {
         return authenticated;
     }
     public boolean isAuthenticated() {
         return authenticated.getValue();
     }
-
     public ObjectProperty<UserSessionVm> currentUserProperty() {
         return currentUser;
     }
@@ -44,18 +37,11 @@ public class ApplicationState {
         return currentUser.getValue();
     }
 
-//    public ObjectProperty<ViewName> currentViewProperty() {
-//        return currentView;
-//    }
 
-    public BooleanProperty loadingProperty() {
-        return loading;
-    }
-
-    // Methods to modify state
     public void login(UserSessionVm user) {
         currentUser.set(user);
         authenticated.set(true);
+
     }
 
     public void logout() {
@@ -63,8 +49,6 @@ public class ApplicationState {
         authenticated.set(false);
         cachedData.clear();
     }
-
-    // Cache management
     public void cacheData(String key, Object data) {
         cachedData.put(key, data);
     }

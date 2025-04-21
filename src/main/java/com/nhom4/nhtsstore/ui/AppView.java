@@ -4,7 +4,6 @@ import com.nhom4.nhtsstore.ui.page.dashboard.DashBoardPanel;
 import com.nhom4.nhtsstore.ui.page.login.LoginPanel;
 import com.nhom4.nhtsstore.ui.page.user.UserProfilePanel;
 import lombok.Getter;
-
 import javax.swing.*;
 
 @Getter

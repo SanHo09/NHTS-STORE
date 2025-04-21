@@ -4,6 +4,7 @@ import com.nhom4.nhtsstore.ui.AppView;
 import com.nhom4.nhtsstore.ui.shared.components.sidebar.EventMenuSelected;
 import com.nhom4.nhtsstore.ui.shared.components.sidebar.ListMenu;
 import com.nhom4.nhtsstore.ui.shared.components.sidebar.Model_Menu;
+import com.nhom4.nhtsstore.ui.shared.components.sidebar.SidebarManager;
 
 import java.awt.Color;
 import java.awt.GradientPaint;
@@ -17,6 +18,7 @@ import javax.swing.*;
 
 @org.springframework.stereotype.Component
 public class Menu extends javax.swing.JPanel {
+    private final SidebarManager sidebarManager;
 
     private EventMenuSelected event;
 
@@ -24,12 +26,23 @@ public class Menu extends javax.swing.JPanel {
         this.event = event;
         listMenu1.addEventMenuSelected(event);
     }
-
-    public Menu() {
+    // Add SidebarManager to constructor
+    public Menu(SidebarManager sidebarManager) {
+        this.sidebarManager = sidebarManager;
         initComponents();
         setOpaque(false);
         listMenu1.setOpaque(false);
-        // add menu items by looping through the ViewName enum
+
+        // Initialize menu items
+        initMenuItems();
+
+        // Set the ListMenu in SidebarManager
+        sidebarManager.setListMenu(listMenu1);
+        sidebarManager.initializeMenuMap();
+    }
+
+    private void initMenuItems() {
+        int index = 0;
         for (AppView parent : AppView.values()) {
             if (parent == AppView.LOGIN) {
                 continue;
@@ -38,17 +51,18 @@ public class Menu extends javax.swing.JPanel {
             // Only add main menu items (those without parents)
             if (parent.getParent() == null) {
                 listMenu1.addItem(new Model_Menu(parent.getIcon(), parent.getName(), Model_Menu.MenuType.MENU));
+                sidebarManager.registerMenuItem(parent, index++);
 
                 // Check for submenu items
                 for (AppView children : AppView.values()) {
                     if (children.getParent() == parent) {
                         // Add submenu items
                         listMenu1.addItem(new Model_Menu(children.getIcon(), children.getName(), Model_Menu.MenuType.MENU));
+                        sidebarManager.registerMenuItem(children, index++);
                     }
                 }
             }
         }
-
     }
 
     @SuppressWarnings("unchecked")

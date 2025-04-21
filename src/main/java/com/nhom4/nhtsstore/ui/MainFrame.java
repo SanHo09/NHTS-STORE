@@ -8,6 +8,7 @@ import jakarta.annotation.PostConstruct;
 import javafx.application.Platform;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.stereotype.Controller;
+import raven.modal.component.ModalContainer;
 
 import javax.swing.*;
 import java.awt.*;
@@ -26,6 +27,7 @@ public class MainFrame extends JFrame {
         this.mainPanelFactory = mainPanelFactory;
         this.loginPanel = loginPanel;
         this.mainPanel = mainPanel;
+
     }
 
     @PostConstruct
@@ -54,10 +56,7 @@ public class MainFrame extends JFrame {
         });
 
         add(cardContainer, BorderLayout.CENTER);
-        SwingUtilities.invokeLater(() -> {
-            FlatIntelliJLaf.setup();
-            setVisible(true);
-        });
+
     }
 
 }

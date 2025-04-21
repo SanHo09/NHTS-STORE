@@ -1,5 +1,6 @@
 package com.nhom4.nhtsstore.ui.page.login;
 
+import com.nhom4.nhtsstore.entities.rbac.User;
 import com.nhom4.nhtsstore.services.UserService;
 import com.nhom4.nhtsstore.ui.ApplicationState;
 import com.nhom4.nhtsstore.utils.IconUtil;
@@ -14,6 +15,8 @@ import javafx.geometry.VPos;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import lombok.SneakyThrows;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import raven.modal.Toast;
 import raven.modal.toast.option.ToastLocation;
@@ -24,9 +27,9 @@ import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 @Component
 public class LoginPanelController  implements Initializable {
-    @FXML public MFXTextField usernameField;
-    @FXML public MFXPasswordField passwordField;
-    @FXML public MFXButton loginButton;
+    @FXML private MFXTextField usernameField;
+    @FXML private MFXPasswordField passwordField;
+    @FXML private MFXButton loginButton;
 
     private MFXTooltip usernameTooltip;
     private MFXTooltip passwordTooltip;
@@ -79,7 +82,6 @@ public class LoginPanelController  implements Initializable {
     @FXML
     public void submitLogin(MouseEvent actionEvent) {
         if (isLoading) return;
-        System.out.println("Login button clicked");
         if (!validateInputs()) return;
 
         startLoadingState();
@@ -87,11 +89,10 @@ public class LoginPanelController  implements Initializable {
             try {
                 var username = usernameField.getText().trim();
                 var password = passwordField.getText();
-                var userSession = userService.authenticate(username, password);
-                System.out.println("User session: " + userSession);
+                var userSessionVm = userService.authenticate(username, password);
                 Platform.runLater(() -> {
-                    if (userSession) {
-                        applicationState.login(userService.findByUsername(username));
+                    if (userSessionVm!=null) {
+                        applicationState.login(userSessionVm);
                         Toast.show(loginPanel, Toast.Type.SUCCESS, "Login successful");
                     } else {
                         Toast.show(loginPanel, Toast.Type.WARNING,
