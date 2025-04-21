@@ -18,6 +18,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "users")
@@ -55,9 +56,12 @@ public class User extends AbstractAuditEntity implements Serializable, UserDetai
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        List<Role> roleList = roles.stream().map(UserHasRole::getRole).toList();
-        List<String> roleNames = roleList.stream().map(Role::getRoleName).toList();
-        return roleNames.stream().map(SimpleGrantedAuthority::new).toList();
+        Set<Role> roleList = roles.stream().map(UserHasRole::getRole).collect(Collectors.toSet());
+        Set<RoleHasPermission> roleHasPermissionList = roleList.stream().flatMap(role -> role.getRolePermissions().stream()).collect(Collectors.toSet());
+        Set<Permission> permissionList = roleHasPermissionList.stream().map(RoleHasPermission::getPermission).collect(Collectors.toSet());
+        return permissionList.stream()
+                .map(permission -> new SimpleGrantedAuthority(permission.getPermissionName()))
+                .collect(Collectors.toSet());
     }
 
     @Override
