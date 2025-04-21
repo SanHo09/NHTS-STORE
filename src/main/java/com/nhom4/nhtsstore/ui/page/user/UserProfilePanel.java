@@ -65,6 +65,13 @@ public class UserProfilePanel extends JPanel implements RoutablePanel {
         lblFullName.setText(user.getFullName());
         lblEmail.setText(user.getEmail());
         lblUsername.setText(user.getUsername());
-        lblRole.setText(user.getRoles().toString());
+        StringBuilder stringBuilder = new StringBuilder();
+        user.getRoles().forEach(role -> {
+            stringBuilder.append(role.getRoleName());
+            if (user.getRoles().size() > 1) {
+                stringBuilder.append(", ");
+            }
+        });
+        lblRole.setText(stringBuilder.toString());
     }
 }
