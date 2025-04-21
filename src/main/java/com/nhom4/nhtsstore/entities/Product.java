@@ -3,6 +3,7 @@ package com.nhom4.nhtsstore.entities;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Nationalized;
 
 import java.util.Date;
 
@@ -17,6 +18,7 @@ public class Product {
     private Long Id;
 
     @Column(nullable = false)
+    @Nationalized
     private String Name;
 
     @Column(nullable = false)
@@ -34,6 +36,7 @@ public class Product {
     private Date ExpiryDate;
 
     @Column(nullable = true)
+    @Nationalized
     private String Manufacturer;
 
     @Column(nullable = true)

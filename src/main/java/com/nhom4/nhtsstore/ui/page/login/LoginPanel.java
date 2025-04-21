@@ -30,7 +30,8 @@ public class LoginPanel extends JPanel {
 
                 });
         add(jfxLoginPanel);
-
+        revalidate();
+        repaint();
     }
 
 

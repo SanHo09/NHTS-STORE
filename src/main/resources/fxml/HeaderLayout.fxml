@@ -9,20 +9,19 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 
-
-<BorderPane prefHeight="42.0" prefWidth="632.0" stylesheets="@../css/Global.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.nhom4.nhtsstore.ui.layout.Header">
+<BorderPane prefHeight="42.0" prefWidth="632.0" style="-fx-background-color: transparent;" stylesheets="@../css/Global.css"  xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.nhom4.nhtsstore.ui.layout.Header">
    <right>
       <MenuButton fx:id="dropDownMenu" mnemonicParsing="false" prefHeight="32.0" prefWidth="171.0" text="MenuButton" BorderPane.alignment="CENTER">
          <graphic>
             <ImageView fx:id="userAvatarImage" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true" />
          </graphic>
          <items>
-            <CustomMenuItem fx:id="menuItemProfile" mnemonicParsing="false" onAction="#onActionMenuItemProfile" text="Profile">
+            <CustomMenuItem fx:id="menuItemProfile" mnemonicParsing="false" onAction="#onActionMenuItemProfile" text="Edit your profile">
                <content>
                   <HBox alignment="CENTER_LEFT" prefWidth="169.0" spacing="9.0">
                      <children>
                         <ImageView fx:id="profileIcon" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true" />
-                        <Label text="Profile" />
+                        <Label text="Edit your profile" />
                      </children>
                   </HBox>
                </content>

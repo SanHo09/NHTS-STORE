@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Nationalized;
 
 import java.util.List;
 
@@ -19,6 +20,7 @@ public class Category {
     private Long Id;
 
     @Column(nullable = false)
+    @Nationalized
     private String Name;
 
     @JsonIgnore

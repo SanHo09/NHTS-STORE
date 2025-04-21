@@ -7,22 +7,20 @@ import java.awt.*;
 
 @Component
 public class PagePanel extends JPanel {
-	private final CardLayout cardLayout;
 
 	public PagePanel() {
-		cardLayout = new CardLayout();
-		setLayout(cardLayout);
+		setLayout(new BorderLayout());
 	}
 
 	public void showPanel(JPanel panel) {
-		// Remove all previous components
 		removeAll();
 
-		// Add the new panel
-		add(panel, panel.getClass().getName());
+		add(panel, BorderLayout.CENTER);
+
 
 		// Show the panel
 		revalidate();
 		repaint();
+
 	}
 }
