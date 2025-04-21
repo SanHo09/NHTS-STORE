@@ -1,7 +1,5 @@
-package com.nhom4.nhtsstore.utils;
+package com.nhom4.nhtsstore.ui;
 
-import com.nhom4.nhtsstore.ui.ApplicationState;
-import com.nhom4.nhtsstore.ui.AppView;
 import com.nhom4.nhtsstore.ui.layout.PagePanel;
 import org.springframework.stereotype.Component;
 

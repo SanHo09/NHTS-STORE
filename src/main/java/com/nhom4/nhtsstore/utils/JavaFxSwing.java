@@ -75,17 +75,24 @@ public class JavaFxSwing {
      * @return a JFXPanel with the FXML content
      */
     public static JFXPanel createJFXPanelFromFxml(String fxmlPath, ApplicationContext applicationContext) {
-        JFXPanel jfxPanel = new JFXPanel();
+        JFXPanel jfxPanel = createLoadingJFXPanel();
         Platform.runLater(() -> {
-            try {
-                FXMLLoader loader = new FXMLLoader(JavaFxSwing.class.getResource(fxmlPath));
-                loader.setControllerFactory(applicationContext::getBean);
-                Parent root = loader.load();
-                Scene scene = new Scene(root);
-                jfxPanel.setScene(scene);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            Thread loadThread = new Thread(() -> {
+                try {
+                    FXMLLoader loader = new FXMLLoader(JavaFxSwing.class.getResource(fxmlPath));
+                    loader.setControllerFactory(applicationContext::getBean);
+                    Parent root = loader.load();
+                    Platform.runLater(() -> {
+                        Scene actualScene = new Scene(root);
+                        jfxPanel.setScene(actualScene);
+
+                    });
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+            loadThread.setDaemon(true);
+            loadThread.start();
         });
         return jfxPanel;
     }
@@ -103,6 +110,7 @@ public class JavaFxSwing {
         });
         return jfxPanel;
     }
+
 
     /**
      * Creates a JFXPanel from FXML with access to the controller

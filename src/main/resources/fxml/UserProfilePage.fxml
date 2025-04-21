@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import io.github.palexdev.materialfx.controls.MFXButton?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<HBox depthTest="ENABLE" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" stylesheets="@../css/Global.css" xmlns="http://javafx.com/javafx/21.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.nhom4.nhtsstore.ui.page.user.UserProfilePanel">
+   <children>
+      <VBox prefHeight="462.0" prefWidth="560.0">
+         <children>
+            <GridPane prefHeight="432.0" prefWidth="649.0">
+              <columnConstraints>
+                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="109.20001220703125" minWidth="0.0" prefWidth="59.19998397827149" />
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="500.0000160217286" minWidth="10.0" prefWidth="500.0000160217286" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints maxHeight="114.80000305175781" minHeight="10.0" prefHeight="42.00000610351563" vgrow="SOMETIMES" />
+                <RowConstraints maxHeight="293.5999938964844" minHeight="0.0" prefHeight="293.5999938964844" vgrow="SOMETIMES" />
+                <RowConstraints maxHeight="114.60001220703126" minHeight="10.0" prefHeight="88.00001831054686" vgrow="SOMETIMES" />
+              </rowConstraints>
+               <children>
+                  <HBox alignment="CENTER_LEFT" GridPane.columnIndex="1">
+                     <children>
+                        <Label prefHeight="27.0" prefWidth="169.0" text="Profile">
+                           <font>
+                              <Font name="System Bold" size="24.0" />
+                           </font>
+                        </Label>
+                        <HBox alignment="CENTER_RIGHT" prefHeight="46.0" prefWidth="406.0" spacing="15.0">
+                           <children>
+                              <MFXButton buttonType="RAISED" prefHeight="35.0" prefWidth="146.0" text="Change password">
+                                 <font>
+                                    <Font name="System Bold" size="12.0" />
+                                 </font>
+                              </MFXButton>
+                              <MFXButton buttonType="RAISED" prefHeight="35.0" prefWidth="50.0" text="Edit">
+                                 <font>
+                                    <Font name="System Bold" size="12.0" />
+                                 </font>
+                              </MFXButton>
+                           </children>
+                        </HBox>
+                     </children>
+                  </HBox>
+                  <BorderPane prefHeight="294.0" prefWidth="422.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                     <left>
+                        <VBox prefHeight="294.0" prefWidth="136.0" spacing="25.0" BorderPane.alignment="CENTER">
+                           <children>
+                              <Label text="Full name" />
+                              <Label layoutX="35.0" layoutY="35.0" text="Email" />
+                              <Label layoutX="35.0" layoutY="68.0" text="Username" />
+                              <Label layoutX="35.0" layoutY="100.0" text="Role" />
+                           </children>
+                           <padding>
+                              <Insets bottom="25.0" right="25.0" top="25.0" />
+                           </padding>
+                        </VBox>
+                     </left>
+                     <right>
+                        <VBox prefHeight="294.0" prefWidth="347.0" spacing="25.0" BorderPane.alignment="CENTER">
+                           <padding>
+                              <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
+                           </padding>
+                           <children>
+                              <Label fx:id="lblFullName" text="Label" />
+                              <Label fx:id="lblEmail" text="Label" />
+                              <Label fx:id="lblUsername" text="Label" />
+                              <Label fx:id="lblRole" text="Label" />
+                           </children>
+                        </VBox>
+                     </right>
+                  </BorderPane>
+               </children>
+            </GridPane>
+         </children>
+      </VBox>
+   </children>
+   <padding>
+      <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+   </padding>
+</HBox>

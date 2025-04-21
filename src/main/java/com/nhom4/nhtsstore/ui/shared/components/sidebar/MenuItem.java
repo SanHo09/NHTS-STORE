@@ -23,6 +23,7 @@ public class MenuItem extends javax.swing.JPanel {
             lblName.setVisible(false);
         } else {
             lblName.setText(" ");
+
         }
     }
 

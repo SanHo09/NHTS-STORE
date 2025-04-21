@@ -1,7 +1,11 @@
 package com.nhom4.nhtsstore.ui.layout;
 
+import com.nhom4.nhtsstore.ui.AppView;
 import com.nhom4.nhtsstore.ui.ApplicationState;
-import com.nhom4.nhtsstore.utils.PanelManager;
+import com.nhom4.nhtsstore.ui.navigation.NavigationService;
+import com.nhom4.nhtsstore.ui.navigation.RouteParams;
+import com.nhom4.nhtsstore.ui.shared.components.sidebar.SidebarManager;
+import com.nhom4.nhtsstore.ui.PanelManager;
 import com.nhom4.nhtsstore.viewmodel.user.UserSessionVm;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -17,7 +21,7 @@ import java.util.ResourceBundle;
 @Controller
 public class Header extends StackPane implements Initializable {
     private final ApplicationState applicationState;
-    private final PanelManager panelManager;
+    private final NavigationService navigationService;
     @FXML
     private MenuButton dropDownMenu;
 
@@ -30,9 +34,10 @@ public class Header extends StackPane implements Initializable {
     @FXML
     private MenuItem menuItemLogout;
 
-    public Header(ApplicationState applicationState, PanelManager panelManager) {
+    public Header(ApplicationState applicationState, PanelManager panelManager, NavigationService navigationService) {
         this.applicationState = applicationState;
-        this.panelManager = panelManager;
+        this.navigationService = navigationService;
+
 
     }
 
@@ -70,8 +75,9 @@ public class Header extends StackPane implements Initializable {
 
     private void navigateToProfile() {
         // Navigate to the profile view
-//        panelManager.navigateTo(ViewName.PROFILE_VIEW,
-//                applicationState.getViewPanelByBean(ViewName.PROFILE_VIEW.getPanelClass()));
+        RouteParams params = new RouteParams();
+        params.set("userId", applicationState.getCurrentUser().getUserId());
+        navigationService.navigateTo(AppView.USER_PROFILE, params);
     }
 
     private void logout() {

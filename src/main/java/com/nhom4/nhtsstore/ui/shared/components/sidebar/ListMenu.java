@@ -92,4 +92,19 @@ public class ListMenu<E extends Object> extends JList<E> {
     public void addItem(Model_Menu data) {
         model.addElement(data);
     }
+    public void setSelectedIndex(int index) {
+        if (index >= 0 && index < model.size()) {
+            Object o = model.getElementAt(index);
+            if (o instanceof Model_Menu) {
+                Model_Menu menu = (Model_Menu) o;
+                if (menu.getType() == Model_Menu.MenuType.MENU) {
+                    selectedIndex = index;
+                    if (event != null) {
+                        event.selected(index);
+                    }
+                    repaint();
+                }
+            }
+        }
+    }
 }
