@@ -1,11 +1,12 @@
 package com.nhom4.nhtsstore.ui.base;
 
 import com.nhom4.nhtsstore.entities.GenericEntity;
-import com.nhom4.nhtsstore.entities.Product;
 import com.nhom4.nhtsstore.services.EventBus;
 import com.nhom4.nhtsstore.services.GenericService;
 import com.nhom4.nhtsstore.ui.ApplicationState;
-import com.nhom4.nhtsstore.utils.PanelManager;
+import com.nhom4.nhtsstore.ui.PanelManager;
+import com.nhom4.nhtsstore.ui.navigation.NavigationService;
+import com.nhom4.nhtsstore.ui.navigation.RouteParams;
 import javax.swing.*;
 import javax.swing.table.*;
 import java.awt.*;
@@ -14,13 +15,25 @@ import java.awt.event.MouseEvent;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.swing.Timer;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 /**
  * Component bảng dữ liệu tổng quát có thể tái sử dụng cho nhiều màn hình
  * @param <T> Loại entity mà bảng sẽ hiển thị
  */
 public class GenericTablePanel<T extends GenericEntity> extends JPanel {
+    @Autowired
+    private PanelManager panelManager;
+    @Autowired
+    private ApplicationState applicationState;
+    @Autowired
+    private NavigationService navigationService;
     private JTable table;
     private GenericTableModel<T> tableModel;
     private JPopupMenu tableRowMenu;
@@ -31,10 +44,17 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
     private final Class<? extends JPanel> editPanelClass;
     private final String[] columnNames;
     private final String panelTitle;
-    @Autowired
-    private PanelManager panelManager;
-    @Autowired
-    private ApplicationState applicationState;
+    private JTextField searchField;
+    private JComboBox<Integer> pageSizeCombo;
+    private JLabel pageInfoLabel;
+    private JButton firstPageBtn, prevPageBtn, nextPageBtn, lastPageBtn;
+    private JTextField pageNumberField;
+    private Timer searchTimer;
+    private Timer pageNumberTimer;
+    private int currentPage = 0;
+    private int totalPages = 0;
+    private int pageSize = 10;
+    private List<String> searchFields;
     
     /**
      * Constructor cho GenericTablePanel
@@ -48,15 +68,18 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
         Class<T> entityClass,
         Class<? extends JPanel> editPanelClass,
         String[] columnNames,
-        String panelTitle) 
+        String panelTitle,
+        List<String> searchFields)
     {
         this.service = service;
         this.entityClass = entityClass;
         this.editPanelClass = editPanelClass;
         this.columnNames = columnNames;
         this.panelTitle = panelTitle;
+        this.searchFields = searchFields;
         
         initComponents();
+        initPaginationComponents();
         loadData();
     }
     
@@ -89,7 +112,7 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
             JMenuItem refreshItem = new JMenuItem("Refresh");
             refreshItem.addActionListener(ev -> loadData());
             
-            JMenuItem deleteItem = new JMenuItem("Delete Selected");
+            JMenuItem deleteItem = new JMenuItem("Delete");
             deleteItem.addActionListener(ev -> deleteSelectedRecords());
             
             headerMenu.add(refreshItem);
@@ -120,15 +143,7 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
         checkboxColumn.setCellEditor(new CheckBoxEditor());
         
         // Thiết lập checkbox cho header cột đầu tiên
-        JCheckBox selectAllCheckbox = new JCheckBox();
-        selectAllCheckbox.addActionListener(e -> {
-            boolean selected = selectAllCheckbox.isSelected();
-            for (int i = 0; i < tableModel.getRowCount(); i++) {
-                tableModel.setValueAt(selected, i, 0);
-            }
-            tableModel.fireTableDataChanged();
-        });
-        checkboxColumn.setHeaderRenderer(new CheckBoxHeaderRenderer(selectAllCheckbox));
+        checkboxColumn.setHeaderRenderer(new CheckBoxHeaderRenderer(table, 0));
         
         // Cấu hình cột action menu (cột cuối)
         int lastColumnIndex = tableModel.getColumnCount() - 1;
@@ -142,21 +157,180 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
         add(scrollPane, BorderLayout.CENTER);
     }
     
-    /**
-     * Tải dữ liệu từ service và cập nhật bảng
-     */
-    public void loadData() {
-        SwingWorker<List<T>, Void> worker = new SwingWorker<>() {
+    private void initPaginationComponents() {
+        // Panel tìm kiếm
+        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        searchField = new JTextField(20);
+        searchField.getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) { debounceSearch(); }
+            public void removeUpdate(DocumentEvent e) { debounceSearch(); }
+            public void insertUpdate(DocumentEvent e) { debounceSearch(); }
+        });
+        searchPanel.add(new JLabel("Search:"));
+        searchPanel.add(searchField);
+        
+        // Panel phân trang
+        JPanel paginationPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        
+        // Nút trang đầu
+        firstPageBtn = new JButton("<<");
+        firstPageBtn.addActionListener(e -> goToPage(0));
+        
+        // Nút trang trước
+        prevPageBtn = new JButton("<");
+        prevPageBtn.addActionListener(e -> goToPage(currentPage - 1));
+        
+        // Nút trang sau
+        nextPageBtn = new JButton(">");
+        nextPageBtn.addActionListener(e -> goToPage(currentPage + 1));
+        
+        // Nút trang cuối
+        lastPageBtn = new JButton(">>");
+        lastPageBtn.addActionListener(e -> goToPage(totalPages - 1));
+        
+        // Hiển thị thông tin trang
+        pageInfoLabel = new JLabel();
+        
+        // Nhập số trang
+        pageNumberField = new JTextField(3);
+//        pageNumberField.getDocument().addDocumentListener(new DocumentListener() {
+//            public void changedUpdate(DocumentEvent e) { debouncePageNumber(); }
+//            public void removeUpdate(DocumentEvent e) { debouncePageNumber(); }
+//            public void insertUpdate(DocumentEvent e) { debouncePageNumber(); }
+//        });
+        pageNumberField.getDocument().addDocumentListener(new DocumentListener() {
+            private String lastValue = "";
+
             @Override
-            protected List<T> doInBackground() {
-                return service.findAll();
+            public void insertUpdate(DocumentEvent e) {
+                handlePageNumberChange();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                handlePageNumberChange();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                handlePageNumberChange();
+            }
+
+            private void handlePageNumberChange() {
+                String currentValue = pageNumberField.getText();
+                if (!currentValue.equals(lastValue)) {
+                    lastValue = currentValue;
+                    debouncePageNumber();
+                }
+            }
+        });
+        
+        // Combo chọn số lượng item mỗi trang
+        pageSizeCombo = new JComboBox<>(new Integer[]{5, 10, 20, 50, 100});
+        pageSizeCombo.setSelectedItem(pageSize);
+        pageSizeCombo.addActionListener(e -> {
+            pageSize = (Integer) pageSizeCombo.getSelectedItem();
+            currentPage = 0;
+            loadData();
+        });
+        
+        paginationPanel.add(firstPageBtn);
+        paginationPanel.add(prevPageBtn);
+        paginationPanel.add(pageInfoLabel);
+        paginationPanel.add(new JLabel("Go to:"));
+        paginationPanel.add(pageNumberField);
+        paginationPanel.add(new JLabel("Items per page:"));
+        paginationPanel.add(pageSizeCombo);
+        paginationPanel.add(nextPageBtn);
+        paginationPanel.add(lastPageBtn);
+        
+        // Thêm các panel vào layout
+        JPanel bottomPanel = new JPanel(new BorderLayout());
+        bottomPanel.add(searchPanel, BorderLayout.WEST);
+        bottomPanel.add(paginationPanel, BorderLayout.EAST);
+        add(bottomPanel, BorderLayout.SOUTH);
+        
+        // Timer cho search debounce
+        searchTimer = new Timer(500, e -> {
+            searchTimer.stop();
+            currentPage = 0;
+            loadData();
+        });
+        searchTimer.setRepeats(false);
+        
+        // Timer cho page number debounce
+        pageNumberTimer = new Timer(500, e -> {
+            pageNumberTimer.stop();
+            try {
+                int page = Integer.parseInt(pageNumberField.getText()) - 1;
+                if (page >= 0 && page < totalPages) {
+                    goToPage(page);
+                }
+            } catch (NumberFormatException ex) {
+                // Ignore invalid input
+            }
+        });
+        pageNumberTimer.setRepeats(false);
+    }
+    
+    private void debounceSearch() {
+        searchTimer.restart();
+    }
+    
+    private void debouncePageNumber() {
+//        pageNumberTimer.restart();
+        if (pageNumberTimer != null) {
+            pageNumberTimer.stop();
+        }
+
+        pageNumberTimer = new Timer(500, e -> {
+            try {
+                String text = pageNumberField.getText().trim();
+                if (!text.isEmpty()) {
+                    int page = Integer.parseInt(text) - 1;
+                    if (page >= 0 && page < totalPages && page != currentPage) {
+                        goToPage(page);
+                    }
+                }
+            } catch (NumberFormatException ex) {
+                // Khôi phục giá trị hợp lệ nếu nhập không phải số
+                SwingUtilities.invokeLater(() -> 
+                    pageNumberField.setText(String.valueOf(currentPage + 1)));
+            }
+        });
+        pageNumberTimer.setRepeats(false);
+        pageNumberTimer.start();
+    }
+    
+    private void goToPage(int page) {
+        if (page >= 0 && page < totalPages && page != currentPage) {
+            currentPage = page;
+            loadData();
+        }
+    }
+    
+    public void loadData() {
+        SwingWorker<Page<T>, Void> worker = new SwingWorker<>() {
+            @Override
+            protected Page<T> doInBackground() {
+                String keyword = searchField.getText().trim();
+                Pageable pageable = PageRequest.of(currentPage, pageSize);
+                
+                if (keyword.isEmpty()) {
+                    return service.findAll(pageable);
+                } else {
+                    return service.search(keyword, searchFields, pageable);
+                }
             }
             
             @Override
             protected void done() {
                 try {
-                    List<T> data = get();
-                    tableModel.setData(data);
+                    Page<T> page = get();
+                    tableModel.setData(page.getContent());
+                    totalPages = page.getTotalPages();
+
+                    updatePaginationControls();
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(GenericTablePanel.this,
                             "Error loading data: " + ex.getMessage(),
@@ -168,6 +342,15 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
         worker.execute();
     }
     
+    private void updatePaginationControls() {
+        pageInfoLabel.setText(String.format("Page %d of %d", currentPage + 1, totalPages));
+        firstPageBtn.setEnabled(currentPage > 0);
+        prevPageBtn.setEnabled(currentPage > 0);
+        nextPageBtn.setEnabled(currentPage < totalPages - 1);
+        lastPageBtn.setEnabled(currentPage < totalPages - 1);
+        pageNumberField.setText(String.valueOf(currentPage + 1));
+    }
+    
     /**
      * Hiển thị dialog để tạo entity mới
      */
@@ -175,29 +358,6 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
         EventBus.postEntity(null);
         JPanel newPanel = applicationState.getViewPanelByBean(editPanelClass);
         this.panelManager.navigateTo(null, newPanel);
-//        // Tạo frame mới để thêm/sửa entity
-//        JFrame newEntityFrame = new JFrame("Add New " + entityClass.getSimpleName());
-//        newEntityFrame.setSize(500, 400);
-//        newEntityFrame.setLocationRelativeTo(this);
-//        
-//        // Thêm form panel tương ứng với loại entity
-//        try {
-//            // Ở đây cần implement EntityFormPanel cho mỗi loại entity
-//            // Giả sử chúng ta có một factory để tạo ra form panel phù hợp
-//            JPanel formPanel = EntityFormPanelFactory.createFormPanel(entityClass, null, entity -> {
-//                service.save((T) entity);
-//                loadData();
-//                newEntityFrame.dispose();
-//            });
-//            
-//            newEntityFrame.add(formPanel);
-//            newEntityFrame.setVisible(true);
-//        } catch (Exception e) {
-//            JOptionPane.showMessageDialog(this, 
-//                    "Could not create form for " + entityClass.getSimpleName() + ": " + e.getMessage(),
-//                    "Form Error", JOptionPane.ERROR_MESSAGE);
-//            e.printStackTrace();
-//        }
     }
     
     /**
@@ -373,22 +533,37 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
     /**
      * Renderer cho checkbox trong header
      */
-    private static class CheckBoxHeaderRenderer implements TableCellRenderer {
-        private final JCheckBox selectAll;
-        
-        public CheckBoxHeaderRenderer(JCheckBox selectAll) {
-            this.selectAll = selectAll;
-            selectAll.setHorizontalAlignment(JCheckBox.CENTER);
+    private class CheckBoxHeaderRenderer extends JCheckBox implements TableCellRenderer {
+        public CheckBoxHeaderRenderer(JTable table, int columnIndex) {
+            setHorizontalAlignment(CENTER);
+            setBorderPainted(true);
+            
+            table.getTableHeader().addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    int viewColumn = table.columnAtPoint(e.getPoint());
+                    int modelColumn = table.convertColumnIndexToModel(viewColumn);
+                    if (modelColumn == columnIndex) {
+                        boolean newSelected = !isSelected();
+                        setSelected(newSelected);
+                        
+                        GenericTableModel<?> model = (GenericTableModel<?>) table.getModel();
+                        for (int i = 0; i < model.getRowCount(); i++) {
+                            model.setValueAt(newSelected, i, columnIndex);
+                        }
+                    }
+                }
+            });
         }
         
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value,
                                                       boolean isSelected, boolean hasFocus,
                                                       int row, int column) {
-            return selectAll;
+            return this;
         }
     }
-    
+
     /**
      * Renderer cho nút action
      */
@@ -494,28 +669,9 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
      * Mở dialog chỉnh sửa entity
      */
     private void editEntity(T entity) {
-        EventBus.postEntity(entity);
-        JPanel editPanel = applicationState.getViewPanelByBean(editPanelClass);
-        this.panelManager.navigateTo(null, editPanel);
-//        JFrame editFrame = new JFrame("Edit " + entityClass.getSimpleName());
-//        editFrame.setSize(500, 400);
-//        editFrame.setLocationRelativeTo(this);
-//        
-//        try {
-//            JPanel formPanel = EntityFormPanelFactory.createFormPanel(entityClass, entity, updatedEntity -> {
-//                service.save((T) updatedEntity);
-//                loadData();
-//                editFrame.dispose();
-//            });
-//            
-//            editFrame.add(formPanel);
-//            editFrame.setVisible(true);
-//        } catch (Exception e) {
-//            JOptionPane.showMessageDialog(this, 
-//                    "Could not create edit form: " + e.getMessage(),
-//                    "Edit Error", JOptionPane.ERROR_MESSAGE);
-//            e.printStackTrace();
-//        }
+        RouteParams params = new RouteParams();
+        params.set("entity", entity);
+        this.navigationService.navigateTo(editPanelClass, params);
     }
     
     /**
