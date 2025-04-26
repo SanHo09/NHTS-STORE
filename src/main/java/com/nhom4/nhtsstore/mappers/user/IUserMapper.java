@@ -27,20 +27,12 @@ public interface IUserMapper extends BaseMapper<User, UserRecordVm> {
      * @param user The user entity
      * @return UserSessionVm with session information
      */
-    @Mapping(source = "userId", target = "userId")
-    @Mapping(source = "username", target = "username")
-    @Mapping(source = "fullName", target = "fullName")
-    @Mapping(source = "email", target = "email")
+
     @Mapping(source = "roles", target = "roles", qualifiedByName = "mapUserRoles")
     @Mapping(source = "roles", target = "permissions", qualifiedByName = "mapUserPermissions")
     UserSessionVm toUserSessionVm(User user);
 
-    @Mapping( source = "userId", target = "userId")
-    @Mapping( source = "username", target = "username")
-    @Mapping( source = "fullName", target = "fullName")
-    @Mapping( source = "email", target = "email")
-    @Mapping( source = "avatar", target = "avatar")
-    @Mapping( source = "status", target = "status")
+
     @Mapping( source = "roles", target = "roles", qualifiedByName = "mapUserRolesWithPermission")
     UserDetailVm toUserDetailVm(User user);
     /**

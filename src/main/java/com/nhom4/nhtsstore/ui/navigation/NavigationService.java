@@ -51,5 +51,21 @@ public class NavigationService {
         sidebarManager.selectMenuItem(view);
     }
 
+    public void navigateTo(Class<? extends JPanel> panelClass, RouteParams params) {
+        JPanel panel = applicationState.getViewPanelByBean(panelClass);
 
+        // Set the current route parameters
+        this.currentParams = params;
+
+        // If panel implements RoutablePanel, pass the parameters
+        if (panel instanceof RoutablePanel) {
+            ((RoutablePanel) panel).onNavigate(params);
+        }
+
+        // Navigate to the panel
+        panelManager.navigateTo(null, panel);
+
+        // Update sidebar selection
+//        sidebarManager.selectMenuItem(view);
+    }
 }

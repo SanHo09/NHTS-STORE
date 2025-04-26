@@ -9,6 +9,7 @@ import javax.swing.*;
 
 import com.nhom4.nhtsstore.utils.JavaFxSwing;
 import jakarta.annotation.PostConstruct;
+import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import org.springframework.stereotype.Controller;
 
@@ -23,15 +24,19 @@ public class LoginPanel extends JPanel {
     }
     @PostConstruct
     private void initComponent(){
-        JFXPanel jfxLoginPanel = JavaFxSwing.createJFXPanelWithController(
-                "/fxml/LoginPanel.fxml",
-                appState.getApplicationContext(),
-                (LoginPanelController controller) -> {
 
-                });
-        add(jfxLoginPanel);
-        revalidate();
-        repaint();
+        Platform.runLater(() -> {
+            JFXPanel jfxLoginPanel = JavaFxSwing.createJFXPanelWithController(
+                    "/fxml/LoginPanel.fxml",
+                    appState.getApplicationContext(),
+                    (LoginPanelController controller) -> {
+
+                    });
+            add(jfxLoginPanel);
+            revalidate();
+            repaint();
+        });
+
     }
 
 

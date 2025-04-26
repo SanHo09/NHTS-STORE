@@ -58,16 +58,11 @@ public class WindowLayout implements Initializable {
     public MFXButton closeWindowButton;
 
     private void minimizeWindow() {
-        Platform.runLater(() -> {
-
-            mainFrame.setState(Frame.ICONIFIED);
-        });
+        mainFrame.setState(Frame.ICONIFIED);
     }
 
     private void closeWindow() {
-        Platform.runLater(() -> {
-            mainFrame.dispose();
-            System.exit(0);
-        });
+        mainFrame.dispose();
+        System.exit(0);
     }
 }

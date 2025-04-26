@@ -15,6 +15,7 @@ public class UserSessionVm {
     String username;
     String fullName;
     String email;
+    String avatar;
     Set<String> roles;
     Set<String> permissions;
 }

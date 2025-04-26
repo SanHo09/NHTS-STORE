@@ -5,12 +5,18 @@
 <?import io.github.palexdev.materialfx.controls.MFXTextField?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.Cursor?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-
-<VBox alignment="CENTER" prefHeight="663.0" prefWidth="597.0" spacing="15.0" stylesheets="@../css/Global.css"  xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.nhom4.nhtsstore.ui.page.login.LoginPanelController">
+<VBox alignment="CENTER" prefHeight="663.0" prefWidth="597.0" spacing="20.0" stylesheets="@../css/Global.css" xmlns="http://javafx.com/javafx/21.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.nhom4.nhtsstore.ui.page.login.LoginPanelController">
    <children>
+      <ImageView fitHeight="168.0" fitWidth="179.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../NHTS_Store_logo.png" />
+         </image>
+      </ImageView>
 
                                     
                                             <MFXTextField fx:id="usernameField" floatMode="BORDER" floatingText="Email" graphicTextGap="1.0" prefHeight="50.0" prefWidth="402.0" text="phamduyhuy" />
@@ -19,7 +25,7 @@
                 <Insets />
             </opaqueInsets>
         </MFXPasswordField>
-      <MFXButton fx:id="loginButton" depthLevel="LEVEL5" onMousePressed="#submitLogin" prefHeight="50.0" prefWidth="402.0" rippleColor="#2cc0e1" rippleRadius="2.0" style="-fx-background-radius: 15;" text="Continue" textAlignment="CENTER" textFill="WHITE" wrapText="true">
+      <MFXButton fx:id="loginButton" depthLevel="LEVEL5" onMousePressed="#submitLogin" prefHeight="50.0" prefWidth="402.0" rippleColor="#2cc0e1" rippleRadius="2.0" style="-fx-background-radius: 15;" text="Login" textAlignment="CENTER" textFill="WHITE" wrapText="true">
          <font>
             <Font name="System Bold" size="12.0" />
          </font>

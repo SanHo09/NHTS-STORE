@@ -11,6 +11,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import org.springframework.stereotype.Controller;
@@ -37,15 +38,10 @@ public class Header extends StackPane implements Initializable {
     public Header(ApplicationState applicationState, PanelManager panelManager, NavigationService navigationService) {
         this.applicationState = applicationState;
         this.navigationService = navigationService;
-
-
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // Existing icon setup code
-
-
         applicationState.currentUserProperty().addListener((obs, oldValue, newValue) -> updateUserDisplay(newValue));
     }
 
@@ -53,9 +49,8 @@ public class Header extends StackPane implements Initializable {
 
     private void updateUserDisplay(UserSessionVm user) {
         if (user != null) {
-            // Update avatar or user display
             String initial = user.getFullName();
-//            userAvatarImage.setImage(new Image(user.getAvatarUrl()));
+//            userAvatarImage.setImage(new Image(user.getAvatar()== null ? "/icons/default-avatar.png" : user.getAvatar()));
             dropDownMenu.setText(initial);
         } else {
             dropDownMenu.setText("User");
