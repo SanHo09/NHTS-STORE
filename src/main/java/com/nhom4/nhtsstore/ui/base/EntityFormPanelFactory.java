@@ -124,13 +124,4 @@ public class EntityFormPanelFactory {
         
         return panel;
     }
-//    
-//    // Form cho Employee (tương tự như Product)
-//    private static JPanel createEmployeeFormPanel(com.example.management.model.Employee employee, Consumer<GenericEntity> saveCallback) {
-//        // Cài đặt tương tự như product form
-//        // Phương thức này sẽ được cài đặt khi có class Employee
-//        JPanel panel = new JPanel();
-//        panel.add(new JLabel("Employee form sẽ được cài đặt ở đây"));
-//        return panel;
-//    }
 }

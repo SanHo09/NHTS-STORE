@@ -4,6 +4,8 @@ import com.nhom4.nhtsstore.entities.Product;
 import com.nhom4.nhtsstore.services.EventBus;
 import com.nhom4.nhtsstore.services.GenericService;
 import com.nhom4.nhtsstore.ui.base.GenericTablePanel;
+import java.util.Arrays;
+import java.util.List;
 import org.springframework.stereotype.Controller;
 
 /**
@@ -15,9 +17,10 @@ public class ProductListPanel extends GenericTablePanel<Product> {
     private static final String[] PRODUCT_COLUMNS = {
         "Name", "SalePrice", "Category", "Quantity", "ExpiryDate", "Status"
     };
+    private static final List<String> SEARCH_FIELDS = Arrays.asList("Name");
 
     public ProductListPanel(GenericService<Product> productService) {
-        super(productService, Product.class, ProductEditPanel.class, PRODUCT_COLUMNS, "Product Management");
+        super(productService, Product.class, ProductEditPanel.class, PRODUCT_COLUMNS, "Product Management", SEARCH_FIELDS);
         EventBus.getReloadSubject().subscribe(isReload -> {
             if ((Boolean) isReload) {
                 this.loadData();

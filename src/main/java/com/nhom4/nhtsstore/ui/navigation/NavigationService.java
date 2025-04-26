@@ -64,8 +64,5 @@ public class NavigationService {
 
         // Navigate to the panel
         panelManager.navigateTo(null, panel);
-
-        // Update sidebar selection
-//        sidebarManager.selectMenuItem(view);
     }
 }
