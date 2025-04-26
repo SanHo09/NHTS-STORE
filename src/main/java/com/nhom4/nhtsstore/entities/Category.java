@@ -13,7 +13,7 @@ import java.util.List;
 @Table
 @Getter
 @Setter
-public class Category {
+public class Category extends GenericEntity {
     @Id
     @Column
     @GenericGenerator(name="autoGenerate" , strategy="increment")
@@ -26,4 +26,17 @@ public class Category {
     @JsonIgnore
     @OneToMany(mappedBy = "Category")
     private List<Product> Products;
+    
+    @Override
+    public String toString() {
+        return this.Name;
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Category category = (Category) o;
+        return Id != null && Id.equals(category.Id);
+    }
 }
