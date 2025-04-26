@@ -4,7 +4,24 @@ IF NOT EXISTS (SELECT 1 FROM permissions)
         SET IDENTITY_INSERT permissions ON;
         INSERT INTO permissions (permission_id, permission_name, description)
         VALUES (1, N'FULL_ACCESS', N'Toàn quyền truy cập'),
-               (2, N'VIEW_ONLY', N'Chỉ xem');
+               (2, N'USER_MANAGEMENT', N'Quản lý người dùng'),
+               (3, N'ROLE_MANAGEMENT', N'Quản lý vai trò'),
+               (4, N'PERMISSION_MANAGEMENT', N'Quản lý quyền truy cập'),
+               (5, N'PRODUCT_MANAGEMENT', N'Quản lý sản phẩm'),
+               (6, N'ORDER_MANAGEMENT', N'Quản lý đơn hàng'),
+               (7, N'CUSTOMER_MANAGEMENT', N'Quản lý khách hàng'),
+               (8,N'USER_CREATION', N'Tạo người dùng'),
+               (9,N'USER_UPDATE', N'Cập nhật người dùng'),
+               (10,N'USER_DELETION', N'Xóa người dùng'),
+               (11,N'ROLE_CREATION', N'Tạo vai trò'),
+               (12,N'ROLE_UPDATE', N'Cập nhật vai trò'),
+               (13,N'ROLE_DELETION', N'Xóa vai trò'),
+               (14,N'PERMISSION_CREATION', N'Tạo quyền truy cập'),
+               (15,N'PERMISSION_UPDATE', N'Cập nhật quyền truy cập'),
+               (16,N'PERMISSION_DELETION', N'Xóa quyền truy cập'),
+                (17,N'USER_LIST', N'Xem danh sách người dùng'),
+                (18,N'USER_DETAIL', N'Xem chi tiết người dùng');
+          ;
 
         SET IDENTITY_INSERT permissions OFF;
 
@@ -21,7 +38,8 @@ IF NOT EXISTS (SELECT 1 FROM roles)
 IF NOT EXISTS (SELECT 1 FROM role_permissions)
     BEGIN
         INSERT INTO role_permissions (role_id, permission_id)
-        VALUES (1, 1);
+        VALUES
+             (1, 1);
     END
 
 IF NOT EXISTS (SELECT 1 FROM users)

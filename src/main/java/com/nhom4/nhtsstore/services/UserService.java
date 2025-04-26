@@ -11,8 +11,11 @@ import com.nhom4.nhtsstore.mappers.user.IUserUpdateMapper;
 import com.nhom4.nhtsstore.repositories.UserRepository;
 import com.nhom4.nhtsstore.repositories.specification.SpecSearchCriteria;
 import com.nhom4.nhtsstore.repositories.specification.UserSpecification;
+import com.nhom4.nhtsstore.ui.ApplicationState;
 import com.nhom4.nhtsstore.utils.PageResponseHelper;
+import com.nhom4.nhtsstore.utils.ValidationHelper;
 import com.nhom4.nhtsstore.viewmodel.user.*;
+import jakarta.validation.Valid;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -27,7 +30,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -39,30 +44,28 @@ public class UserService implements IUserService {
     private final IUserCreateMapper userCreateUpdateMapper;
     private final IUserUpdateMapper userUpdateMapper;
     private final AuthenticationManager authenticationManager;
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, IUserMapper userMapper, IUserCreateMapper userCreateUpdateMapper, IUserUpdateMapper userUpdateMapper, AuthenticationManager authenticationManager) {
+    private final ApplicationState applicationState;
+    private final ValidationHelper validationHelper;
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, IUserMapper userMapper, IUserCreateMapper userCreateUpdateMapper, IUserUpdateMapper userUpdateMapper, AuthenticationManager authenticationManager, ApplicationState applicationState, ValidationHelper validationHelper) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.userMapper = userMapper;
         this.userCreateUpdateMapper = userCreateUpdateMapper;
         this.userUpdateMapper = userUpdateMapper;
         this.authenticationManager = authenticationManager;
+        this.applicationState = applicationState;
+        this.validationHelper = validationHelper;
     }
 
     @Override
-    public UserSessionVm authenticate(String username, String password) {
-        try {
-            Authentication auth = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(username, password));
-            if (auth.isAuthenticated()) {
-                SecurityContextHolder.getContext().setAuthentication(auth);
-                return userMapper.toUserSessionVm(userRepository
-                        .findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User not found")));
-            }
-            return null;
-
-        } catch (AuthenticationException e) {
-            return null;
+    public UserSessionVm authenticate(String username, String password) throws AuthenticationException{
+        Authentication auth = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(username, password));
+        if (auth.isAuthenticated()) {
+            SecurityContextHolder.getContext().setAuthentication(auth);
+            return userMapper.toUserSessionVm((User)auth.getPrincipal());
         }
+        return null;
     }
 
 
@@ -103,20 +106,35 @@ public class UserService implements IUserService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public UserDetailVm editProfile(UserUpdateVm profileVm) {
-        String username = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = userRepository.findByUsername(username)
+        User userSession= (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userRepository.findById(userSession.getUserId())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
-        // Handle password change
-        if (profileVm.getPassword() != null && profileVm.getNewPassword() != null && profileVm.getConfirmPassword() != null) {
-            if (passwordEncoder.matches(profileVm.getPassword(), user.getPassword())) {
-                if (profileVm.getNewPassword().equals(profileVm.getConfirmPassword())) {
-                    user.setPassword(passwordEncoder.encode(profileVm.getNewPassword()));
-                } else {
-                    throw new IllegalArgumentException("New password and confirm password do not match");
-                }
-            } else {
-                throw new IllegalArgumentException("Current password is incorrect");
+        UserSessionVm userSessionVm = applicationState.getCurrentUser();
+        boolean isSelf = Objects.equals(userSessionVm.getUserId(), profileVm.getUserId());
+        boolean isSuperAdmin = userSessionVm.getRoles().stream()
+                .anyMatch(role -> role.equals("SUPER_ADMIN"));
+        if (!isSelf && !isSuperAdmin) {
+            throw new IllegalArgumentException("You do not have permission to edit this user");
+        }
+        if (isSuperAdmin && !Objects.equals(userSessionVm.getUserId(), profileVm.getUserId())) {
+            if (profileVm.getStatus() != null) {
+                user.setStatus(profileVm.getStatus());
+            }
+            if (profileVm.getRoles() != null && !profileVm.getRoles().isEmpty()) {
+                Set<Role> roles = profileVm.getRoles().stream()
+                        .map(roleVm -> Role.builder()
+                                .roleId(roleVm.getRoleId())
+                                .roleName(roleVm.getRoleName())
+                                .description(roleVm.getDescription())
+                                .build())
+                        .collect(Collectors.toSet());
+                Set<UserHasRole> userHasRoles = roles.stream()
+                        .map(role -> UserHasRole.builder()
+                                .role(role)
+                                .user(user)
+                                .build())
+                        .collect(Collectors.toSet());
+                user.setRoles(userHasRoles);
             }
         }
         user.setAvatar(profileVm.getAvatar());
@@ -124,6 +142,25 @@ public class UserService implements IUserService {
         user.setFullName(profileVm.getFullName());
         User savedUser = userRepository.save(user);
         return userMapper.toUserDetailVm(savedUser);
+    }
+
+    @Override
+    public UserDetailVm changePassword( UserChangePasswordVm userChangePasswordVm) {
+
+        User userSession = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userRepository.findById(userSession.getUserId())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        if (!passwordEncoder.matches(userChangePasswordVm.getPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("Current password is incorrect");
+        }
+
+        if (!userChangePasswordVm.getNewPassword().equals(userChangePasswordVm.getConfirmPassword())) {
+            throw new IllegalArgumentException("New password and confirm password do not match");
+        }
+
+        user.setPassword(passwordEncoder.encode(userChangePasswordVm.getNewPassword()));
+        return userMapper.toUserDetailVm(userRepository.save(user));
     }
 
     @Override
@@ -138,8 +175,19 @@ public class UserService implements IUserService {
 
     @Override
     public UserDetailVm findUserById(int userId) {
-        return userRepository.findById(userId).map(userMapper::toUserDetailVm)
+        UserSessionVm userSessionVm = applicationState.getCurrentUser();
+        boolean isSelf = userSessionVm.getUserId() == userId;
+        boolean isSuperAdmin = userSessionVm.getRoles().stream()
+                .anyMatch(role -> role.equals("SUPER_ADMIN"));
+
+        if (!isSelf && !isSuperAdmin) {
+            throw new IllegalArgumentException("You do not have permission to view this user");
+        }
+        User user = userRepository.findById(isSelf ? userSessionVm.getUserId() : userId)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        return userMapper.toUserDetailVm(user);
+
     }
 
 

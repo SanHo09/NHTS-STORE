@@ -35,12 +35,12 @@
                         </Label>
                         <HBox alignment="CENTER_RIGHT" prefHeight="46.0" prefWidth="406.0" spacing="15.0">
                            <children>
-                              <MFXButton buttonType="RAISED" prefHeight="35.0" prefWidth="146.0" text="Change password">
+                              <MFXButton fx:id="btnChangePassword" buttonType="RAISED" onAction="#onActionChangePassword" prefHeight="35.0" prefWidth="146.0" text="Change password">
                                  <font>
                                     <Font name="System Bold" size="12.0" />
                                  </font>
                               </MFXButton>
-                              <MFXButton buttonType="RAISED" prefHeight="35.0" prefWidth="50.0" text="Edit">
+                              <MFXButton fx:id="btnEditProfile" buttonType="RAISED" onAction="#onActionEditProfile" prefHeight="35.0" prefWidth="50.0" text="Edit">
                                  <font>
                                     <Font name="System Bold" size="12.0" />
                                  </font>
@@ -51,7 +51,7 @@
                   </HBox>
                   <BorderPane prefHeight="294.0" prefWidth="422.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
                      <left>
-                        <VBox prefHeight="294.0" prefWidth="136.0" spacing="25.0" BorderPane.alignment="CENTER">
+                        <VBox prefHeight="294.0" prefWidth="96.0" spacing="25.0" BorderPane.alignment="CENTER">
                            <children>
                               <Label text="Full name" />
                               <Label layoutX="35.0" layoutY="35.0" text="Email" />
@@ -64,7 +64,7 @@
                         </VBox>
                      </left>
                      <right>
-                        <VBox prefHeight="294.0" prefWidth="347.0" spacing="25.0" BorderPane.alignment="CENTER">
+                        <VBox prefHeight="294.0" prefWidth="407.0" spacing="25.0" BorderPane.alignment="CENTER">
                            <padding>
                               <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
                            </padding>

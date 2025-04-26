@@ -48,6 +48,8 @@ public class ApplicationState {
         currentUser.set(null);
         authenticated.set(false);
         cachedData.clear();
+        SecurityContextHolder.clearContext();
+
     }
     public void cacheData(String key, Object data) {
         cachedData.put(key, data);

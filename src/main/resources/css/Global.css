@@ -1,11 +1,30 @@
 .mfx-button{
     -fx-background-color:  #0f156d;
     -fx-text-fill: white;
+    -fx-cursor: hand;
+
+}
+.mfx-button-secondary{
+    -fx-background-color:  #FFFFFF;
+    -fx-text-fill: #121331;
+    -fx-border-color: #C4C4CB;
+    -fx-cursor: hand;
+}
+.floating-text{
+    -fx-text-fill: #121331;
+}
+.mfx-text-field:focus-within{
+    -fx-border-color: #C4C4CB;
+
+}
+.mfx-password-field:focus-within{
+    -fx-border-color: #C4C4CB;
 }
 .mfx-button:hover {
     -fx-background-color: #f05502;
 
 }
+
 .window-control-button {
     -fx-background-color: transparent;
     -fx-background-radius: 0;

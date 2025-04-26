@@ -7,7 +7,12 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
-public record UserServiceDetail(UserRepository userRepository) {
+public class UserServiceDetail {
+    private final UserRepository userRepository;
+
+    public UserServiceDetail(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     public UserDetailsService userDetailsService() {
         return username -> userRepository.findByUsername(username)

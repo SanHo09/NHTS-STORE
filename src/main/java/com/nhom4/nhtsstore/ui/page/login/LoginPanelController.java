@@ -15,6 +15,7 @@ import javafx.geometry.VPos;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import lombok.SneakyThrows;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
@@ -65,11 +66,6 @@ public class LoginPanelController  implements Initializable {
         passwordTooltip = createTooltip(passwordField, "Password is required", errorColor);
     }
 
-//    private void setupListeners() {
-//        usernameField.textProperty().addListener((o, old, n) -> enableLoginButton());
-//        passwordField.textProperty().addListener((o, old, n) -> enableLoginButton());
-//    }
-
     private MFXTooltip createTooltip(MFXTextField field, String text, Color iconColor) {
         MFXTooltip tooltip = new MFXTooltip(field);
         tooltip.setContent(field);
@@ -78,37 +74,6 @@ public class LoginPanelController  implements Initializable {
                 "/icons/TdesignErrorCircleFilled.svg", 24, 24, color -> iconColor));
         return tooltip;
     }
-
-    @FXML
-    public void submitLogin(MouseEvent actionEvent) {
-        if (isLoading) return;
-        if (!validateInputs()) return;
-
-        startLoadingState();
-        CompletableFuture.runAsync(() -> {
-            try {
-                var username = usernameField.getText().trim();
-                var password = passwordField.getText();
-                var userSessionVm = userService.authenticate(username, password);
-                Platform.runLater(() -> {
-                    if (userSessionVm!=null) {
-                        applicationState.login(userSessionVm);
-                        Toast.show(loginPanel, Toast.Type.SUCCESS, "Login successful");
-                    } else {
-                        Toast.show(loginPanel, Toast.Type.WARNING,
-                                "Invalid username or password", ToastLocation.TOP_CENTER);
-                    }
-                    stopLoadingState();
-                });
-            } catch (Exception e) {
-                Platform.runLater(() -> {
-                    MsgBox.showError("Login Error", e.getMessage());
-                    stopLoadingState();
-                });
-            }
-        });
-    }
-
     private boolean validateInputs() {
         String username = usernameField.getText().trim();
         String password = passwordField.getText();
@@ -130,6 +95,55 @@ public class LoginPanelController  implements Initializable {
     private void showTooltip(MFXTextField field, MFXTooltip tooltip) {
         tooltip.show(field, Alignment.of(HPos.RIGHT, VPos.TOP), 0, -field.getPrefHeight());
     }
+
+    @FXML
+    public void submitLogin(MouseEvent actionEvent) {
+        if (isLoading) return;
+        if (!validateInputs()) return;
+
+        startLoadingState();
+        CompletableFuture.runAsync(() -> {
+            try {
+                var username = usernameField.getText().trim();
+                var password = passwordField.getText();
+                var userSessionVm = userService.authenticate(username, password);
+                Platform.runLater(() -> {
+                    applicationState.login(userSessionVm);
+                    Toast.show(loginPanel, Toast.Type.SUCCESS, "Login successful");
+                    resetFields();
+                    stopLoadingState();
+                });
+            } catch (AuthenticationException e) {
+                Platform.runLater(() -> {
+                    if(e.getMessage().equals("User is disabled")) {
+                        Toast.show(loginPanel, Toast.Type.WARNING,
+                                "Your account is disabled. Please contact the administrator.",
+                                ToastLocation.TOP_CENTER);
+                    } else if (e.getMessage().equals("User account is locked")) {
+                        Toast.show(loginPanel, Toast.Type.WARNING,
+                                "Your account is locked. Please contact the administrator.",
+                                ToastLocation.TOP_CENTER);
+                    }else if(e.getMessage().equals("Bad credentials")) {
+                        Toast.show(loginPanel, Toast.Type.WARNING,
+                                "Invalid username or password", ToastLocation.TOP_CENTER);
+                    }
+                    else {
+                        Toast.show(loginPanel, Toast.Type.WARNING,
+                                e.getMessage() , ToastLocation.TOP_CENTER);
+                    }
+                    stopLoadingState();
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+                Platform.runLater(() -> {
+                    MsgBox.showError("Login Error", e.getMessage());
+                    stopLoadingState();
+                });
+            }
+        });
+    }
+
+
 
     private void startLoadingState() {
         isLoading = true;
