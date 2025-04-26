@@ -104,6 +104,12 @@
             <artifactId>materialfx</artifactId>
             <version>11.13.5</version>
         </dependency>
+        <dependency>
+            <groupId>io.github.typhon0</groupId>
+            <artifactId>AnimateFX</artifactId>
+            <version>1.2.3</version>
+
+        </dependency>
 <!--Swing UI library-->
         <!-- https://mvnrepository.com/artifact/com.miglayout/miglayout-swing -->
         <dependency>
