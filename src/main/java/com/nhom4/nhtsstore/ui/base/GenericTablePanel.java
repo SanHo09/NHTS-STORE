@@ -355,9 +355,8 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
      * Hiển thị dialog để tạo entity mới
      */
     private void addEntity() {
-        EventBus.postEntity(null);
-        JPanel newPanel = applicationState.getViewPanelByBean(editPanelClass);
-        this.panelManager.navigateTo(null, newPanel);
+        RouteParams params = new RouteParams();
+        this.navigationService.navigateTo(editPanelClass, params);
     }
     
     /**
