@@ -10,12 +10,13 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "role_permissions")
+@Table(name = "role_permissions",
+       uniqueConstraints = @UniqueConstraint(columnNames = {"role_id", "permission_id"}))
 public class RoleHasPermission {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "role_id")

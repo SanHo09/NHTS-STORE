@@ -1,12 +1,8 @@
 package com.nhom4.nhtsstore.viewmodel.user;
 
-import com.nhom4.nhtsstore.common.UserStatus;
 import com.nhom4.nhtsstore.viewmodel.role.RoleVm;
-import com.nhom4.nhtsstore.viewmodel.role.RoleWithPermissionVm;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.util.Set;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -18,7 +14,7 @@ public class UserCreateVm {
     String password;
     String email;
     String fullName;
-    String avatar;
-    UserStatus status;
-    Set<RoleVm> roles;
+    byte[] avatar;
+    boolean active;
+    RoleVm role;
 }

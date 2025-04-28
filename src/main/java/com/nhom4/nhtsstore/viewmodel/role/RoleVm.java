@@ -9,7 +9,7 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class RoleVm {
-    Integer roleId;
+    Long roleId;
     String roleName;
     String description;
 }

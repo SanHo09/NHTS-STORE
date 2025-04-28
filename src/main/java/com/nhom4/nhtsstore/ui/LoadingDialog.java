@@ -30,6 +30,7 @@ public class LoadingDialog extends JDialog {
     private StackPane root;
 
     public LoadingDialog(Frame owner) {
+        super(owner);
         setSize(450, 450);
         setLocationRelativeTo(null);
         setUndecorated(true);
@@ -54,8 +55,8 @@ public class LoadingDialog extends JDialog {
             Rectangle glassPanel = new Rectangle(320, 420);
             glassPanel.setArcWidth(20);
             glassPanel.setArcHeight(20);
-            glassPanel.setFill(Color.rgb(255, 255, 255, 0.15)); // Very light color with transparency
-            glassPanel.setStroke(Color.rgb(255, 255, 255, 0.5));
+            glassPanel.setFill(Color.rgb(0, 0, 0, 0.5)); // Very light color with transparency
+            glassPanel.setStroke(Color.rgb(255, 255, 255, 0.75));
             glassPanel.setStrokeWidth(1);
 
             // Apply blur effect for glass look
@@ -149,4 +150,5 @@ public class LoadingDialog extends JDialog {
             }
         });
     }
+
 }

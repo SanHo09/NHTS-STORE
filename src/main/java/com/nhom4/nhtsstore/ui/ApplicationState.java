@@ -43,7 +43,11 @@ public class ApplicationState {
         authenticated.set(true);
 
     }
-
+    public void updateUserSession(UserSessionVm user) {
+        if (user != null) {
+            currentUser.set(user);
+        }
+    }
     public void logout() {
         currentUser.set(null);
         authenticated.set(false);

@@ -9,7 +9,7 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @Builder
 public class PermissionVm {
-    Integer id;
+    Long id;
     String permissionName;
     String description;
 

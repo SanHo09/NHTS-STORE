@@ -1,6 +1,7 @@
 package com.nhom4.nhtsstore.ui.page.user;
 
 import com.nhom4.nhtsstore.common.FieldValidationError;
+import com.nhom4.nhtsstore.services.IUserService;
 import com.nhom4.nhtsstore.services.UserService;
 import com.nhom4.nhtsstore.ui.ApplicationState;
 import com.nhom4.nhtsstore.ui.navigation.RoutablePanel;
@@ -13,8 +14,6 @@ import com.nhom4.nhtsstore.viewmodel.user.UserDetailVm;
 import io.github.palexdev.materialfx.controls.MFXButton;
 import io.github.palexdev.materialfx.controls.MFXPasswordField;
 import io.github.palexdev.materialfx.controls.MFXTextField;
-import jakarta.annotation.PostConstruct;
-import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -30,10 +29,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 @Controller
 public class UserChangePasswordPanel extends JPanel implements RoutablePanel {
-    private final UserService userService;
+    private final IUserService userService;
     private final ApplicationState appState;
     private final ValidationHelper validationHelper;
     @FXML public MFXPasswordField txtFieldNewPass;

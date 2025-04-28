@@ -17,7 +17,7 @@ public interface IUserService {
     UserRecordVm updateUser(UserUpdateVm userUpdateVm);
 
     @PreAuthorize("hasAnyAuthority('USER_DELETION','FULL_ACCESS','USER_MANAGEMENT')")
-    void deleteUser(int userId);
+    void deleteUser(Long userId);
 
 
     UserDetailVm editProfile(UserUpdateVm profileVm);
@@ -28,7 +28,7 @@ public interface IUserService {
     PageResponse<UserRecordVm> findAllUsers(int page, int size, String sortBy, String sortDir);
 
     @PreAuthorize("hasAnyAuthority('USER_DETAIL','FULL_ACCESS','USER_MANAGEMENT') or #userId == applicationState.currentUser.userId")
-    UserDetailVm findUserById(int userId);
+    UserDetailVm findUserById(Long userId);
 
     @PreAuthorize("hasAnyAuthority('USER_LIST','FULL_ACCESS','USER_MANAGEMENT')")
     PageResponse<UserRecordVm> searchUsers(SpecSearchCriteria criteria, int page, int size, String sortBy, String sortDir);

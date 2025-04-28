@@ -1,15 +1,11 @@
 package com.nhom4.nhtsstore.viewmodel.user;
 
-import com.nhom4.nhtsstore.common.UserStatus;
 import com.nhom4.nhtsstore.viewmodel.role.RoleVm;
-import com.nhom4.nhtsstore.viewmodel.role.RoleWithPermissionVm;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
-
-import java.util.Set;
 
 import static lombok.AccessLevel.PRIVATE;
 
@@ -19,11 +15,12 @@ import static lombok.AccessLevel.PRIVATE;
 @NoArgsConstructor
 @Builder
 public class UserUpdateVm {
-    Integer userId;
+    Long userId;
     String username;
     String email;
     String fullName;
-    String avatar;
-    UserStatus status;
-    Set<RoleVm> roles;
+    byte[] avatar;
+    boolean active;
+    String password;
+    RoleVm role;
 }

@@ -19,8 +19,8 @@ public class ValidationHelper {
         this.validator = validator;
     }
 
-    public <T> List<FieldValidationError> validateAndCollectErrors(T object) {
-        Set<ConstraintViolation<T>> violations = validator.validate(object);
+    public <Vm> List<FieldValidationError> validateAndCollectErrors(Vm object) {
+        Set<ConstraintViolation<Vm>> violations = validator.validate(object);
         return violations.stream()
                 .map(v -> new FieldValidationError(getPropertyName(v.getPropertyPath()), v.getMessage()))
                 .collect(Collectors.toList());

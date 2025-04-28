@@ -33,6 +33,7 @@ public class NavigationService {
     }
 
     public void navigateTo(AppView view, RouteParams params) {
+
         JPanel panel = applicationState.getViewPanelByBean(view.getPanelClass());
 
         // Set the current route parameters

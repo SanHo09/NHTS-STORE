@@ -12,7 +12,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RoleWithPermissionVm {
-    Integer id;
+    Long id;
     String roleName;
     String description;
     Set<PermissionVm> permissions;

@@ -1,6 +1,7 @@
 package com.nhom4.nhtsstore.entities.rbac;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.nhom4.nhtsstore.entities.GenericEntity;
 import com.nhom4.nhtsstore.entities.audit.AbstractAuditEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -14,12 +15,12 @@ import java.util.Set;
 @Getter
 @Setter
 @Builder @NoArgsConstructor @AllArgsConstructor
-public class Permission  {
+public class Permission extends GenericEntity {
 
     @Id
     @Column
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer permissionId;
+    private Long permissionId;
 
     @Column(unique = true, nullable = false, length = 50)
     private String permissionName;
@@ -29,4 +30,9 @@ public class Permission  {
 
     @OneToMany(mappedBy = "permission",fetch = FetchType.EAGER)
     private Set<RoleHasPermission> permissions = new HashSet<>();
+
+    @Override
+    public Long getId() {
+        return permissionId;
+    }
 }

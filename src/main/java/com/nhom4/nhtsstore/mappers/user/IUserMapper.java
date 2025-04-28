@@ -1,8 +1,7 @@
 package com.nhom4.nhtsstore.mappers.user;
 
-
+import com.nhom4.nhtsstore.entities.rbac.Role;
 import com.nhom4.nhtsstore.entities.rbac.User;
-import com.nhom4.nhtsstore.entities.rbac.UserHasRole;
 import com.nhom4.nhtsstore.mappers.BaseMapper;
 import com.nhom4.nhtsstore.viewmodel.permission.PermissionVm;
 import com.nhom4.nhtsstore.viewmodel.role.RoleWithPermissionVm;
@@ -22,69 +21,44 @@ import java.util.stream.Collectors;
 @Component
 public interface IUserMapper extends BaseMapper<User, UserRecordVm> {
 
-    /**
-     * Maps User entity to UserSessionVm for storing user session information
-     * @param user The user entity
-     * @return UserSessionVm with session information
-     */
-
-    @Mapping(source = "roles", target = "roles", qualifiedByName = "mapUserRoles")
-    @Mapping(source = "roles", target = "permissions", qualifiedByName = "mapUserPermissions")
+    @Mapping(source = "role", target = "roles", qualifiedByName = "mapUserRole")
+    @Mapping(source = "role", target = "permissions", qualifiedByName = "mapUserPermissions")
     UserSessionVm toUserSessionVm(User user);
 
-
-    @Mapping( source = "roles", target = "roles", qualifiedByName = "mapUserRolesWithPermission")
+    @Mapping(source = "role", target = "role", qualifiedByName = "mapUserRoleWithPermission")
     UserDetailVm toUserDetailVm(User user);
-    /**
-     * Extract role names from UserHasRole entities
-     */
-    @Named("mapUserRoles")
-    default Set<String> mapUserRoles(Set<UserHasRole> userHasRoles) {
-        if (userHasRoles == null) {
+
+    @Named("mapUserRole")
+    default Set<String> mapUserRole(Role role) {
+        if (role == null) {
             return Collections.emptySet();
         }
-
-        return userHasRoles.stream()
-                .map(userHasRole -> userHasRole.getRole().getRoleName())
-                .collect(Collectors.toSet());
-    }
-    @Named("mapUserRolesWithPermission")
-    default Set<RoleWithPermissionVm> mapUserRolesWithPermission(Set<UserHasRole> userHasRoles) {
-        if (userHasRoles == null) {
-            return Collections.emptySet();
-        }
-
-        return userHasRoles.stream()
-                .map(userHasRole -> RoleWithPermissionVm.builder()
-                        .id(userHasRole.getRole().getRoleId())
-                        .roleName(userHasRole.getRole().getRoleName())
-                        .permissions(userHasRole.getRole().getRolePermissions().stream()
-                                .map(roleHasPermission ->
-                                                PermissionVm.builder()
-                                                        .id(roleHasPermission.getPermission().getPermissionId())
-                                                        .permissionName(roleHasPermission.getPermission().getPermissionName())
-                                                        .description(roleHasPermission.getPermission().getDescription())
-                                                        .build()
-                                        )
-                                .collect(Collectors.toSet()))
-                        .build())
-                .collect(Collectors.toSet());
+        return Collections.singleton(role.getRoleName());
     }
 
-    /**
-     * Extract permissions from user roles
-     */
+    @Named("mapUserRoleWithPermission")
+    default RoleWithPermissionVm mapUserRoleWithPermission(Role role) {
+        return RoleWithPermissionVm.builder()
+                .id(role.getRoleId())
+                .roleName(role.getRoleName())
+                .description(role.getDescription())
+                .permissions(role.getRolePermissions().stream()
+                        .map(roleHasPermission -> PermissionVm.builder()
+                                .id(roleHasPermission.getPermission().getPermissionId())
+                                .permissionName(roleHasPermission.getPermission().getPermissionName())
+                                .build())
+                        .collect(Collectors.toSet()))
+                .build();
+    }
+
     @Named("mapUserPermissions")
-    default Set<String> mapUserPermissions(Set<UserHasRole> userHasRoles) {
-        if (userHasRoles == null) {
+    default Set<String> mapUserPermissions(Role role) {
+        if (role == null) {
             return Collections.emptySet();
         }
 
-        return userHasRoles.stream()
-                .map(UserHasRole::getRole)
-                .flatMap(role -> role.getRolePermissions().stream()) // Get RoleHasPermission objects
+        return role.getRolePermissions().stream()
                 .map(roleHasPermission -> roleHasPermission.getPermission().getPermissionName())
                 .collect(Collectors.toSet());
     }
-
 }

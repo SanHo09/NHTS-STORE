@@ -11,8 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
-
 public class FieldErrorUtil {
 
     private static final String ERROR_ICON_PATH = "/icons/TdesignErrorCircleFilled.svg";

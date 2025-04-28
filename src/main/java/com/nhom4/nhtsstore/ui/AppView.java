@@ -2,6 +2,7 @@ package com.nhom4.nhtsstore.ui;
 
 import com.nhom4.nhtsstore.ui.page.dashboard.DashBoardPanel;
 import com.nhom4.nhtsstore.ui.page.login.LoginPanel;
+import com.nhom4.nhtsstore.ui.page.role.RoleListPanel;
 import com.nhom4.nhtsstore.ui.page.user.UserProfilePanel;
 import com.nhom4.nhtsstore.ui.page.product.ProductListPanel;
 import lombok.Getter;
@@ -16,6 +17,7 @@ public enum AppView {
     SUPPLIER("Supplier", "", null, Form_1.class),
     USER("User", "BiPersonBoundingBox.svg", null, Form_2.class),
     USER_PROFILE("User Profile", "", USER, UserProfilePanel.class),
+    ROLE("Role", "BiPersonBoundingBox.svg", USER, RoleListPanel.class),
     CUSTOMER("Customer", "user.png", USER, null),
     SETTING("Setting", "hammer.png", null, null);
 
