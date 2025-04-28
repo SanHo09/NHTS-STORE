@@ -1,7 +1,6 @@
 package com.nhom4.nhtsstore.ui.layout;
 
 import org.springframework.stereotype.Component;
-
 import javax.swing.*;
 import java.awt.*;
 

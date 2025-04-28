@@ -1,6 +1,6 @@
 package com.nhom4.nhtsstore.ui.page.user;
 
-import com.nhom4.nhtsstore.services.UserService;
+import com.nhom4.nhtsstore.services.IUserService;
 import com.nhom4.nhtsstore.ui.ApplicationState;
 import com.nhom4.nhtsstore.ui.navigation.RoutablePanel;
 import com.nhom4.nhtsstore.ui.navigation.RouteParams;
@@ -15,18 +15,16 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import org.springframework.stereotype.Controller;
 import raven.modal.ModalDialog;
-import raven.modal.Toast;
 import raven.modal.component.SimpleModalBorder;
 import raven.modal.option.Option;
 import javax.swing.*;
 import java.awt.*;
-
 @Controller
 public class UserProfilePanel extends JPanel implements RoutablePanel {
     private final ApplicationState appState;
-    private final UserService userService;
+    private final IUserService userService;
     private final UserChangePasswordPanel userChangePasswordPanel;
-    private final UserProfileEditPanel userProfileEditPanel;
+    private final UserProfileUpdatePanel userProfileUpdatePanel;
     @FXML public MFXButton btnChangePassword;
     @FXML public MFXButton btnEditProfile;
     private JFXPanel jfxPanel;
@@ -36,54 +34,61 @@ public class UserProfilePanel extends JPanel implements RoutablePanel {
     @FXML public Label lblUsername;
     @FXML public Label lblRole;
 
-    UserProfilePanel(ApplicationState appState, UserService userService, UserChangePasswordPanel userChangePasswordPanel, UserProfileEditPanel userProfileEditPanel) {
+    UserProfilePanel(ApplicationState appState, IUserService userService, UserChangePasswordPanel userChangePasswordPanel, UserProfileUpdatePanel userProfileUpdatePanel) {
         this.appState = appState;
         this.userService = userService;
         this.userChangePasswordPanel = userChangePasswordPanel;
-        this.userProfileEditPanel = userProfileEditPanel;
+        this.userProfileUpdatePanel = userProfileUpdatePanel;
         setLayout(new BorderLayout());
     }
 
     @PostConstruct
     private void initComponent() {
-        Platform.runLater(() -> {
-            jfxPanel = JavaFxSwing.createJFXPanelFromFxml(
-                    "/fxml/UserProfilePage.fxml",
-                    appState.getApplicationContext()
-            );
-            add(jfxPanel, BorderLayout.CENTER);
-        });
+        new JFXPanel();
+        jfxPanel = JavaFxSwing.createJFXPanelFromFxml(
+                "/fxml/UserProfilePage.fxml",
+                appState.getApplicationContext()
+        );
+        add(jfxPanel, BorderLayout.CENTER);
     }
 
     @Override
     public void onNavigate(RouteParams params) {
-        Integer userId = params.get("userId", Integer.class);
+        Long userId = params.get("userId", Long.class);
         if (userId != null) {
             loadUserById(userId);
         }
     }
 
-    private void loadUserById(Integer userId) {
-        JavaFxSwing.runAndWait(() -> {
-            this.userDetailVm = userService.findUserById(userId);
-            if (this.userDetailVm != null) {
-                updateUserDataFields(this.userDetailVm);
-            }
-        });
+    private void loadUserById(Long userId) {
 
+        SwingWorker<UserDetailVm,Void> worker = new SwingWorker<>() {
+            @Override
+            protected UserDetailVm doInBackground() {
+                return userService.findUserById(userId);
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    userDetailVm = get();
+                    updateUserDataFields(userDetailVm);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    JOptionPane.showMessageDialog(UserProfilePanel.this, "Failed to load user data", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        };
+        worker.execute();
     }
     public void updateUserDataFields(UserDetailVm user) {
-        lblFullName.setText(user.getFullName());
-        lblEmail.setText(user.getEmail());
-        lblUsername.setText(user.getUsername());
-        StringBuilder stringBuilder = new StringBuilder();
-        user.getRoles().forEach(role -> {
-            stringBuilder.append(role.getRoleName());
-            if (user.getRoles().size() > 1) {
-                stringBuilder.append(", ");
-            }
+        Platform.runLater(() -> {
+            lblFullName.setText(user.getFullName());
+            lblEmail.setText(user.getEmail());
+            lblUsername.setText(user.getUsername());
+
+            lblRole.setText(user.getRole().getRoleName());
         });
-        lblRole.setText(stringBuilder.toString());
     }
     @FXML
     public void onActionChangePassword(ActionEvent actionEvent) {
@@ -106,9 +111,9 @@ public class UserProfilePanel extends JPanel implements RoutablePanel {
         option.getLayoutOption().setMovable(true);
         RouteParams params = new RouteParams();
         params.set("user", this.userDetailVm);
-        userProfileEditPanel.onNavigate(params);
-        SimpleModalBorder simpleModalBorder= new SimpleModalBorder(userProfileEditPanel,
+        userProfileUpdatePanel.onNavigate(params);
+        SimpleModalBorder simpleModalBorder= new SimpleModalBorder(userProfileUpdatePanel,
                 "Edit profile");
-        ModalDialog.showModal(this,simpleModalBorder, option,userProfileEditPanel.getModalId());
+        ModalDialog.showModal(this,simpleModalBorder, option, userProfileUpdatePanel.getModalId());
     }
 }

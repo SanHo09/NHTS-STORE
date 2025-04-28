@@ -23,7 +23,7 @@ public class DashBoardPanel extends JPanel {
 
         testLoadUser.addActionListener(e -> {
             RouteParams params = new RouteParams();
-            params.set("userId", 3);
+            params.set("userId", 3L);
 
             // Navigate to profile with parameters
             navigationService.navigateTo(AppView.USER_PROFILE, params);

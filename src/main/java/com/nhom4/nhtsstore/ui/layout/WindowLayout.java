@@ -1,6 +1,8 @@
 package com.nhom4.nhtsstore.ui.layout;
 
 
+import com.nhom4.nhtsstore.NhtsStoreApplication;
+import com.nhom4.nhtsstore.ui.LoadingDialog;
 import com.nhom4.nhtsstore.utils.IconUtil;
 import io.github.palexdev.materialfx.controls.MFXButton;
 import javafx.application.Platform;
@@ -9,9 +11,13 @@ import javafx.fxml.Initializable;
 import javafx.scene.image.ImageView;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Controller;
 import javax.swing.*;
 import java.awt.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -61,8 +67,14 @@ public class WindowLayout implements Initializable {
         mainFrame.setState(Frame.ICONIFIED);
     }
 
+    @Autowired
+    private ConfigurableApplicationContext applicationContext;
+
     private void closeWindow() {
-        mainFrame.dispose();
-        System.exit(0);
+        Platform.runLater(() -> {
+            mainFrame.dispose();
+            Platform.exit();
+            System.exit(0);
+        });
     }
 }

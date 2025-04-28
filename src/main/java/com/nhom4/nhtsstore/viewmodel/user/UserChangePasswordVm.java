@@ -16,7 +16,7 @@ import static lombok.AccessLevel.PRIVATE;
 @NoArgsConstructor
 @Builder
 public class UserChangePasswordVm {
-    Integer userId;
+    Long userId;
     @NotBlank(message = "Current password is required")
     String password;
     @NotBlank(message = "New password is required")

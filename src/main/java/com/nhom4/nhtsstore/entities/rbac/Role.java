@@ -1,7 +1,7 @@
 package com.nhom4.nhtsstore.entities.rbac;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.nhom4.nhtsstore.entities.audit.AbstractAuditEntity;
+
+import com.nhom4.nhtsstore.entities.GenericEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Nationalized;
@@ -14,12 +14,12 @@ import java.util.Set;
 @Getter
 @Setter
 @Builder @NoArgsConstructor @AllArgsConstructor
-public class Role  {
+public class Role extends GenericEntity {
 
     @Id
     @Column
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer roleId;
+    private Long roleId;
 
     @Column(unique = true, nullable = false, length = 50)
     private String roleName;
@@ -27,8 +27,21 @@ public class Role  {
     @Nationalized
     private String description;
 
-
     @OneToMany(mappedBy = "role",fetch = FetchType.EAGER)
     private Set<RoleHasPermission> rolePermissions = new HashSet<>();
+
+    @Override
+    public Long getId() {
+        return roleId;
+    }
+    @Override
+    public Object getFieldValueByIndex(int index) {
+        switch (index) {
+            case 0: return roleName;
+            case 1: return description;
+            case 2: return isActive() ? "Active" : "Inactive";
+            default: return null;
+        }
+    }
 }
 

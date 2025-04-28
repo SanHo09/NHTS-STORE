@@ -11,11 +11,11 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserSessionVm {
-    Integer userId;
+    Long userId;
     String username;
     String fullName;
     String email;
-    String avatar;
+    byte[] avatar;
     Set<String> roles;
     Set<String> permissions;
 }

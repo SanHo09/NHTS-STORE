@@ -1,6 +1,5 @@
 package com.nhom4.nhtsstore.viewmodel.user;
 
-import com.nhom4.nhtsstore.common.UserStatus;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -10,11 +9,11 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @Builder
 public class UserRecordVm {
-    Integer userId;
+    Long userId;
     String username;
     String email;
     String fullName;
-    String avatar;
-    UserStatus status;
+    byte[] avatar;
+    boolean active;
 
 }

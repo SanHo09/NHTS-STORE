@@ -17,12 +17,12 @@
             <ImageView fx:id="userAvatarImage" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true" />
          </graphic>
          <items>
-            <CustomMenuItem fx:id="menuItemProfile" mnemonicParsing="false" onAction="#onActionMenuItemProfile" text="Edit your profile">
+            <CustomMenuItem fx:id="menuItemProfile" mnemonicParsing="false" onAction="#onActionMenuItemProfile" text="Profile">
                <content>
                   <HBox alignment="CENTER_LEFT" prefWidth="169.0" spacing="9.0">
                      <children>
                         <ImageView fx:id="profileIcon" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true" />
-                        <Label text="Edit your profile" />
+                        <Label text="Profile" />
                      </children>
                   </HBox>
                </content>
