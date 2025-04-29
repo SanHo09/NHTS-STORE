@@ -18,6 +18,7 @@ import javafx.embed.swing.JFXPanel;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import lombok.Getter;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import raven.modal.ModalDialog;
 import raven.modal.Toast;

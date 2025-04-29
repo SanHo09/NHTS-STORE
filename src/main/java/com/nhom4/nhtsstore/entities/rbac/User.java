@@ -42,7 +42,7 @@ public class User extends AbstractAuditEntity implements Serializable, UserDetai
     @Column
     private byte[] avatar;
     @ManyToOne
-    @JoinColumn(name = "role_id", nullable = false)
+    @JoinColumn(name = "role_id", nullable = true)
     private Role role;
     @Column(name = "is_active")
     private boolean active = true;
