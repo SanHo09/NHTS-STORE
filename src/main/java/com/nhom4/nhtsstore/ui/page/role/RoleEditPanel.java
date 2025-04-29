@@ -5,6 +5,7 @@ import com.nhom4.nhtsstore.entities.rbac.RoleHasPermission;
 import com.nhom4.nhtsstore.services.EventBus;
 import com.nhom4.nhtsstore.services.IRoleService;
 import com.nhom4.nhtsstore.ui.navigation.NavigationService;
+import com.nhom4.nhtsstore.ui.navigation.RoutablePanel;
 import com.nhom4.nhtsstore.ui.navigation.RouteParams;
 import com.nhom4.nhtsstore.ui.shared.components.ComboBoxMultiSelection;
 import com.nhom4.nhtsstore.ui.shared.components.ToggleSwitch;
@@ -15,12 +16,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import lombok.Getter;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;
 
 @Scope("prototype")
 @Controller
-public class RoleEditPanel extends JPanel {
+public class RoleEditPanel extends JPanel implements RoutablePanel {
     private final IRoleService roleService;
     private final NavigationService navigationService;
 
@@ -38,14 +40,13 @@ public class RoleEditPanel extends JPanel {
         this.navigationService = navigationService;
 
         setLayout(new BorderLayout(10, 10));
-        setPreferredSize(new Dimension(491, 500));
 
         initComponents();
     }
-
-    public void setRouteParams(RouteParams params) {
+    @Override
+    public void onNavigate(RouteParams params) {
         if (params.get("entity") != null) {
-            role = (Role) params.get("entity");
+            role =  params.get("entity",Role.class);
             isNewRole = false;
         } else {
             role = new Role();
@@ -53,6 +54,7 @@ public class RoleEditPanel extends JPanel {
         }
         populateFields();
     }
+
 
     private void initComponents() {
         JPanel headerPanel = new JPanel(new BorderLayout());
@@ -176,7 +178,7 @@ public class RoleEditPanel extends JPanel {
         List<PermissionWrapper> selectedPermissions = permissionsCombo.getSelectedItems()
                 .stream()
                 .map(item -> (PermissionWrapper) item)
-                .collect(Collectors.toList());
+                .toList();
 
 
         try {
@@ -206,21 +208,16 @@ public class RoleEditPanel extends JPanel {
         return true;
     }
 
-    class PermissionWrapper {
+
+
+    @Getter
+    static class PermissionWrapper {
         private Long id;
         private String name;
 
         public PermissionWrapper(Long id, String name) {
             this.id = id;
             this.name = name;
-        }
-
-        public Long getId() {
-            return id;
-        }
-
-        public String getName() {
-            return name;
         }
 
         @Override

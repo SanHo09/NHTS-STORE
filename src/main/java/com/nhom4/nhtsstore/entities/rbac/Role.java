@@ -6,7 +6,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Nationalized;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -27,7 +29,7 @@ public class Role extends GenericEntity {
     @Nationalized
     private String description;
 
-    @OneToMany(mappedBy = "role",fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "role",fetch = FetchType.EAGER,            cascade = CascadeType.ALL)
     private Set<RoleHasPermission> rolePermissions = new HashSet<>();
 
     @Override
