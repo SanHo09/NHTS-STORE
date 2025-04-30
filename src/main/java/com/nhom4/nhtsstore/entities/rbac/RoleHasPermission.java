@@ -3,6 +3,8 @@ package com.nhom4.nhtsstore.entities.rbac;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.Objects;
+
 
 @Getter
 @Setter
@@ -10,8 +12,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "role_permissions",
-       uniqueConstraints = @UniqueConstraint(columnNames = {"role_id", "permission_id"}))
+@Table(name = "role_permissions")
 public class RoleHasPermission {
 
     @Id
@@ -25,4 +26,6 @@ public class RoleHasPermission {
     @ManyToOne
     @JoinColumn(name = "permission_id")
     private Permission permission;
+
+
 }

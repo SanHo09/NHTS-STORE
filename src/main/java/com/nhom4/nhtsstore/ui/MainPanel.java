@@ -17,21 +17,19 @@ import java.awt.*;
 public class MainPanel extends JPanel {
 	private final ApplicationState applicationState;
 	private final ApplicationContext applicationContext;
-	private final PanelManager panelManager;
+	private final NavigationService navigationService;
 	private final PagePanel pagePanel;
 	private final Menu menu;
-	private final NavigationService navigationService;
 	private JPanel mainContentPanel;
 
-	public MainPanel(ApplicationState applicationState, ApplicationContext applicationContext, PanelManager panelManager,
-                     PagePanel pagePanel, Menu menu, NavigationService navigationService) {
+	public MainPanel(ApplicationState applicationState, ApplicationContext applicationContext,
+					 PagePanel pagePanel, Menu menu, NavigationService navigationService) {
 		this.applicationState = applicationState;
-        this.applicationContext = applicationContext;
-        this.panelManager = panelManager;
+		this.applicationContext = applicationContext;
 		this.pagePanel = pagePanel;
 		this.menu = menu;
-        this.navigationService = navigationService;
-        setLayout(new BorderLayout());
+		this.navigationService = navigationService;
+		setLayout(new BorderLayout());
 		menu.initMoving(this);
 		menu.addEventMenuSelected(index -> {
 			AppView[] appViews = AppView.values();
@@ -42,14 +40,27 @@ public class MainPanel extends JPanel {
 				}
 				if (menuPosition == index) {
 					// Navigate to the selected view
-					panelManager.navigateTo(appView,
-							applicationState.getViewPanelByBean(appView.getPanelClass()));
+					navigationService.navigateTo(appView, new RouteParams());
 					break;
 				}
 				menuPosition++;
 			}
 		});
 
+		// Add listener to detect when user logs in
+		applicationState.authenticatedProperty().addListener((obs, oldValue, newValue) -> {
+			if (newValue) {
+				// User just logged in - refresh menu
+				SwingUtilities.invokeLater(this::refreshMenu);
+			}
+		});
+	}
+	private void refreshMenu() {
+		// Clear and rebuild the menu based on current user role
+		menu.refreshMenuItems();
+
+		// Navigate to default view (typically dashboard)
+		navigationService.navigateTo(AppView.DASHBOARD, new RouteParams());
 	}
 
 	@PostConstruct
@@ -59,19 +70,10 @@ public class MainPanel extends JPanel {
 				this.applicationContext,
 				true,
 				(Header header) -> {
-
 				}), BorderLayout.NORTH);
 		mainContentPanel = new JPanel(new BorderLayout());
 		mainContentPanel.add(menu, BorderLayout.WEST);
 		mainContentPanel.add(pagePanel, BorderLayout.CENTER);
 		add(mainContentPanel, BorderLayout.CENTER);
-
-		// Set the default view to DASHBOARD
-		panelManager.navigateTo(AppView.DASHBOARD,
-				applicationState.getViewPanelByBean(DashBoardPanel.class));
-
-		//test
-
-
 	}
 }

@@ -35,4 +35,13 @@ public class Permission extends GenericEntity {
     public Long getId() {
         return permissionId;
     }
+    @Override
+    public Object getFieldValueByIndex(int index) {
+        switch (index) {
+            case 0: return permissionName;
+            case 1: return description;
+            case 2: return isActive() ? "Active" : "Inactive";
+            default: return null;
+        }
+    }
 }

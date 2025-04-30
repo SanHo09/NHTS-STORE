@@ -17,22 +17,25 @@ public class Order extends GenericEntity {
     @Id
     @Column
     @GenericGenerator(name="autoGenerate" , strategy="increment")
-    private Long Id;
+    private Long id;
 
     @Temporal(TemporalType.DATE)
     @Column(nullable = false)
-    private Date CreateDate;
+    private Date createDate;
 
     @Column(nullable = false)
-    private double TotalAmount;
+    private double totalAmount;
 
     @Column(nullable = false)
-    private OrderStatus Status;
+    @Enumerated(EnumType.STRING)
+    private OrderStatus status;
 
-    @OneToMany(mappedBy = "Order")
-    private List<OrderDetail> OrderDetails;
+    @OneToMany(mappedBy = "order")
+    private List<OrderDetail> orderDetails;
 
     @ManyToOne()
     @JoinColumn(name = "customer_id", nullable = false)
-    private Customer Customer;
+    private Customer customer;
+
+
 }

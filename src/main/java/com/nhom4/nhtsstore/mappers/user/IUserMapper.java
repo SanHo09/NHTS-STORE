@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 @Component
 public interface IUserMapper extends BaseMapper<User, UserRecordVm> {
 
-    @Mapping(source = "role", target = "roles", qualifiedByName = "mapUserRole")
+    @Mapping(source = "role", target = "role", qualifiedByName = "mapUserRole")
     @Mapping(source = "role", target = "permissions", qualifiedByName = "mapUserPermissions")
     UserSessionVm toUserSessionVm(User user);
 
@@ -29,15 +29,18 @@ public interface IUserMapper extends BaseMapper<User, UserRecordVm> {
     UserDetailVm toUserDetailVm(User user);
 
     @Named("mapUserRole")
-    default Set<String> mapUserRole(Role role) {
+    default String mapUserRole(Role role) {
         if (role == null) {
-            return Collections.emptySet();
+            return null;
         }
-        return Collections.singleton(role.getRoleName());
+        return role.getRoleName();
     }
 
     @Named("mapUserRoleWithPermission")
     default RoleWithPermissionVm mapUserRoleWithPermission(Role role) {
+        if (role == null) {
+            return null;
+        }
         return RoleWithPermissionVm.builder()
                 .id(role.getRoleId())
                 .roleName(role.getRoleName())

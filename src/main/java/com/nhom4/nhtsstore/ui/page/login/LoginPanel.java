@@ -6,15 +6,16 @@ package com.nhom4.nhtsstore.ui.page.login;
 
 import com.nhom4.nhtsstore.services.IUserService;
 import com.nhom4.nhtsstore.services.UserService;
+import com.nhom4.nhtsstore.ui.AppView;
 import com.nhom4.nhtsstore.ui.ApplicationState;
 import javax.swing.*;
 
+import com.nhom4.nhtsstore.ui.navigation.NavigationService;
 import com.nhom4.nhtsstore.utils.IconUtil;
 import com.nhom4.nhtsstore.utils.JavaFxSwing;
 import com.nhom4.nhtsstore.utils.MsgBox;
 import io.github.palexdev.materialfx.beans.Alignment;
 import io.github.palexdev.materialfx.controls.*;
-import jakarta.annotation.PostConstruct;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.fxml.FXML;
@@ -23,7 +24,6 @@ import javafx.geometry.HPos;
 import javafx.geometry.VPos;
 import javafx.scene.input.MouseEvent;
 import lombok.SneakyThrows;
-import org.springframework.context.annotation.Scope;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Controller;
 import raven.modal.Toast;
@@ -38,9 +38,11 @@ import java.util.concurrent.CompletableFuture;
 public class LoginPanel extends JPanel implements Initializable {
     private final IUserService userService;
     private final ApplicationState applicationState;
-    public LoginPanel(UserService userService, ApplicationState applicationState) {
+    private final NavigationService navigationService;
+    public LoginPanel(UserService userService, ApplicationState applicationState, NavigationService navigationService) {
         this.userService = userService;
         this.applicationState=applicationState;
+        this.navigationService = navigationService;
         SwingUtilities.invokeLater(() -> {
             JFXPanel jfxLoginPanel = JavaFxSwing.createJFXPanelFromFxml(
                     "/fxml/LoginPanel.fxml",
@@ -128,6 +130,7 @@ public class LoginPanel extends JPanel implements Initializable {
                     Toast.show(this, Toast.Type.SUCCESS, "Login successful");
                     resetFields();
                     stopLoadingState();
+                    navigationService.navigateTo(AppView.DASHBOARD);
                 });
             } catch (AuthenticationException e) {
                 Platform.runLater(() -> {

@@ -62,20 +62,15 @@ CREATE TABLE role_permissions
     id            bigint IDENTITY (1, 1) NOT NULL,
     role_id       bigint,
     permission_id bigint,
-    CONSTRAINT pk_role_permissions PRIMARY KEY (id)
+    CONSTRAINT pk_role_permissions PRIMARY KEY (id),
+    FOREIGN KEY (role_id) REFERENCES roles(role_id) ON DELETE CASCADE,
+    FOREIGN KEY (permission_id) REFERENCES permissions(permission_id) ON DELETE CASCADE
 )
 GO
 
-ALTER TABLE role_permissions
-    ADD CONSTRAINT uc_e8ecd47e0540a13a477a6fe0e UNIQUE (role_id, permission_id)
-GO
+-- ALTER TABLE role_permissions
+--     ADD CONSTRAINT uc_e8ecd47e0540a13a477a6fe0e UNIQUE (role_id, permission_id)
+-- GO
 
-ALTER TABLE role_permissions
-    ADD CONSTRAINT FK_ROLE_PERMISSIONS_ON_PERMISSION FOREIGN KEY (permission_id) REFERENCES permissions (permission_id)
-GO
 
-ALTER TABLE role_permissions
-    ADD CONSTRAINT FK_ROLE_PERMISSIONS_ON_ROLE FOREIGN KEY (role_id) REFERENCES roles (role_id)
-
-GO
 

@@ -1,10 +1,12 @@
 package com.nhom4.nhtsstore.ui.layout;
 
 import com.nhom4.nhtsstore.ui.AppView;
+import com.nhom4.nhtsstore.ui.ApplicationState;
 import com.nhom4.nhtsstore.ui.shared.components.sidebar.EventMenuSelected;
 import com.nhom4.nhtsstore.ui.shared.components.sidebar.ListMenu;
 import com.nhom4.nhtsstore.ui.shared.components.sidebar.Model_Menu;
 import com.nhom4.nhtsstore.ui.shared.components.sidebar.SidebarManager;
+import com.nhom4.nhtsstore.viewmodel.user.UserSessionVm;
 
 import java.awt.Color;
 import java.awt.GradientPaint;
@@ -19,7 +21,7 @@ import javax.swing.*;
 @org.springframework.stereotype.Component
 public class Menu extends javax.swing.JPanel {
     private final SidebarManager sidebarManager;
-
+    private final ApplicationState applicationState;
     private EventMenuSelected event;
 
     public void addEventMenuSelected(EventMenuSelected event) {
@@ -27,44 +29,80 @@ public class Menu extends javax.swing.JPanel {
         listMenu1.addEventMenuSelected(event);
     }
     // Add SidebarManager to constructor
-    public Menu(SidebarManager sidebarManager) {
+    public Menu(SidebarManager sidebarManager, ApplicationState applicationState) {
         this.sidebarManager = sidebarManager;
+        this.applicationState = applicationState;
         initComponents();
         setOpaque(false);
         listMenu1.setOpaque(false);
 
-        // Initialize menu items
-        initMenuItems();
+        // Initialize menu items based on user role
+        refreshMenuItems();
 
         // Set the ListMenu in SidebarManager
         sidebarManager.setListMenu(listMenu1);
         sidebarManager.initializeMenuMap();
     }
 
-    private void initMenuItems() {
+
+
+    public void refreshMenuItems() {
+        // Clear existing menu items
+        listMenu1.clearMenuItems();
+        sidebarManager.clearMenuMap();
+
+        // Rebuild menu items based on current user role
         int index = 0;
         for (AppView parent : AppView.values()) {
             if (parent == AppView.LOGIN) {
                 continue;
             }
 
-            // Only add main menu items (those without parents)
+            // Check if user has permission to see this menu item
+            if (!hasMenuPermission(parent)) {
+                continue; // Skip this menu item
+            }
+
+            // Add main menu items
             if (parent.getParent() == null) {
                 listMenu1.addItem(new Model_Menu(parent.getIcon(), parent.getName(), Model_Menu.MenuType.MENU));
                 sidebarManager.registerMenuItem(parent, index++);
 
                 // Check for submenu items
                 for (AppView children : AppView.values()) {
-                    if (children.getParent() == parent) {
-                        // Add submenu items
+                    if (children.getParent() == parent && hasMenuPermission(children)) {
                         listMenu1.addItem(new Model_Menu(children.getIcon(), children.getName(), Model_Menu.MenuType.MENU));
                         sidebarManager.registerMenuItem(children, index++);
                     }
                 }
             }
         }
+
+        // Refresh UI
+        revalidate();
+        repaint();
     }
 
+    private boolean hasMenuPermission(AppView view) {
+        // If user isn't logged in, only show LOGIN
+        if (!applicationState.isAuthenticated()) {
+            return view == AppView.LOGIN;
+        }
+
+        UserSessionVm currentUser = applicationState.getCurrentUser();
+        if (currentUser == null) {
+            return false;
+        }
+
+        // Check if view requires SUPER_ADMIN role
+        if (view.requiresSuperAdmin()) {
+            return currentUser.getRole() != null &&
+                    "SUPER_ADMIN".equals(currentUser.getRole());
+        }
+
+        // All other views are accessible to authenticated users
+        return true;
+    }
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {

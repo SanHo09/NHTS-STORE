@@ -56,38 +56,21 @@ public class UserProfilePanel extends JPanel implements RoutablePanel {
     public void onNavigate(RouteParams params) {
         Long userId = params.get("userId", Long.class);
         if (userId != null) {
-            loadUserById(userId);
+            try {
+                userDetailVm = userService.findUserById(userId);
+                updateUserDataFields(userDetailVm);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to load user data: " + e.getMessage());
+            }
         }
     }
 
-    private void loadUserById(Long userId) {
-
-        SwingWorker<UserDetailVm,Void> worker = new SwingWorker<>() {
-            @Override
-            protected UserDetailVm doInBackground() {
-                return userService.findUserById(userId);
-            }
-
-            @Override
-            protected void done() {
-                try {
-                    userDetailVm = get();
-                    updateUserDataFields(userDetailVm);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    JOptionPane.showMessageDialog(UserProfilePanel.this, "Failed to load user data", "Error", JOptionPane.ERROR_MESSAGE);
-                }
-            }
-        };
-        worker.execute();
-    }
     public void updateUserDataFields(UserDetailVm user) {
         Platform.runLater(() -> {
             lblFullName.setText(user.getFullName());
             lblEmail.setText(user.getEmail());
             lblUsername.setText(user.getUsername());
-
-            lblRole.setText(user.getRole().getRoleName());
+            lblRole.setText(user.getRole()!= null ? user.getRole().getRoleName() : "N/A");
         });
     }
     @FXML

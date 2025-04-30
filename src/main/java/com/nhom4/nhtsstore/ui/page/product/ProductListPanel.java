@@ -6,12 +6,16 @@ import com.nhom4.nhtsstore.services.GenericService;
 import com.nhom4.nhtsstore.ui.base.GenericTablePanel;
 import java.util.Arrays;
 import java.util.List;
+
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;
 
 /**
  *
  * @author NamDang
  */
+@Scope("prototype")
+
 @Controller
 public class ProductListPanel extends GenericTablePanel<Product> {
     private static final String[] PRODUCT_COLUMNS = {

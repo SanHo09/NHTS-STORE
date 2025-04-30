@@ -17,23 +17,23 @@ public class Supplier extends GenericEntity {
     @Id
     @GenericGenerator(name="autoGenerate" , strategy="increment")
     @GeneratedValue(generator="autoGenerate")
-    private Long Id;
+    private Long id;
 
     @Column(nullable = false)
     @Nationalized
-    private String Name;
+    private String name;
 
     @Column(nullable = false)
     @Nationalized
-    private String Address;
+    private String address;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "Supplier")
+    @OneToMany(mappedBy = "supplier")
     private List<Product> products;
     
     @Override
     public String toString() {
-        return this.Name;
+        return this.name;
     }
         
     @Override
@@ -41,6 +41,6 @@ public class Supplier extends GenericEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Supplier supplier = (Supplier) o;
-        return Id != null && Id.equals(supplier.Id);
+        return id != null && id.equals(supplier.id);
     }
 }

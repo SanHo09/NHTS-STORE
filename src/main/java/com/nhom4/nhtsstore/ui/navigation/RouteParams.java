@@ -24,7 +24,13 @@ public class RouteParams {
         }
         return (T) value;
     }
-
+    public RouteParams copy() {
+        RouteParams copy = new RouteParams();
+        for (Map.Entry<String, Object> entry : this.params.entrySet()) {
+            copy.set(entry.getKey(), entry.getValue());
+        }
+        return copy;
+    }
     @Override
     public String toString() {
         StringBuilder url = new StringBuilder();

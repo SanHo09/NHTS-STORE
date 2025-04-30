@@ -17,19 +17,19 @@ public class Category extends GenericEntity {
     @Id
     @Column
     @GenericGenerator(name="autoGenerate" , strategy="increment")
-    private Long Id;
+    private Long id;
 
     @Column(nullable = false)
     @Nationalized
-    private String Name;
+    private String name;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "Category")
-    private List<Product> Products;
+    @OneToMany(mappedBy = "category")
+    private List<Product> products;
     
     @Override
     public String toString() {
-        return this.Name;
+        return this.name;
     }
     
     @Override
@@ -37,6 +37,6 @@ public class Category extends GenericEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Category category = (Category) o;
-        return Id != null && Id.equals(category.Id);
+        return id != null && id.equals(category.id);
     }
 }

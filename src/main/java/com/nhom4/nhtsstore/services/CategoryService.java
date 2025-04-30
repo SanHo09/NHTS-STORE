@@ -3,6 +3,7 @@ package com.nhom4.nhtsstore.services;
 import com.nhom4.nhtsstore.entities.Category;
 import com.nhom4.nhtsstore.repositories.CategoryRepository;
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,7 +15,7 @@ import org.springframework.stereotype.Service;
  * @author NamDang
  */
 @Service
-public class CategoryService implements GenericService<Category>  {
+public class CategoryService implements GenericService<Category> {
     
     @Autowired
     private CategoryRepository repository;

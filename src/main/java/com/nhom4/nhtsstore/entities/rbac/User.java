@@ -48,6 +48,9 @@ public class User extends AbstractAuditEntity implements Serializable, UserDetai
     private boolean active = true;
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
+        if (role == null) {
+            return Set.of();
+        }
         Set<RoleHasPermission> roleHasPermissionList = role.getRolePermissions();
         Set<Permission> permissionList = roleHasPermissionList.stream().map(RoleHasPermission::getPermission).collect(Collectors.toSet());
         return permissionList.stream()

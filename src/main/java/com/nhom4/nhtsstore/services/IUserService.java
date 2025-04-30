@@ -21,13 +21,13 @@ public interface IUserService {
 
 
     UserDetailVm editProfile(UserUpdateVm profileVm);
-    @PreAuthorize("hasAnyAuthority('FULL_ACCESS','USER_MANAGEMENT')")
+
     UserDetailVm changePassword(UserChangePasswordVm profileVm);
 
     @PreAuthorize("hasAnyAuthority('USER_LIST','FULL_ACCESS','USER_MANAGEMENT')")
     PageResponse<UserRecordVm> findAllUsers(int page, int size, String sortBy, String sortDir);
 
-    @PreAuthorize("hasAnyAuthority('USER_DETAIL','FULL_ACCESS','USER_MANAGEMENT') or #userId == applicationState.currentUser.userId")
+    @PreAuthorize("hasAnyAuthority('USER_DETAIL','FULL_ACCESS','USER_MANAGEMENT') or @userService.hasUserPermission(#userId) or @userService.isSuperAdmin()")
     UserDetailVm findUserById(Long userId);
 
     @PreAuthorize("hasAnyAuthority('USER_LIST','FULL_ACCESS','USER_MANAGEMENT')")

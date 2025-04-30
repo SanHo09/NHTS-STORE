@@ -98,17 +98,15 @@ public class UserService implements IUserService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public UserDetailVm editProfile(UserUpdateVm profileVm) {
-        User userSession = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!hasUserPermission(profileVm.getUserId())) {
+            throw new IllegalArgumentException("You do not have permission to edit this user");
+        }
+
         User user = userRepository.findById(profileVm.getUserId())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        boolean isSelf = Objects.equals(userSession.getUserId(), user.getUserId());
-        boolean isSuperAdmin = userSession.getRole() != null &&
-                userSession.getRole().getRoleName().equals("SUPER_ADMIN");
-
-        if (!isSelf && !isSuperAdmin) {
-            throw new IllegalArgumentException("You do not have permission to edit this user");
-        }
+        boolean isSelfUser = isSelf(profileVm.getUserId());
+        boolean isSuperAdminUser = isSuperAdmin();
 
         // Update basic profile information
         user.setEmail(profileVm.getEmail());
@@ -116,11 +114,7 @@ public class UserService implements IUserService {
         user.setAvatar(profileVm.getAvatar());
 
         // Super admin can edit other users' statuses and roles
-        if (isSuperAdmin && !isSelf) {
-//            if (profileVm.getStatus() != null) {
-////                user.setStatus(profileVm.getStatus());
-//            }
-
+        if (isSuperAdminUser && !isSelfUser) {
             // Update role if provided
             if (profileVm.getRole() != null) {
                 Role role = new Role();
@@ -132,9 +126,11 @@ public class UserService implements IUserService {
             if (profileVm.getPassword() != null && !profileVm.getPassword().isEmpty()) {
                 user.setPassword(passwordEncoder.encode(profileVm.getPassword()));
             }
+            user.setActive(profileVm.isActive());
         }
+
         User savedUser = userRepository.save(user);
-        if (isSelf) {
+        if (isSelfUser) {
             Platform.runLater(() -> {
                 applicationState.updateUserSession(userMapper.toUserSessionVm(savedUser));
             });
@@ -143,10 +139,12 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public UserDetailVm changePassword( UserChangePasswordVm userChangePasswordVm) {
+    public UserDetailVm changePassword(UserChangePasswordVm userChangePasswordVm) {
+        if (!hasUserPermission(userChangePasswordVm.getUserId())) {
+            throw new IllegalArgumentException("You do not have permission to change this user's password");
+        }
 
-        User userSession = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = userRepository.findById(userSession.getUserId())
+        User user = userRepository.findById(userChangePasswordVm.getUserId())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         if (!passwordEncoder.matches(userChangePasswordVm.getPassword(), user.getPassword())) {
@@ -173,15 +171,10 @@ public class UserService implements IUserService {
 
     @Override
     public UserDetailVm findUserById(Long userId) {
-        UserSessionVm userSessionVm = applicationState.getCurrentUser();
-        boolean isSelf = userSessionVm.getUserId() == userId;
-        boolean isSuperAdmin = userSessionVm.getRoles().stream()
-                .anyMatch(role -> role.equals("SUPER_ADMIN"));
 
-        if (!isSelf && !isSuperAdmin) {
-            throw new IllegalArgumentException("You do not have permission to view this user");
-        }
-        User user = userRepository.findById(isSelf ? userSessionVm.getUserId() : userId)
+        User userSession = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        boolean isSelf = isSelf(userId);
+        User user = userRepository.findById(isSelf ? userSession.getUserId() : userId)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         return userMapper.toUserDetailVm(user);
@@ -198,5 +191,16 @@ public class UserService implements IUserService {
         return PageResponseHelper.createPageResponse(userRecordPage);
     }
 
-
+    public boolean isSelf(Long targetUserId) {
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return Objects.equals(currentUser.getUserId(), targetUserId);
+    }
+    public boolean isSuperAdmin() {
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return currentUser.getRole() != null &&
+                currentUser.getRole().getRoleName().equals("SUPER_ADMIN");
+    }
+    public boolean hasUserPermission(Long targetUserId) {
+        return isSelf(targetUserId) || isSuperAdmin();
+    }
 }

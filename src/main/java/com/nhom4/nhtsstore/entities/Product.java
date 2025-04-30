@@ -19,54 +19,54 @@ public class Product extends GenericEntity {
     @Id
     @Column
     @GeneratedValue(strategy= GenerationType.IDENTITY)
-    private Long Id;
+    private Long id;
 
     @Column(nullable = false)
     @Nationalized
-    private String Name;
+    private String name;
 
     @Column(nullable = false)
-    private double SalePrice;
+    private double salePrice;
 
     @Column(nullable = true)
-    private double PurchasePrice;
-
-    @Temporal(TemporalType.DATE)
-    @Column(nullable = true)
-    private Date ManufactureDate;
+    private double purchasePrice;
 
     @Temporal(TemporalType.DATE)
     @Column(nullable = true)
-    private Date ExpiryDate;
+    private Date manufactureDate;
+
+    @Temporal(TemporalType.DATE)
+    @Column(nullable = true)
+    private Date expiryDate;
 
     @Column(nullable = true)
     @Nationalized
-    private String Manufacturer;
+    private String manufacturer;
 
     @Column(nullable = true)
     private int quantity;
 
     @ManyToOne
     @JoinColumn(name = "supplier_id", nullable = false)
-    private Supplier Supplier;
+    private Supplier supplier;
 
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
-    private Category Category;
+    private Category category;
     
     @Override
     public Long getId() {
-        return Id;
+        return id;
     }
     
     @Override
     public Object getFieldValueByIndex(int index) {
         switch (index) {
-            case 0: return Name;
-            case 1: return SalePrice;
-            case 2: return Category.getName();
+            case 0: return name;
+            case 1: return salePrice;
+            case 2: return category.getName();
             case 3: return quantity;
-            case 4: return ExpiryDate;
+            case 4: return expiryDate;
             case 5: return isActive() ? "Active" : "Inactive";
             default: return null;
         }
