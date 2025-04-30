@@ -4,6 +4,7 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.JFXPanel;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.chart.*;
 import javafx.scene.control.ScrollPane;
@@ -150,7 +151,7 @@ public class DashBoardFxController extends JFXPanel {
 
         lineChart.getData().add(series);
         lineChart.setPrefHeight(300);
-
+        addLineChartTooltips(lineChart);
         return lineChart;
     }
 
@@ -197,6 +198,7 @@ public class DashBoardFxController extends JFXPanel {
 
         barChart.getData().add(series);
         barChart.setPrefHeight(300);
+        addBarChartTooltips(barChart);
         return barChart;
     }
 
@@ -249,6 +251,7 @@ public class DashBoardFxController extends JFXPanel {
 
         stackedBarChart.getData().addAll(activeSeries, inactiveSeries);
         stackedBarChart.setPrefHeight(300);
+        addStackedBarChartTooltips(stackedBarChart);
         return stackedBarChart;
     }
     private LineChart<String, Number> createAverageOrderValueChart() {
@@ -271,6 +274,7 @@ public class DashBoardFxController extends JFXPanel {
         }
 
         lineChart.getData().add(series);
+        addLineChartTooltips(lineChart);
         return lineChart;
     }
 
@@ -294,6 +298,7 @@ public class DashBoardFxController extends JFXPanel {
         }
 
         barChart.getData().add(series);
+        addBarChartTooltips(barChart);
         return barChart;
     }
 
@@ -319,15 +324,68 @@ public class DashBoardFxController extends JFXPanel {
     private void addPieChartPercentages(PieChart chart, double total) {
         chart.getData().forEach(data -> {
             double percentage = (data.getPieValue() / total) * 100;
-            String text = String.format("%s (%.1f%%)", data.getName(), percentage);
+            String percentText = String.format("%.1f%%", percentage);
+            String displayText = String.format("%s (%s)", data.getName(), percentText);
+            String tooltipText = String.format("%s: %,.2f (%.1f%%)",
+                    data.getName(), data.getPieValue(), percentage);
 
-            Tooltip tooltip = new Tooltip(text);
-            Tooltip.install(data.getNode(), tooltip);
+            data.setName(displayText);
 
-            data.setName(text);
+            // Create tooltip with more detailed information
+            createToolTipForNodeData(data.getNode(),tooltipText);
         });
 
         chart.setLabelsVisible(true);
         chart.setLabelLineLength(10);
+    }
+    private void addBarChartTooltips(BarChart<String, Number> barChart) {
+        addChartTooltips(barChart, (series, data) ->
+                String.format("%s: %,d", data.getXValue(), data.getYValue().intValue()));
+    }
+
+    private void addStackedBarChartTooltips(StackedBarChart<String, Number> barChart) {
+        addChartTooltips(barChart, (series, data) ->
+                String.format("%s - %s: %,d", data.getXValue(), series.getName(), data.getYValue().intValue()));
+    }
+
+    private void addLineChartTooltips(LineChart<String, Number> lineChart) {
+        addChartTooltips(lineChart, (series, data) ->
+                String.format("%s: %s - %,.2f", series.getName(), data.getXValue(), data.getYValue().doubleValue()));
+    }
+    private <X, Y> void addChartTooltips(XYChart<X, Y> chart,
+                                         TooltipFormatter<X, Y> tooltipFormatter) {
+        Platform.runLater(() -> {
+            for (XYChart.Series<X, Y> series : chart.getData()) {
+                for (XYChart.Data<X, Y> data : series.getData()) {
+                    Node node = data.getNode();
+                    if (node != null) {
+                        String tooltipText = tooltipFormatter.format(series, data);
+                        createToolTipForNodeData(node, tooltipText);
+                    }
+                }
+            }
+        });
+    }
+    private void createToolTipForNodeData(Node node, String tooltipText) {
+        Tooltip tooltip = new Tooltip(tooltipText);
+        tooltip.setStyle("-fx-font-size: 12px; -fx-font-weight: bold;");
+        tooltip.setShowDelay(javafx.util.Duration.millis(100));
+        tooltip.setHideDelay(javafx.util.Duration.millis(200));
+
+        Tooltip.install(node, tooltip);
+
+        node.setOnMouseEntered(event -> {
+            node.setStyle("-fx-opacity: 0.8;");
+            tooltip.setAutoHide(false);
+        });
+
+        node.setOnMouseExited(event -> {
+            node.setStyle("-fx-opacity: 1.0;");
+            tooltip.setAutoHide(true);
+        });
+    }
+    @FunctionalInterface
+    private interface TooltipFormatter<X, Y> {
+        String format(XYChart.Series<X, Y> series, XYChart.Data<X, Y> data);
     }
 }
