@@ -16,6 +16,6 @@ public class UserSessionVm {
     String fullName;
     String email;
     byte[] avatar;
-    Set<String> roles;
+    String role;
     Set<String> permissions;
 }

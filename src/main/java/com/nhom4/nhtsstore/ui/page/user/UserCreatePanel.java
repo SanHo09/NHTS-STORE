@@ -3,7 +3,6 @@ package com.nhom4.nhtsstore.ui.page.user;
 import com.nhom4.nhtsstore.services.IUserService;
 import com.nhom4.nhtsstore.services.RoleService;
 import com.nhom4.nhtsstore.services.UserService;
-import com.nhom4.nhtsstore.ui.AppView;
 import com.nhom4.nhtsstore.ui.navigation.NavigationService;
 import com.nhom4.nhtsstore.ui.navigation.RoutablePanel;
 import com.nhom4.nhtsstore.ui.navigation.RouteParams;

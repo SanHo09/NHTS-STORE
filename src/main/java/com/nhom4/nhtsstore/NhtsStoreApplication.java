@@ -89,7 +89,6 @@ public class NhtsStoreApplication {
     private static void setupProgressAnimationTimer() {
         progressAnimationTimer = new Timer(30, e -> {
             if (currentProgress < targetProgress) {
-                // Increase by small increments (1-2% at a time)
                 currentProgress = Math.min(currentProgress + 1, targetProgress);
                 updateProgressBar(currentProgress);
             }

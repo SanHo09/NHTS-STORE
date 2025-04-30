@@ -1,33 +1,29 @@
 package com.nhom4.nhtsstore.ui.page.dashboard;
 
-import com.nhom4.nhtsstore.ui.AppView;
 import com.nhom4.nhtsstore.ui.navigation.NavigationService;
-import com.nhom4.nhtsstore.ui.navigation.RouteParams;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;
 
 import javax.swing.*;
+import java.awt.*;
 
 @Controller
 public class DashBoardPanel extends JPanel {
     private final NavigationService navigationService;
-    public DashBoardPanel(NavigationService navigationService) {
+    private final DashBoardFxController dashBoardFxController;
+    public DashBoardPanel(NavigationService navigationService, DashBoardFxController dashBoardFxController) {
         this.navigationService = navigationService;
+        this.dashBoardFxController = dashBoardFxController;
+        setLayout(new BorderLayout(5, 5));
         initComponents();
     }
 
     private void initComponents() {
-        setVisible(true);
-        JLabel label = new JLabel("Dashboard");
-        add(label);
-        JButton testLoadUser = new JButton("Test Load User");
-
-        testLoadUser.addActionListener(e -> {
-            RouteParams params = new RouteParams();
-            params.set("userId", 3L);
-
-            // Navigate to profile with parameters
-            navigationService.navigateTo(AppView.USER_PROFILE, params);
-        });
-        add(testLoadUser);
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        JLabel titleLabel = new JLabel("Dashboard");
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        headerPanel.add(titleLabel);
+        add(headerPanel, BorderLayout.NORTH);
+        add(dashBoardFxController, BorderLayout.CENTER);
     }
 }

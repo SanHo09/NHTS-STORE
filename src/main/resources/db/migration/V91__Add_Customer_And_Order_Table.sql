@@ -8,7 +8,7 @@ CREATE TABLE customer
     address      VARCHAR(255)  NOT NULL,
     CONSTRAINT pk_customer PRIMARY KEY (id)
 );
-
+GO
 CREATE TABLE order_detail
 (
     id         BIGINT IDENTITY(1,1) NOT NULL,
@@ -16,7 +16,7 @@ CREATE TABLE order_detail
     product_id BIGINT                NOT NULL,
     CONSTRAINT pk_orderdetail PRIMARY KEY (id)
 );
-
+GO
 CREATE TABLE orders
 (
     id           BIGINT IDENTITY(1,1)  NOT NULL,
@@ -28,7 +28,7 @@ CREATE TABLE orders
     CONSTRAINT pk_orders PRIMARY KEY (id)
 );
 
-
+GO
 ALTER TABLE order_detail
     ADD CONSTRAINT FK_ORDERDETAIL_ON_ORDER FOREIGN KEY (order_id) REFERENCES orders (id);
 
@@ -37,3 +37,4 @@ ALTER TABLE order_detail
 
 ALTER TABLE orders
     ADD CONSTRAINT FK_ORDERS_ON_CUSTOMER FOREIGN KEY (customer_id) REFERENCES customer (id);
+GO

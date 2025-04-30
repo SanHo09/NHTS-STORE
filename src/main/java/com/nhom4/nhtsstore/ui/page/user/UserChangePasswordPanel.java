@@ -18,7 +18,6 @@ import javafx.embed.swing.JFXPanel;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import lombok.Getter;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import raven.modal.ModalDialog;
 import raven.modal.Toast;
@@ -29,7 +28,6 @@ import java.awt.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 @Controller
 public class UserChangePasswordPanel extends JPanel implements RoutablePanel {
     private final IUserService userService;

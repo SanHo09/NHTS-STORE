@@ -16,22 +16,22 @@ public class Customer extends GenericEntity {
     @Id
     @Column
     @GenericGenerator(name="autoGenerate" , strategy="increment")
-    private Long Id;
+    private Long id;
 
     @Column(nullable = false)
     @Nationalized
-    private String Name;
+    private String name;
 
     @Column(nullable = false)
     @Email
-    private String Email;
+    private String email;
 
     @Column(nullable = false)
-    private String PhoneNumber;
+    private String phoneNumber;
 
     @Column(nullable = false)
-    private String Address;
+    private String address;
 
-    @OneToMany(mappedBy = "Customer")
-    private List<Order> Order;
+    @OneToMany(mappedBy = "customer")
+    private List<Order> order;
 }

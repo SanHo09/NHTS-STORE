@@ -228,21 +228,20 @@ public class UserProfileUpdatePanel extends JPanel implements RoutablePanel {
 
         User userSession = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         // Get roles from application state
-        boolean isSuperAdmin = appState.getCurrentUser().getRoles().stream()
-                .anyMatch(role -> role.equals("SUPER_ADMIN"));
+        boolean isSuperAdmin = appState.getCurrentUser().getRole().equals("SUPER_ADMIN");
         boolean isSelf = userSession.getUserId().equals(userDetailVm.getUserId());
-        // Check role from the single role object
+
         boolean targetHasSuperAdminRole = userDetailVm.getRole() != null &&
                 userDetailVm.getRole().getRoleName().equals("SUPER_ADMIN");
 
-        boolean showRoles = (isSuperAdmin && !isSelf) || (!isSuperAdmin && isSelf);
+        boolean showRoles = ((isSuperAdmin && !isSelf) || (!isSuperAdmin && isSelf)) &&
+                (userDetailVm.getRole() != null || isSuperAdmin);
         boolean showPassword = isSuperAdmin && !isSelf && !targetHasSuperAdminRole;
         boolean enableEditing = isSuperAdmin || isSelf;
 
-        // Clear form and rebuild
+
         formPanel.removeAll();
 
-        // Add basic fields that always show
         formPanel.add(new JLabel("Full name:"), "");
         formPanel.add(txtFullName, "growx, wrap");
 

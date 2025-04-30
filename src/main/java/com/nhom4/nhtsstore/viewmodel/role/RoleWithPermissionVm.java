@@ -15,5 +15,6 @@ public class RoleWithPermissionVm {
     Long id;
     String roleName;
     String description;
+    boolean active;
     Set<PermissionVm> permissions;
 }

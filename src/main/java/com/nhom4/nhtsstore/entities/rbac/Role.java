@@ -19,7 +19,6 @@ import java.util.Set;
 public class Role extends GenericEntity {
 
     @Id
-    @Column
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long roleId;
 
@@ -29,7 +28,7 @@ public class Role extends GenericEntity {
     @Nationalized
     private String description;
 
-    @OneToMany(mappedBy = "role",fetch = FetchType.EAGER,            cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "role",fetch = FetchType.EAGER,cascade = CascadeType.ALL,orphanRemoval = true)
     private Set<RoleHasPermission> rolePermissions = new HashSet<>();
 
     @Override

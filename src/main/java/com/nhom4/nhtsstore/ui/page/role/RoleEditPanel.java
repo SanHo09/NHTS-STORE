@@ -1,20 +1,26 @@
 package com.nhom4.nhtsstore.ui.page.role;
 
+import com.nhom4.nhtsstore.entities.rbac.Permission;
 import com.nhom4.nhtsstore.entities.rbac.Role;
 import com.nhom4.nhtsstore.entities.rbac.RoleHasPermission;
 import com.nhom4.nhtsstore.services.EventBus;
-import com.nhom4.nhtsstore.services.IRoleService;
+import com.nhom4.nhtsstore.services.PermissionService;
+import com.nhom4.nhtsstore.services.RoleService;
 import com.nhom4.nhtsstore.ui.navigation.NavigationService;
 import com.nhom4.nhtsstore.ui.navigation.RoutablePanel;
 import com.nhom4.nhtsstore.ui.navigation.RouteParams;
 import com.nhom4.nhtsstore.ui.shared.components.ComboBoxMultiSelection;
 import com.nhom4.nhtsstore.ui.shared.components.ToggleSwitch;
+import raven.modal.Toast;
+import raven.modal.toast.option.ToastLocation;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import lombok.Getter;
 import org.springframework.context.annotation.Scope;
@@ -23,7 +29,8 @@ import org.springframework.stereotype.Controller;
 @Scope("prototype")
 @Controller
 public class RoleEditPanel extends JPanel implements RoutablePanel {
-    private final IRoleService roleService;
+    private final RoleService roleService;
+    private final PermissionService permissionService;
     private final NavigationService navigationService;
 
     private Role role;
@@ -35,26 +42,28 @@ public class RoleEditPanel extends JPanel implements RoutablePanel {
     private JButton cancelButton;
     private boolean isNewRole = false;
 
-    public RoleEditPanel(IRoleService roleService, NavigationService navigationService) {
+    public RoleEditPanel(RoleService roleService, PermissionService permissionService, NavigationService navigationService) {
         this.roleService = roleService;
+        this.permissionService = permissionService;
         this.navigationService = navigationService;
 
         setLayout(new BorderLayout(10, 10));
-
         initComponents();
     }
+
     @Override
     public void onNavigate(RouteParams params) {
         if (params.get("entity") != null) {
-            role =  params.get("entity",Role.class);
+            role = params.get("entity", Role.class);
             isNewRole = false;
         } else {
             role = new Role();
             isNewRole = true;
         }
+
+        loadPermissions();
         populateFields();
     }
-
 
     private void initComponents() {
         JPanel headerPanel = new JPanel(new BorderLayout());
@@ -104,7 +113,6 @@ public class RoleEditPanel extends JPanel implements RoutablePanel {
 
         gbc.gridy++;
         permissionsCombo = new ComboBoxMultiSelection<>();
-        loadPermissions();
         formPanel.add(permissionsCombo, gbc);
 
         add(new JScrollPane(formPanel), BorderLayout.CENTER);
@@ -128,28 +136,52 @@ public class RoleEditPanel extends JPanel implements RoutablePanel {
     }
 
     private void loadPermissions() {
+        permissionsCombo.removeAllItems();
+        setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-        //dummy data
-        permissionsCombo.addItem(new PermissionWrapper(1L, "CREATE_USER"));
-        permissionsCombo.addItem(new PermissionWrapper(2L, "EDIT_USER"));
-        permissionsCombo.addItem(new PermissionWrapper(3L, "DELETE_USER"));
-        permissionsCombo.addItem(new PermissionWrapper(4L, "VIEW_USER"));
+        SwingWorker<List<Permission>, Void> worker = new SwingWorker<>() {
+            @Override
+            protected List<Permission> doInBackground() {
+                return permissionService.findAll();
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    List<Permission> permissions = get();
+                    for (Permission permission : permissions) {
+                        permissionsCombo.addItem(new PermissionWrapper(
+                                permission.getId(),
+                                permission.getPermissionName()
+                        ));
+                    }
+
+                    if (!isNewRole && role != null) {
+                        loadRolePermissions();
+                    }
+
+                } catch (InterruptedException | ExecutionException e) {
+                    Toast.show(RoleEditPanel.this, Toast.Type.ERROR,
+                            "Error loading permissions: " + e.getMessage(),
+                            ToastLocation.TOP_CENTER);
+                } finally {
+                    setCursor(Cursor.getDefaultCursor());
+                }
+            }
+        };
+        worker.execute();
     }
 
     private void populateFields() {
-        if (!isNewRole) {
+        if (!isNewRole && role != null) {
             roleNameField.setText(role.getRoleName());
             descriptionArea.setText(role.getDescription());
             activeSwitch.setSelected(role.isActive());
-
-
-            loadRolePermissions();
         }
     }
 
     private void loadRolePermissions() {
         List<Object> selectedPermissions = new ArrayList<>();
-
 
         if (role.getRolePermissions() != null) {
             for (RoleHasPermission rhp : role.getRolePermissions()) {
@@ -180,35 +212,64 @@ public class RoleEditPanel extends JPanel implements RoutablePanel {
                 .map(item -> (PermissionWrapper) item)
                 .toList();
 
+        setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+        saveButton.setEnabled(false);
 
-        try {
-//            roleService.save(role)
-            JOptionPane.showMessageDialog(this,
-                    "Role saved successfully!",
-                    "Success", JOptionPane.INFORMATION_MESSAGE);
+        SwingWorker<Role, Void> worker = new SwingWorker<>() {
+            @Override
+            protected Role doInBackground() throws Exception {
+                // Create or update role permissions
+                Set<RoleHasPermission> rolePermissions = new HashSet<>();
 
+                for (PermissionWrapper wrapper : selectedPermissions) {
+                    Permission permission = permissionService.findById(wrapper.getId());
+                    if (permission != null) {
+                        RoleHasPermission rolePermission = RoleHasPermission.builder()
+                                .role(role)
+                                .permission(permission)
+                                .build();
+                        rolePermissions.add(rolePermission);
+                    }
+                }
+                role.getRolePermissions().clear();
+                // Set the permissions
+                role.getRolePermissions().addAll(rolePermissions);
 
-            EventBus.postReload(true);
+                return roleService.save(role);
+            }
 
-            navigateBack();
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this,
-                    "Error saving role: " + ex.getMessage(),
-                    "Error", JOptionPane.ERROR_MESSAGE);
-        }
+            @Override
+            protected void done() {
+                try {
+                    Role savedRole = get();
+                    Toast.show(RoleEditPanel.this, Toast.Type.SUCCESS,
+                            "Role saved successfully!",
+                            ToastLocation.TOP_CENTER);
+
+                    EventBus.postReload(true);
+                    navigateBack();
+                } catch (InterruptedException | ExecutionException ex) {
+                    Toast.show(RoleEditPanel.this, Toast.Type.ERROR,
+                            "Error saving role: " + ex.getMessage(),
+                            ToastLocation.TOP_CENTER);
+                } finally {
+                    setCursor(Cursor.getDefaultCursor());
+                    saveButton.setEnabled(true);
+                }
+            }
+        };
+        worker.execute();
     }
 
     private boolean validateForm() {
         if (roleNameField.getText().trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this,
+            Toast.show(this, Toast.Type.WARNING,
                     "Role name is required",
-                    "Validation Error", JOptionPane.ERROR_MESSAGE);
+                    ToastLocation.TOP_CENTER);
             return false;
         }
         return true;
     }
-
-
 
     @Getter
     static class PermissionWrapper {

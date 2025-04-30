@@ -38,4 +38,7 @@ public class SidebarManager {
             menuIndexMap.put(view, index++);
         }
     }
+    public void clearMenuMap() {
+        menuIndexMap.clear();
+    }
 }

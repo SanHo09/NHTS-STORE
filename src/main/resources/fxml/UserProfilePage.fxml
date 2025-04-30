@@ -69,10 +69,10 @@
                               <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
                            </padding>
                            <children>
-                              <Label fx:id="lblFullName" text="Label" />
-                              <Label fx:id="lblEmail" text="Label" />
-                              <Label fx:id="lblUsername" text="Label" />
-                              <Label fx:id="lblRole" text="Label" />
+                              <Label fx:id="lblFullName" text="N/A" />
+                              <Label fx:id="lblEmail" text="N/A" />
+                              <Label fx:id="lblUsername" text="N/A" />
+                              <Label fx:id="lblRole" text="N/A" />
                            </children>
                         </VBox>
                      </right>

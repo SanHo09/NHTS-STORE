@@ -18,7 +18,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.Date;
 import java.util.List;
-import org.jdatepicker.JDatePicker;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;

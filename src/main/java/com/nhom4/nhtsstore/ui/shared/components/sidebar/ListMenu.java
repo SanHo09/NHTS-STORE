@@ -15,7 +15,7 @@ public class ListMenu<E extends Object> extends JList<E> {
     private int selectedIndex = -1;
     private int overIndex = -1;
     private EventMenuSelected event;
-    
+    private boolean isUpdating = false;
     public void addEventMenuSelected(EventMenuSelected event) {
         this.event = event;
     }
@@ -92,19 +92,40 @@ public class ListMenu<E extends Object> extends JList<E> {
     public void addItem(Model_Menu data) {
         model.addElement(data);
     }
+
     public void setSelectedIndex(int index) {
+        // Check if we're already in the process of updating to prevent recursion
+        if (isUpdating) {
+            return;
+        }
+
         if (index >= 0 && index < model.size()) {
             Object o = model.getElementAt(index);
             if (o instanceof Model_Menu) {
                 Model_Menu menu = (Model_Menu) o;
                 if (menu.getType() == Model_Menu.MenuType.MENU) {
                     selectedIndex = index;
-                    if (event != null) {
-                        event.selected(index);
+
+                    // Set flag to prevent recursive calls
+                    isUpdating = true;
+                    try {
+                        if (event != null) {
+                            event.selected(index);
+                        }
+                    } finally {
+                        // Always reset the flag, even if an exception occurs
+                        isUpdating = false;
                     }
+
                     repaint();
                 }
             }
         }
+    }
+    public void clearMenuItems() {
+        model.clear();
+        selectedIndex = -1;
+        overIndex = -1;
+        repaint();
     }
 }

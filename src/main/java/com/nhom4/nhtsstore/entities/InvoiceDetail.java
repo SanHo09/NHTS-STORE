@@ -12,13 +12,13 @@ public class InvoiceDetail {
     @Id
     @Column
     @GeneratedValue(strategy= GenerationType.IDENTITY)
-    private Long Id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "invoice_id", nullable = false)
-    private Invoice Invoice;
+    private Invoice invoice;
 
     @ManyToOne()
     @JoinColumn(name = "product_id", nullable = false)
-    private Product Product;
+    private Product product;
 }

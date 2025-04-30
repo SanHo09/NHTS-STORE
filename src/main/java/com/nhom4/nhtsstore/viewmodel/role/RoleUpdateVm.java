@@ -1,19 +1,18 @@
-package com.nhom4.nhtsstore.viewmodel.permission;
+package com.nhom4.nhtsstore.viewmodel.role;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-public class PermissionVm {
+public class RoleUpdateVm {
     Long id;
-    String permissionName;
+    String roleName;
     String description;
     boolean active;
-
-
+    Long[] permissionIds;
 
 }

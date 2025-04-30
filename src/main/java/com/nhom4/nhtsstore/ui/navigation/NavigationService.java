@@ -7,7 +7,8 @@ import com.nhom4.nhtsstore.ui.shared.components.sidebar.SidebarManager;
 import lombok.Getter;
 import org.springframework.stereotype.Service;
 
-import javax.swing.JPanel;
+import javax.swing.*;
+import java.util.Stack;
 
 @Service
 public class NavigationService {
@@ -19,6 +20,8 @@ public class NavigationService {
     private AppView currentView;
     @Getter
     private RouteParams currentParams = new RouteParams();
+
+
 
     public NavigationService(PanelManager panelManager,
                              ApplicationState applicationState,
@@ -34,6 +37,7 @@ public class NavigationService {
 
     public void navigateTo(AppView view, RouteParams params) {
 
+
         JPanel panel = applicationState.getViewPanelByBean(view.getPanelClass());
 
         // Set the current route parameters
@@ -41,8 +45,13 @@ public class NavigationService {
         this.currentParams = params;
 
         // If panel implements RoutablePanel, pass the parameters
-        if (panel instanceof RoutablePanel) {
-            ((RoutablePanel) panel).onNavigate(params);
+        try {
+            if (panel instanceof RoutablePanel) {
+                ((RoutablePanel) panel).onNavigate(params);
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(panel, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            return;
         }
 
         // Navigate to the panel
@@ -53,17 +62,25 @@ public class NavigationService {
     }
 
     public void navigateTo(Class<? extends JPanel> panelClass, RouteParams params) {
+
         JPanel panel = applicationState.getViewPanelByBean(panelClass);
 
         // Set the current route parameters
         this.currentParams = params;
 
         // If panel implements RoutablePanel, pass the parameters
-        if (panel instanceof RoutablePanel) {
-            ((RoutablePanel) panel).onNavigate(params);
+        try {
+            if (panel instanceof RoutablePanel) {
+                ((RoutablePanel) panel).onNavigate(params);
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(panel, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            return;
         }
 
         // Navigate to the panel
         panelManager.navigateTo(null, panel);
     }
+
+
 }
