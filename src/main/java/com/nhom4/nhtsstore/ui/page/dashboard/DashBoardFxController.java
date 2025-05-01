@@ -14,11 +14,8 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import javafx.geometry.Insets;
-import com.nhom4.nhtsstore.entities.*;
-import com.nhom4.nhtsstore.enums.OrderStatus;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;
 
@@ -143,7 +140,7 @@ public class DashBoardFxController extends JFXPanel {
         XYChart.Series<String, Number> series = new XYChart.Series<>();
         series.setName("Doanh thu 2024");
 
-        Map<String, Double> revenueByMonth = dashboardStatistics.getRevenueByTimeFrame(12);
+        Map<String, Double> revenueByMonth = dashboardStatistics.getRevenueByTimeFrame();
 
         for (Map.Entry<String, Double> entry : revenueByMonth.entrySet()) {
             series.getData().add(new XYChart.Data<>(entry.getKey(), entry.getValue()));
@@ -267,7 +264,7 @@ public class DashBoardFxController extends JFXPanel {
         XYChart.Series<String, Number> series = new XYChart.Series<>();
         series.setName("Giá trị trung bình");
 
-        Map<String, Double> data = dashboardStatistics.getAverageOrderValueByMonth(12);
+        Map<String, Double> data = dashboardStatistics.getAverageOrderValueByMonth();
 
         for (Map.Entry<String, Double> entry : data.entrySet()) {
             series.getData().add(new XYChart.Data<>(entry.getKey(), entry.getValue()));
@@ -340,12 +337,12 @@ public class DashBoardFxController extends JFXPanel {
     }
     private void addBarChartTooltips(BarChart<String, Number> barChart) {
         addChartTooltips(barChart, (series, data) ->
-                String.format("%s: %,d", data.getXValue(), data.getYValue().intValue()));
+                String.format("%s: %,.2f", data.getXValue(), data.getYValue().doubleValue()));
     }
 
     private void addStackedBarChartTooltips(StackedBarChart<String, Number> barChart) {
         addChartTooltips(barChart, (series, data) ->
-                String.format("%s - %s: %,d", data.getXValue(), series.getName(), data.getYValue().intValue()));
+                String.format("%s - %s: %,.2f", data.getXValue(), series.getName(), data.getYValue().doubleValue()));
     }
 
     private void addLineChartTooltips(LineChart<String, Number> lineChart) {
