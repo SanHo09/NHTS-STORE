@@ -25,7 +25,6 @@ public class NhtsStoreApplication {
     private static int targetProgress = 0;
 
     public static void main(String[] args) {
-        // First, ensure the JavaFX toolkit is initialized
         try {
             SwingUtilities.invokeAndWait(() -> {
                 FlatIntelliJLaf.setup();
@@ -81,13 +80,16 @@ public class NhtsStoreApplication {
                 if (loadingDialog != null) {
                     loadingDialog.dispose();
                 }
+                JOptionPane.showMessageDialog(null,
+                        "An unknown error occurred while starting the application.",
+                        "Error",  JOptionPane.ERROR_MESSAGE);
                 System.exit(1);
             });
         }
     }
 
     private static void setupProgressAnimationTimer() {
-        progressAnimationTimer = new Timer(30, e -> {
+        progressAnimationTimer = new Timer(20, e -> {
             if (currentProgress < targetProgress) {
                 currentProgress = Math.min(currentProgress + 1, targetProgress);
                 updateProgressBar(currentProgress);

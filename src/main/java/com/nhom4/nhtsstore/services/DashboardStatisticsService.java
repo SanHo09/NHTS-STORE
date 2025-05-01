@@ -8,6 +8,7 @@ import com.nhom4.nhtsstore.repositories.ProductRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -29,31 +30,30 @@ public class DashboardStatisticsService implements IDashboardStatisticsService {
     }
 
     @Override
-    public Map<String, Double> getRevenueByTimeFrame(int numberOfMonths) {
+    public Map<String, Double> getRevenueByTimeFrame() {
         Map<String, Double> revenueByMonth = new LinkedHashMap<>();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/yyyy");
 
-        // Calculate start date (n months ago)
-        LocalDate startDate = LocalDate.now().minusMonths(numberOfMonths-1).withDayOfMonth(1);
+        // Calculate start date (2 years ago)
+        LocalDate startDate = LocalDate.now().minusYears(2).withDayOfMonth(1);
+        Date sqlStartDate = Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
 
-        // Generate all month keys to ensure continuous display
+        // Initialize all months with zero
         LocalDate current = startDate;
         while (!current.isAfter(LocalDate.now())) {
             revenueByMonth.put(current.format(formatter), 0.0);
             current = current.plusMonths(1);
         }
 
-        // Get orders from the period
-        List<Order> orders = orderRepository.findByCreateDateBetween(
-                Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant()),
-                new Date()
-        );
+        // Get aggregated data directly from the database
+        List<Object[]> data = orderRepository.getRevenueByTimeFrame(
+                sqlStartDate, new java.sql.Date(System.currentTimeMillis()));
 
-        // Calculate revenue by month
-        for (Order order : orders) {
-            String monthKey = order.getCreatedOn().format(formatter);
-            revenueByMonth.put(monthKey,
-                    revenueByMonth.getOrDefault(monthKey, 0.0) + order.getTotalAmount());
+        // Populate with actual values
+        for (Object[] row : data) {
+            String month = (String) row[0];
+            Double revenue = ((Number) row[1]).doubleValue();
+            revenueByMonth.put(month, revenue);
         }
 
         return revenueByMonth;
@@ -163,11 +163,11 @@ public class DashboardStatisticsService implements IDashboardStatisticsService {
         return result;
     }
     @Override
-    public Map<String, Double> getAverageOrderValueByMonth(int numberOfMonths) {
+    public Map<String, Double> getAverageOrderValueByMonth() {
         Map<String, Double> result = new LinkedHashMap<>();
 
-        // Calculate start date (n months ago)
-        LocalDate startDate = LocalDate.now().minusMonths(numberOfMonths-1).withDayOfMonth(1);
+        // Calculate start date (2 years ago)
+        LocalDate startDate = LocalDate.now().minusYears(2).withDayOfMonth(1);
         Date sqlStartDate = Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/yyyy");
@@ -176,7 +176,6 @@ public class DashboardStatisticsService implements IDashboardStatisticsService {
             result.put(current.format(formatter), 0.0);
             current = current.plusMonths(1);
         }
-
 
         List<Object[]> data = orderRepository.getAverageOrderValueByMonth(
                 sqlStartDate, new java.sql.Date(System.currentTimeMillis()));

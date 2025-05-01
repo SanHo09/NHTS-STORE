@@ -13,7 +13,11 @@ import java.util.Map;
 public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecificationExecutor<Order> {
 
     List<Order> findByCreateDateBetween(Date startDate, Date endDate);
-
+    @Query("SELECT FUNCTION('FORMAT', o.createDate, 'MM/yyyy') as month, SUM(o.totalAmount) as revenue " +
+            "FROM Order o WHERE o.createDate BETWEEN :startDate AND :endDate " +
+            "GROUP BY FUNCTION('FORMAT', o.createDate, 'MM/yyyy') " +
+            "ORDER BY month")
+    List<Object[]> getRevenueByTimeFrame(Date startDate, Date endDate);
     @Query("SELECT p.category.name as Name, SUM(od.product.salePrice * od.product.quantity) as revenue " +
             "FROM OrderDetail od JOIN od.product p JOIN od.order o " +
             "WHERE o.status = 'COMPLETED' GROUP BY p.category.name")
