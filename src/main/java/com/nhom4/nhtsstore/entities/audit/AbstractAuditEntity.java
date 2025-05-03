@@ -18,14 +18,14 @@ import org.springframework.data.annotation.LastModifiedBy;
 public class AbstractAuditEntity {
 
     @CreationTimestamp
-    private ZonedDateTime createdOn;
+    public ZonedDateTime createdOn;
 
     @CreatedBy
-    private String createdBy;
+    public String createdBy;
 
     @UpdateTimestamp
-    private ZonedDateTime lastModifiedOn;
+    public ZonedDateTime lastModifiedOn;
 
     @LastModifiedBy
-    private String lastModifiedBy;
+    public String lastModifiedBy;
 }
