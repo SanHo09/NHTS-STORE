@@ -5,6 +5,8 @@ import com.nhom4.nhtsstore.ui.LoadingDialog;
 import com.nhom4.nhtsstore.ui.MainFrame;
 import javafx.application.Platform;
 import lombok.SneakyThrows;
+import com.nhom4.nhtsstore.utils.AppFont;
+import java.awt.Font;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.event.*;
@@ -27,6 +29,7 @@ public class NhtsStoreApplication {
     public static void main(String[] args) {
         try {
             SwingUtilities.invokeAndWait(() -> {
+                setUIFont(AppFont.DEFAULT_FONT);
                 FlatIntelliJLaf.setup();
                 new javafx.embed.swing.JFXPanel();
             });
@@ -148,5 +151,16 @@ public class NhtsStoreApplication {
                 loadingDialog.setProgress(progress);
             }
         });
+    }
+
+    public static void setUIFont(Font font) {
+        java.util.Enumeration<Object> keys = UIManager.getDefaults().keys();
+        while (keys.hasMoreElements()) {
+            Object key = keys.nextElement();
+            Object value = UIManager.get(key);
+            if (value instanceof Font) {
+                UIManager.put(key, font);
+            }
+        }
     }
 }

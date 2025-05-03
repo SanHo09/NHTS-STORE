@@ -1,5 +1,6 @@
 package com.nhom4.nhtsstore.ui.base;
 
+import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.nhom4.nhtsstore.entities.GenericEntity;
 import com.nhom4.nhtsstore.services.EventBus;
 import com.nhom4.nhtsstore.services.GenericService;
@@ -7,6 +8,9 @@ import com.nhom4.nhtsstore.ui.ApplicationState;
 import com.nhom4.nhtsstore.ui.PanelManager;
 import com.nhom4.nhtsstore.ui.navigation.NavigationService;
 import com.nhom4.nhtsstore.ui.navigation.RouteParams;
+import com.nhom4.nhtsstore.ui.shared.components.GlobalLoadingManager;
+import com.nhom4.nhtsstore.ui.shared.components.PlaceholderTextField;
+import com.nhom4.nhtsstore.utils.AppFont;
 import javax.swing.*;
 import javax.swing.table.*;
 import java.awt.*;
@@ -55,6 +59,8 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
     private int totalPages = 0;
     private int pageSize = 10;
     private List<String> searchFields;
+    private Long totalItems;
+    private JLabel totalRecords;
     
     /**
      * Constructor cho GenericTablePanel
@@ -90,11 +96,12 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
         setLayout(new BorderLayout());
         
         // Panel tiêu đề và nút
-        JPanel headerPanel = new JPanel(new BorderLayout());
+        JPanel titlePanel = new JPanel(new BorderLayout());
         JLabel titleLabel = new JLabel(panelTitle);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        titleLabel.setFont(AppFont.DEFAULT_FONT.deriveFont(24f));
         // Title nằm bên trái header
-        headerPanel.add(titleLabel, BorderLayout.WEST);
+        titlePanel.add(titleLabel, BorderLayout.WEST);
+        titlePanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0)); // add padding
         
         // Panel chứa các nút điều khiển
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -105,12 +112,15 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
         buttonPanel.add(newButton);
         
         // Nút menu 3 chấm
-        JButton menuButton = new JButton("⋮");
+        JButton menuButton = new JButton(new FlatSVGIcon("icons/ThreeDotsVertical.svg", 1.1f));
         menuButton.addActionListener(e -> {
             headerMenu = new JPopupMenu();
             
             JMenuItem refreshItem = new JMenuItem("Refresh");
-            refreshItem.addActionListener(ev -> loadData());
+            refreshItem.addActionListener(ev -> {
+                GlobalLoadingManager.getInstance().showSpinner();
+                loadData();
+            });
             
             JMenuItem deleteItem = new JMenuItem("Delete");
             deleteItem.addActionListener(ev -> deleteSelectedRecords());
@@ -122,9 +132,53 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
             headerMenu.show(menuButton, 0, menuButton.getHeight());
         });
         buttonPanel.add(menuButton);
+                
+        // Panel header
+        JPanel headerPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        searchField = new PlaceholderTextField(20);
+        searchField.setPreferredSize(new Dimension(100, 25));
+
+        PlaceholderTextField placeholderField = (PlaceholderTextField) searchField;
+        placeholderField.setPlaceholder("Search in Name/Category");
+        placeholderField.setPlaceholderColor(Color.LIGHT_GRAY);
+        placeholderField.setPlaceholderPadding(5); // padding kể từ lề trái
+        placeholderField.setPlaceholderItalic(false);
+
+        searchField.getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) { debounceSearch(); }
+            public void removeUpdate(DocumentEvent e) { debounceSearch(); }
+            public void insertUpdate(DocumentEvent e) { debounceSearch(); }
+        });
         
-        headerPanel.add(buttonPanel, BorderLayout.EAST);
-        add(headerPanel, BorderLayout.NORTH);
+        // Cấu hình cho searchField
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.weightx = 0;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.insets = new Insets(0, 0, 0, 0);
+        headerPanel.add(searchField, gbc);
+        
+        // Thêm một panel trống để tạo khoảng cách
+        JPanel emptyPanel = new JPanel();
+        gbc.gridx = 1;
+        gbc.weightx = 1.0; // Chiếm toàn bộ không gian thừa
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        headerPanel.add(emptyPanel, gbc);
+        
+        // Cấu hình cho buttonPanel
+        gbc.gridx = 2;
+        gbc.weightx = 0; // Không chiếm không gian thừa
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.EAST;
+        headerPanel.add(buttonPanel, gbc);
+        
+        JPanel headerWrapperPanel = new JPanel(new BorderLayout());
+        headerWrapperPanel.add(titlePanel, BorderLayout.NORTH);
+        headerWrapperPanel.add(headerPanel, BorderLayout.SOUTH);
+        
+        add(headerWrapperPanel, BorderLayout.NORTH);
         
         // Tạo bảng và model
         tableModel = new GenericTableModel<>(columnNames);
@@ -135,6 +189,8 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
         table.setFocusable(false);
         table.setRowSelectionAllowed(true);
         table.setCellSelectionEnabled(false);
+        table.setFont(AppFont.DEFAULT_FONT);
+        table.getTableHeader().setFont(AppFont.DEFAULT_FONT);
 
         // Cấu hình cột checkbox đầu tiên
         TableColumn checkboxColumn = table.getColumnModel().getColumn(0);
@@ -155,37 +211,64 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
         // Scroll pane cho bảng
         JScrollPane scrollPane = new JScrollPane(table);
         add(scrollPane, BorderLayout.CENTER);
+        
+        // Tạo hiệu ứng sọc cho các dòng
+        table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, 
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+                // Đặt màu nền xen kẽ
+                if (!isSelected) {
+                    c.setBackground(row % 2 == 0 ? Color.WHITE : new Color(248, 248, 248));
+                }
+
+               setBorder(BorderFactory.createCompoundBorder(
+                   BorderFactory.createMatteBorder(1, 1, 1, 1, new Color(200, 200, 200)),
+                   BorderFactory.createEmptyBorder(5, 10, 5, 10)
+               ));
+
+                // Giữ nguyên màu khi được chọn
+                return c;
+            }
+        });
+        
+        // Tạo hiệu ứng sọc cho header
+//        JTableHeader header = table.getTableHeader();
+        // header.setDefaultRenderer(new DefaultTableCellRenderer() {
+        //     @Override
+        //     public Component getTableCellRendererComponent(JTable table, Object value,
+        //             boolean isSelected, boolean hasFocus, int row, int column) {
+        //         super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+        //         // Đặt màu nền cho header
+        //         setBackground(new Color(240, 240, 240));
+        //         setBorder(BorderFactory.createMatteBorder(0, 0, 1, 1, new Color(220, 220, 220)));
+        //         setHorizontalAlignment(SwingConstants.LEFT);
+        //         return this;
+        //     }
+        // });
     }
     
     private void initPaginationComponents() {
-        // Panel tìm kiếm
-        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        searchField = new JTextField(20);
-        searchField.getDocument().addDocumentListener(new DocumentListener() {
-            public void changedUpdate(DocumentEvent e) { debounceSearch(); }
-            public void removeUpdate(DocumentEvent e) { debounceSearch(); }
-            public void insertUpdate(DocumentEvent e) { debounceSearch(); }
-        });
-        searchPanel.add(new JLabel("Search:"));
-        searchPanel.add(searchField);
-        
         // Panel phân trang
         JPanel paginationPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         
         // Nút trang đầu
-        firstPageBtn = new JButton("<<");
+        firstPageBtn = new JButton(new FlatSVGIcon("icons/SkipStartFill.svg", 1.1f));
         firstPageBtn.addActionListener(e -> goToPage(0));
         
         // Nút trang trước
-        prevPageBtn = new JButton("<");
+        prevPageBtn = new JButton(new FlatSVGIcon("icons/CaretLeftFill.svg", 1.1f));
         prevPageBtn.addActionListener(e -> goToPage(currentPage - 1));
         
         // Nút trang sau
-        nextPageBtn = new JButton(">");
+        nextPageBtn = new JButton(new FlatSVGIcon("icons/CaretRightFill.svg", 1.1f));
         nextPageBtn.addActionListener(e -> goToPage(currentPage + 1));
         
         // Nút trang cuối
-        lastPageBtn = new JButton(">>");
+        lastPageBtn = new JButton(new FlatSVGIcon("icons/SkipEndFill.svg", 1.1f));
         lastPageBtn.addActionListener(e -> goToPage(totalPages - 1));
         
         // Hiển thị thông tin trang
@@ -193,11 +276,6 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
         
         // Nhập số trang
         pageNumberField = new JTextField(3);
-//        pageNumberField.getDocument().addDocumentListener(new DocumentListener() {
-//            public void changedUpdate(DocumentEvent e) { debouncePageNumber(); }
-//            public void removeUpdate(DocumentEvent e) { debouncePageNumber(); }
-//            public void insertUpdate(DocumentEvent e) { debouncePageNumber(); }
-//        });
         pageNumberField.getDocument().addDocumentListener(new DocumentListener() {
             private String lastValue = "";
 
@@ -234,19 +312,21 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
             loadData();
         });
         
+        paginationPanel.add(new JLabel("Go to:"));
+        paginationPanel.add(pageNumberField);
         paginationPanel.add(firstPageBtn);
         paginationPanel.add(prevPageBtn);
         paginationPanel.add(pageInfoLabel);
-        paginationPanel.add(new JLabel("Go to:"));
-        paginationPanel.add(pageNumberField);
-        paginationPanel.add(new JLabel("Items per page:"));
-        paginationPanel.add(pageSizeCombo);
         paginationPanel.add(nextPageBtn);
         paginationPanel.add(lastPageBtn);
-        
+        paginationPanel.add(pageSizeCombo);
+
+        totalRecords = new JLabel();
+        updateTotalRecordsLabel();
+    
         // Thêm các panel vào layout
         JPanel bottomPanel = new JPanel(new BorderLayout());
-        bottomPanel.add(searchPanel, BorderLayout.WEST);
+        bottomPanel.add(totalRecords, BorderLayout.WEST);
         bottomPanel.add(paginationPanel, BorderLayout.EAST);
         add(bottomPanel, BorderLayout.SOUTH);
         
@@ -273,12 +353,68 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
         pageNumberTimer.setRepeats(false);
     }
     
+    protected void configureColumnWidths(int[] columnWidths) {
+        TableColumnModel columnModel = table.getColumnModel();
+        
+        for (int i = 0; i < columnModel.getColumnCount() && i < columnWidths.length; i++) {
+            TableColumn column = columnModel.getColumn(i);
+            int width = columnWidths[i];
+            column.setPreferredWidth(width);
+            
+            // Cố định width cho cột checkbox và action
+            if (i == 0 || i == columnModel.getColumnCount() - 1) {
+                column.setMinWidth(width);
+                column.setMaxWidth(width);
+            } else {
+                column.setMinWidth(width / 2);
+                column.setMaxWidth(width * 2);
+            }
+        }
+        
+        table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+    }
+
+    protected void setHeaderAlignment(int alignment) {
+        JTableHeader header = table.getTableHeader();
+        header.setDefaultRenderer(new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+                super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                
+                // Thiết lập các thuộc tính hiển thị
+                setText(value != null ? value.toString() : ""); // Đảm bảo chữ không bị mất
+                setBackground(new Color(240, 240, 240)); // Màu nền header
+                setForeground(Color.BLACK); // Màu chữ
+                setFont(AppFont.DEFAULT_FONT); // Sử dụng font chung của ứng dụng
+                setHorizontalAlignment(alignment); // Căn chỉnh theo tham số
+
+                // Thiết lập border và padding
+                setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createMatteBorder(0, 1, 1, 1, new Color(200, 200, 200)),
+                    BorderFactory.createEmptyBorder(5, 10, 5, 10)
+                ));
+
+                setOpaque(true); // Quan trọng: phải có để hiển thị background
+
+                return this;
+            }
+        });
+    }
+
+    private void updateTotalRecordsLabel() {
+        if (totalItems != null) {
+            totalRecords.setText(totalItems + " items");
+        } else {
+            totalRecords.setText("0 items");
+        }
+    }
+    
     private void debounceSearch() {
         searchTimer.restart();
     }
     
     private void debouncePageNumber() {
-//        pageNumberTimer.restart();
         if (pageNumberTimer != null) {
             pageNumberTimer.stop();
         }
@@ -315,12 +451,15 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
             protected Page<T> doInBackground() {
                 String keyword = searchField.getText().trim();
                 Pageable pageable = PageRequest.of(currentPage, pageSize);
+                Page<T> result;
                 
                 if (keyword.isEmpty()) {
-                    return service.findAll(pageable);
+                    result = service.findAll(pageable);
                 } else {
-                    return service.search(keyword, searchFields, pageable);
+                    result = service.search(keyword, searchFields, pageable);
                 }
+                totalItems = result.getTotalElements();
+                return result;
             }
             
             @Override
@@ -330,12 +469,19 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
                     tableModel.setData(page.getContent());
                     totalPages = page.getTotalPages();
 
+                    updateTotalRecordsLabel();
                     updatePaginationControls();
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(GenericTablePanel.this,
                             "Error loading data: " + ex.getMessage(),
                             "Data Error", JOptionPane.ERROR_MESSAGE);
                     ex.printStackTrace();
+                } finally {
+                    Timer testTimer = new Timer(2000, e -> {
+                        GlobalLoadingManager.getInstance().hideSpinner();
+                    });
+                    testTimer.setRepeats(false);
+                    testTimer.start();
                 }
             }
         };
@@ -457,7 +603,7 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
                 return entity.isSelected();
             } else if (columnIndex == getColumnCount() - 1) {
                 // Cột action
-                return "⋮";
+                return (new FlatSVGIcon("icons/ThreeDotsVertical.svg", 1.1f));
             } else {
                 // Các cột dữ liệu
                 try {
@@ -573,7 +719,7 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
             setMargin(new Insets(0, 0, 0, 0));
             setContentAreaFilled(false);
             setBorderPainted(false);
-            setText("⋮");
+            setIcon(new FlatSVGIcon("icons/ThreeDotsVertical.svg", 1f));
         }
 
         @Override
@@ -592,7 +738,7 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
         private int currentRow;
 
         public ActionButtonEditor() {
-            button = new JButton("⋮");
+            button = new JButton(new FlatSVGIcon("icons/ThreeDotsVertical.svg", 1.1f));
             button.setOpaque(true);
             button.setFocusPainted(false);
             button.setMargin(new Insets(0, 0, 0, 0));
@@ -628,7 +774,7 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
 
         @Override
         public Object getCellEditorValue() {
-            return "⋮";
+            return (new FlatSVGIcon("icons/ThreeDotsVertical.svg", 1.1f));
         }
 
         @Override

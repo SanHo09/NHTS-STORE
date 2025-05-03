@@ -6,12 +6,14 @@ import com.nhom4.nhtsstore.ui.layout.PagePanel;
 import com.nhom4.nhtsstore.ui.navigation.NavigationService;
 import com.nhom4.nhtsstore.ui.navigation.RouteParams;
 import com.nhom4.nhtsstore.ui.page.dashboard.DashBoardPanel;
+import com.nhom4.nhtsstore.ui.shared.components.GlobalLoadingManager;
 import com.nhom4.nhtsstore.utils.JavaFxSwing;
 import jakarta.annotation.PostConstruct;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import javax.swing.*;
 import java.awt.*;
+import javax.swing.border.EmptyBorder;
 
 @Component
 public class MainPanel extends JPanel {
@@ -65,6 +67,8 @@ public class MainPanel extends JPanel {
 
 	@PostConstruct
 	private void initializeComponents() {
+		JLayeredPane layeredPagePanel;
+
 		add(JavaFxSwing.createJFXPanelWithController(
 				"/fxml/HeaderLayout.fxml",
 				this.applicationContext,
@@ -73,7 +77,18 @@ public class MainPanel extends JPanel {
 				}), BorderLayout.NORTH);
 		mainContentPanel = new JPanel(new BorderLayout());
 		mainContentPanel.add(menu, BorderLayout.WEST);
-		mainContentPanel.add(pagePanel, BorderLayout.CENTER);
+
+		// Wrap pagePanel vào JLayeredPane
+		layeredPagePanel = new JLayeredPane();
+		layeredPagePanel.setLayout(new OverlayLayout(layeredPagePanel));
+		layeredPagePanel.add(pagePanel, 0); // pagePanel nằm dưới
+		layeredPagePanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+
+		mainContentPanel.add(layeredPagePanel, BorderLayout.CENTER);
+		pagePanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // add padding
+
 		add(mainContentPanel, BorderLayout.CENTER);
+
+		GlobalLoadingManager.getInstance().init(layeredPagePanel);
 	}
 }
