@@ -13,7 +13,7 @@ import javax.swing.*;
 public enum AppView {
     LOGIN("Login", "", null, LoginPanel.class, null),
     DASHBOARD("Dashboard", "", null, DashBoardPanel.class, null),
-    PRODUCT("Product", "category.png", null, ProductListPanel.class, null),
+    PRODUCT("Product", "BoxSeamFill.svg", null, ProductListPanel.class, null),
     CATEGORY("Category", "category.png", PRODUCT, Form_Home.class, null),
     SUPPLIER("Supplier", "", null, Form_1.class, null),
     USER("User", "BiPersonBoundingBox.svg", null, Form_2.class, "SUPER_ADMIN"),
