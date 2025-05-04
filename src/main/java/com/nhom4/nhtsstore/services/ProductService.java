@@ -12,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  *
@@ -42,20 +43,23 @@ public class ProductService implements GenericService<Product> {
     }
     
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteById(Long id) {
         productImageRepository.deleteByProductId(id);
         repository.deleteById(id);
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteMany(List<Product> entities) {
         List<Long> productIds = entities.stream()
                                     .map(Product::getId)
                                     .collect(Collectors.toList());
         for (Long productId : productIds) {
             productImageRepository.deleteByProductId(productId);
+            repository.deleteById(productId);
         }
-        repository.deleteAll(entities);
+//        repository.deleteAll(entities);
     }
     
     @Override

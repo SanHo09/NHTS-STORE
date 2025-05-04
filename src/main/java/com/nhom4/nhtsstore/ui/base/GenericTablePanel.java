@@ -140,7 +140,7 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
         searchField.setPreferredSize(new Dimension(100, 25));
 
         PlaceholderTextField placeholderField = (PlaceholderTextField) searchField;
-        placeholderField.setPlaceholder("Search in Name/Category");
+        placeholderField.setPlaceholder("Search by Name");
         placeholderField.setPlaceholderColor(Color.LIGHT_GRAY);
         placeholderField.setPlaceholderPadding(5); // padding kể từ lề trái
         placeholderField.setPlaceholderItalic(false);
@@ -218,6 +218,21 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
             public Component getTableCellRendererComponent(JTable table, Object value, 
                     boolean isSelected, boolean hasFocus, int row, int column) {
                 Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+                String cellValue = value != null ? value.toString() : "";
+
+                // Màu theo nội dung
+                if (cellValue.equalsIgnoreCase("Visible")) {
+                    c.setForeground(new Color(0x28a745)); // xanh lá
+                } else if (cellValue.equalsIgnoreCase("Hidden")) {
+                    c.setForeground(new Color(0x6c757d)); // xám
+                } else if (cellValue.equalsIgnoreCase("In stock")) {
+                    c.setForeground(new Color(0x007bff)); // xanh dương
+                } else if (cellValue.equalsIgnoreCase("Out of stock")) {
+                    c.setForeground(new Color(0xdc3545)); // đỏ
+                } else {
+                    c.setForeground(Color.BLACK);
+                }
 
                 // Đặt màu nền xen kẽ
                 if (!isSelected) {
@@ -477,7 +492,7 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
                             "Data Error", JOptionPane.ERROR_MESSAGE);
                     ex.printStackTrace();
                 } finally {
-                    Timer testTimer = new Timer(2000, e -> {
+                    Timer testTimer = new Timer(1000, e -> {
                         GlobalLoadingManager.getInstance().hideSpinner();
                     });
                     testTimer.setRepeats(false);
@@ -795,9 +810,11 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
         
         JMenuItem activateItem = new JMenuItem("Activate");
         activateItem.addActionListener(e -> activateEntity(entity));
+        activateItem.setEnabled(!entity.isActive());
         
         JMenuItem deactivateItem = new JMenuItem("Deactivate");
         deactivateItem.addActionListener(e -> deactivateEntity(entity));
+        deactivateItem.setEnabled(entity.isActive());
         
         JMenuItem deleteItem = new JMenuItem("Delete");
         deleteItem.addActionListener(e -> deleteEntity(entity));

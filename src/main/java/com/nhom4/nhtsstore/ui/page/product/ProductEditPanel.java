@@ -11,7 +11,6 @@ import com.nhom4.nhtsstore.services.ProductService;
 import com.nhom4.nhtsstore.services.SupplierService;
 import com.nhom4.nhtsstore.ui.ApplicationState;
 import com.nhom4.nhtsstore.ui.PanelManager;
-import com.nhom4.nhtsstore.ui.base.GenericTablePanel;
 import com.nhom4.nhtsstore.ui.navigation.RoutablePanel;
 import com.nhom4.nhtsstore.ui.navigation.RouteParams;
 import com.nhom4.nhtsstore.ui.shared.components.DatePicker;
@@ -28,7 +27,6 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import javax.swing.table.TableModel;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -55,11 +53,10 @@ public class ProductEditPanel extends JPanel implements RoutablePanel {
     private ProductImageService productImageService;
     
     private Product product;
-    private JPanel imagePanel;
     private JButton uploadButton;
     private List<ProductImage> images = new ArrayList<>();
-    private ProductImage selectedThumbnail;
-    
+    private ProductImagePanel imagePanel;
+
     public ProductEditPanel() {}
 
     @Override
@@ -104,9 +101,15 @@ public class ProductEditPanel extends JPanel implements RoutablePanel {
         // Active
         ToggleSwitch activeToggle = new ToggleSwitch();
         activeToggle.setSelected(product != null && product.isActive());
-        addFieldToForm(formPanel, createLabeledField("Status:", activeToggle, fieldWidth), gbc, column, row++);
+        addFieldToForm(formPanel, createLabeledField("Visible:", activeToggle, fieldWidth), gbc, column, row++);
 
-        column = 1;
+//        // Cột Spacer
+        gbc.gridx = 1;
+        gbc.weightx = 1.0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        formPanel.add(Box.createHorizontalStrut(100), gbc);
+        
+        column = 2;
         row = 0;
         // Manufacturer
         JTextField manufacturerField = new JTextField(product != null ? product.getManufacturer() : "");
@@ -137,22 +140,21 @@ public class ProductEditPanel extends JPanel implements RoutablePanel {
         JComboBox<Category> categoryCombo = new JComboBox<>(categories.toArray(new Category[0]));
         if (product != null) categoryCombo.setSelectedItem(product.getCategory());
         addFieldToForm(formPanel, createLabeledField("Category:", categoryCombo, fieldWidth), gbc, column, row++);
-
-
         // Images
-        uploadButton = new JButton("Upload");
-        addFieldToForm(formPanel, createLabeledField("Images:", uploadButton, 120), gbc, column, row++);
-        
-        imagePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JScrollPane imageScrollPane = new JScrollPane(imagePanel);
-//        imageScrollPane.setPreferredSize(new Dimension(300, 400));
-        addFieldToForm(formPanel, createLabeledField("", imageScrollPane, 200), gbc, column, row++);
-
+        uploadButton = new JButton("Upload images");
         uploadButton.addActionListener(e -> uploadImages());
-
+        addFieldToForm(formPanel, createLabeledField("", uploadButton, 140), gbc, column, row++);
+        
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton saveButton = new JButton("Save");
+//        saveButton.setFont(saveButton.getFont().deriveFont(Font.BOLD));
+//        saveButton.setBackground(new Color(0x355F9F));
+//        saveButton.setForeground(Color.WHITE);
+//        saveButton.setOpaque(true);
+//        saveButton.setBorderPainted(false);
+
         JButton cancelButton = new JButton("Cancel");
+
         JButton deleteButton = new JButton("Delete");
         
         // Select all value when focus
@@ -174,10 +176,9 @@ public class ProductEditPanel extends JPanel implements RoutablePanel {
                 updatedProduct.setActive(activeToggle.isSelected());
                 
                 for (ProductImage img : images) {
-                    img.setThumbnail(img == selectedThumbnail);
-                    img.setProduct(product);
+                    img.setProduct(updatedProduct);
                 }
-                product.setImages(images);
+                updatedProduct.setImages(images);
 
                 productService.save(updatedProduct);
                 JOptionPane.showMessageDialog(this,
@@ -202,31 +203,37 @@ public class ProductEditPanel extends JPanel implements RoutablePanel {
         deleteButton.addActionListener(e -> delete());
 
         buttonPanel.add(saveButton);
-        buttonPanel.add(cancelButton);
         if (product != null) {
             buttonPanel.add(deleteButton);
         }
+        buttonPanel.add(cancelButton);
 
         formPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
         buttonPanel.setBorder(null);
 
+        imagePanel = new ProductImagePanel(images);
+        JPanel imageTableContainer = new JPanel(new BorderLayout());
+        imageTableContainer.add(imagePanel, BorderLayout.CENTER);
+
+        // Load existing images if editing an existing product
+        if (product != null && product.getImages() != null && !product.getImages().isEmpty()) {
+            images = new ArrayList<>(product.getImages());
+            imagePanel.setImages(images);
+        }
+
+        // GridBagConstraints for image panel
+        GridBagConstraints imageTableGbc = new GridBagConstraints();
+        imageTableGbc.gridx = 0;
+        imageTableGbc.gridy = row++;
+        imageTableGbc.gridwidth = 3;
+        imageTableGbc.fill = GridBagConstraints.BOTH;
+        imageTableGbc.weightx = 1.0;
+        imageTableGbc.weighty = 1.0;
+        imageTableGbc.insets = new Insets(10, 0, 10, 0);
+        formPanel.add(imageTableContainer, imageTableGbc);
+
         add(buttonPanel);
         add(formPanel);
-        
-        String[][] data = {
-            { "Kundan Kumar Jha", "4031", "CSE" },
-            { "Anand Jha", "6014", "IT" },
-            { "Anand Jha", "6014", "IT" },
-            { "Anand Jha", "6014", "IT" },
-            { "Anand Jha", "6014", "IT" },
-            { "Anand Jha", "6014", "IT" },
-            { "Anand Jha", "6014", "IT" },
-            { "Anand Jha", "6014", "IT" },
-            { "Anand Jha", "6014", "IT" }
-        };
-        String[] columnNames = { "Name", "Roll Number", "Department" };
-        JTable table = new JTable(data, columnNames);
-        add(table);
         
         revalidate();
         repaint();
@@ -258,39 +265,6 @@ public class ProductEditPanel extends JPanel implements RoutablePanel {
         }
     }
     
-    private void addImageToPanel(ProductImage image) {
-        JLabel imageLabel = new JLabel(new ImageIcon(image.getImageData()));
-        imageLabel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
-        imageLabel.setPreferredSize(new Dimension(100, 100));
-
-        // Chọn làm thumbnail khi click
-        imageLabel.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                selectedThumbnail = image;
-                for (java.awt.Component comp : imagePanel.getComponents()) {
-                    comp.setBackground(null);
-                }
-                imageLabel.setBorder(BorderFactory.createLineBorder(Color.RED, 2));
-            }
-        });
-
-        // Nút xoá
-        JButton deleteBtn = new JButton("X");
-        deleteBtn.addActionListener(e -> {
-            images.remove(image);
-            imagePanel.remove(imageLabel.getParent());
-            imagePanel.revalidate();
-            imagePanel.repaint();
-        });
-
-        JPanel wrapper = new JPanel(new BorderLayout());
-        wrapper.add(imageLabel, BorderLayout.CENTER);
-        wrapper.add(deleteBtn, BorderLayout.NORTH);
-
-        imagePanel.add(wrapper);
-    }
-
     private void uploadImages() {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setMultiSelectionEnabled(true);
@@ -305,14 +279,14 @@ public class ProductEditPanel extends JPanel implements RoutablePanel {
                     image.setImageData(data);
                     image.setImageName(file.getName());
                     image.setContentType(contentType);
-                    image.setThumbnail(false); // mặc định
+                    image.setThumbnail(images.isEmpty());
 
                     images.add(image);
-                    addImageToPanel(image);
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
             }
+            imagePanel.setImages(images);
             revalidate();
             repaint();
         }
@@ -323,13 +297,16 @@ public class ProductEditPanel extends JPanel implements RoutablePanel {
         gbc.gridy = row;
         gbc.anchor = GridBagConstraints.WEST;
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(10, 0, 10, 40);
+//        gbc.insets = new Insets(10, 0, 10, 40);
+        gbc.insets = new Insets(10, 0, 10, 0);
         formPanel.add(fieldPanel, gbc);
     }
 
     private JPanel createLabeledField(String labelText, JComponent field, int width) {
-        JPanel panel = new JPanel(new BorderLayout());
+        JPanel panel = new JPanel(new BorderLayout(10, 0)); // Giảm khoảng cách giữa label và field xuống 10px
         JLabel label = new JLabel(labelText);
+        label.setPreferredSize(new Dimension(140, label.getPreferredSize().height)); // Đặt chiều rộng cố định cho label
+        
         JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0)); // Không có khoảng cách
         field.setPreferredSize(new Dimension(width, field.getPreferredSize().height));
         rightPanel.add(field);
