@@ -34,4 +34,7 @@ public class Customer extends GenericEntity {
 
     @OneToMany(mappedBy = "customer")
     private List<Order> order;
+
+    @OneToMany(mappedBy = "customer")
+    private List<Invoice> invoice;
 }

@@ -21,4 +21,7 @@ public class OrderDetail {
     @ManyToOne()
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
+
+    @Column(nullable = true)
+    private int quantity = 0;
 }

@@ -26,4 +26,8 @@ public class Invoice {
 
     @OneToMany(mappedBy = "invoice")
     private List<InvoiceDetail> invoiceDetail;
+
+    @ManyToOne()
+    @JoinColumn(name = "customer_id", nullable = false)
+    private Customer customer;
 }
