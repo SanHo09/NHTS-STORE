@@ -1,5 +1,6 @@
 package com.nhom4.nhtsstore.entities;
 
+import com.nhom4.nhtsstore.entities.rbac.User;
 import com.nhom4.nhtsstore.enums.OrderStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -15,8 +16,8 @@ import java.util.List;
 @Setter
 public class Order extends GenericEntity {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column
-    @GenericGenerator(name="autoGenerate" , strategy="increment")
     private Long id;
 
     @Temporal(TemporalType.DATE)
@@ -30,12 +31,14 @@ public class Order extends GenericEntity {
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
-    @OneToMany(mappedBy = "order")
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderDetail> orderDetails;
 
     @ManyToOne()
-    @JoinColumn(name = "customer_id", nullable = false)
+    @JoinColumn(name = "customer_id")
     private Customer customer;
 
-
+    @ManyToOne()
+    @JoinColumn(name = "user_id")
+    private User user;
 }

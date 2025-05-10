@@ -5,6 +5,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Nationalized;
 
 import java.util.Date;
@@ -58,6 +59,7 @@ public class Product extends GenericEntity {
     private Category category;
     
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @BatchSize(size = 10)
     private List<ProductImage> images = new ArrayList<>();
     
     public ProductImage getThumbnail() {
