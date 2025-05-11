@@ -28,11 +28,15 @@
     </scm>
     <properties>
         <java.version>21</java.version>
-        <javafx.version>21.0.2</javafx.version>
+        <javafx.version>21.0.6</javafx.version>
         <mapstruct.version>1.6.3</mapstruct.version>
         <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
     </properties>
     <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
@@ -100,6 +104,12 @@
             <artifactId>materialfx</artifactId>
             <version>11.13.5</version>
         </dependency>
+        <dependency>
+            <groupId>io.github.typhon0</groupId>
+            <artifactId>AnimateFX</artifactId>
+            <version>1.2.3</version>
+
+        </dependency>
 <!--Swing UI library-->
         <!-- https://mvnrepository.com/artifact/com.miglayout/miglayout-swing -->
         <dependency>
@@ -117,6 +127,16 @@
             <artifactId>modal-dialog</artifactId>
             <version>2.4.0</version>
         </dependency>
+        <dependency>
+            <groupId>io.reactivex</groupId>
+            <artifactId>rxjava</artifactId>
+            <version>1.3.8</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jdatepicker</groupId>
+            <artifactId>jdatepicker</artifactId>
+            <version>1.3.4</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -130,6 +150,7 @@
                             <path>
                                 <groupId>org.projectlombok</groupId>
                                 <artifactId>lombok</artifactId>
+                                <version>1.18.36</version>
                             </path>
                             <path>
                                 <groupId>org.projectlombok</groupId>

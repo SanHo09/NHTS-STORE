@@ -1,18 +1,21 @@
 package com.nhom4.nhtsstore.viewmodel.user;
 
-import lombok.AccessLevel;
-import lombok.Data;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.util.Set;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserSessionVm {
-    Integer userId;
+    Long userId;
     String username;
     String fullName;
     String email;
-    Set<String> roles;
+    byte[] avatar;
+    String role;
     Set<String> permissions;
 }

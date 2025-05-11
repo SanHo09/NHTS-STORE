@@ -15,15 +15,19 @@ public class Invoice {
     @Id
     @Column
     @GeneratedValue(strategy= GenerationType.IDENTITY)
-    private Long Id;
+    private Long id;
 
     @Temporal(TemporalType.DATE)
     @Column(nullable = false)
-    private Date CreateDate;
+    private Date createDate;
 
     @Column(nullable = false)
-    private double TotalAmount;
+    private double totalAmount;
 
-    @OneToMany(mappedBy = "Invoice")
-    private List<InvoiceDetail> InvoiceDetail;
+    @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<InvoiceDetail> invoiceDetail;
+
+    @ManyToOne()
+    @JoinColumn(name = "customer_id", nullable = false)
+    private Customer customer;
 }

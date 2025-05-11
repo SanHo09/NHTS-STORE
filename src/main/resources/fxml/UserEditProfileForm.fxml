@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import io.github.palexdev.materialfx.controls.MFXButton?>
+<?import io.github.palexdev.materialfx.controls.MFXPasswordField?>
+<?import io.github.palexdev.materialfx.controls.MFXTextField?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="438.0" prefWidth="491.0" spacing="30.0" stylesheets="@../css/Global.css" xmlns="http://javafx.com/javafx/21.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.nhom4.nhtsstore.ui.page.user.UserProfileUpdatePanel">
+   <padding>
+      <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+   </padding>
+   <children>
+      <HBox prefHeight="40.0" prefWidth="461.0">
+         <children>
+            <HBox alignment="CENTER_LEFT" prefHeight="27.0" prefWidth="112.0">
+               <children>
+                  <Label text="Full name" />
+               </children>
+            </HBox>
+            <HBox prefHeight="21.0" prefWidth="349.0">
+               <children>
+                  <MFXTextField fx:id="txtFullName" floatMode="DISABLED" prefHeight="91.0" prefWidth="350.0" />
+               </children>
+            </HBox>
+         </children>
+      </HBox>
+      <HBox layoutX="25.0" layoutY="25.0" prefHeight="40.0" prefWidth="461.0">
+         <children>
+            <HBox alignment="CENTER_LEFT" prefHeight="27.0" prefWidth="112.0">
+               <children>
+                  <Label text="Email" />
+               </children>
+            </HBox>
+            <HBox prefHeight="39.0" prefWidth="348.0">
+               <children>
+                  <MFXTextField fx:id="txtEmail" floatMode="DISABLED" floatingText="wqdwqd" prefHeight="67.0" prefWidth="348.0" />
+               </children>
+            </HBox>
+         </children>
+      </HBox>
+      <HBox fx:id="boxUsername" layoutX="25.0" layoutY="95.0" prefHeight="40.0" prefWidth="461.0">
+         <children>
+            <HBox alignment="CENTER_LEFT" prefHeight="27.0" prefWidth="112.0">
+               <children>
+                  <Label text="Username" />
+               </children>
+            </HBox>
+            <HBox prefHeight="39.0" prefWidth="348.0">
+               <children>
+                  <MFXTextField fx:id="txtUsername" allowEdit="false" editable="false" floatMode="DISABLED" prefHeight="50.0" prefWidth="352.0" />
+               </children>
+            </HBox>
+         </children>
+      </HBox>
+      <HBox fx:id="boxRole" layoutX="25.0" layoutY="164.0" prefHeight="40.0" prefWidth="470.0">
+         <children>
+            <HBox alignment="CENTER_LEFT" prefHeight="27.0" prefWidth="112.0">
+               <children>
+                  <Label text="Role" />
+               </children>
+            </HBox>
+            <HBox fx:id="boxRoleCombobox" prefHeight="39.0" prefWidth="348.0" />
+         </children>
+      </HBox>
+      <HBox fx:id="boxPassword" layoutX="25.0" layoutY="234.0" prefHeight="40.0" prefWidth="470.0">
+         <children>
+            <HBox alignment="CENTER_LEFT" prefHeight="27.0" prefWidth="112.0">
+               <children>
+                  <Label text="Password" />
+               </children>
+            </HBox>
+            <HBox prefHeight="39.0" prefWidth="348.0">
+               <children>
+                  <MFXPasswordField fx:id="txtPassword" floatMode="DISABLED" prefHeight="50.0" prefWidth="358.0" />
+               </children>
+            </HBox>
+         </children>
+      </HBox>
+      <HBox layoutX="25.0" layoutY="294.0" prefHeight="63.0" prefWidth="461.0">
+         <children>
+            <HBox alignment="CENTER_LEFT" prefHeight="27.0" prefWidth="112.0" />
+            <HBox alignment="CENTER_RIGHT" prefHeight="39.0" prefWidth="348.0" spacing="30.0">
+               <children>
+                  <MFXButton fx:id="btnCancel" onAction="#onActionCancel" prefHeight="44.0" prefWidth="120.0" styleClass="mfx-button-secondary" text="Cancel" />
+                  <MFXButton fx:id="btnSave" onAction="#onActionSave" prefHeight="44.0" prefWidth="120.0" text="Save" />
+               </children>
+            </HBox>
+         </children>
+      </HBox>
+   </children>
+</VBox>

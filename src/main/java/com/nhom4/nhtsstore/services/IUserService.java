@@ -1,27 +1,35 @@
 package com.nhom4.nhtsstore.services;
 
-import com.nhom4.nhtsstore.viewmodel.user.UserCreatVm;
-import com.nhom4.nhtsstore.viewmodel.user.UserRecordVm;
-import com.nhom4.nhtsstore.viewmodel.user.UserSessionVm;
-import com.nhom4.nhtsstore.viewmodel.user.UserUpdateVm;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import com.nhom4.nhtsstore.common.PageResponse;
+import com.nhom4.nhtsstore.repositories.specification.SpecSearchCriteria;
+import com.nhom4.nhtsstore.viewmodel.user.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface IUserService {
-    // login
-    boolean authenticate(String username, String password);
-    UserSessionVm findByUsername(String username);
-    
-    UserRecordVm createUser(UserCreatVm userCreatVm);
+    // login, don't need to check permission
+    @PreAuthorize("permitAll()")
+    UserSessionVm authenticate(String username, String password);
+
+    @PreAuthorize("hasAnyAuthority('USER_CREATION','FULL_ACCESS','USER_MANAGEMENT')")
+    UserDetailVm createUser(UserCreateVm userCreateVm);
+
+    @PreAuthorize("hasAnyAuthority('USER_UPDATE','FULL_ACCESS','USER_MANAGEMENT')")
     UserRecordVm updateUser(UserUpdateVm userUpdateVm);
-    void deleteUser(int userId);
 
-    // find user record page
-    Page<UserRecordVm> findUsersPage(Pageable pageable);
-    // find user record by id
-    UserRecordVm findUserRecordById(int userId);
-    // Filter user
-    Page<UserRecordVm> filterUser(String keyword, Pageable pageable);
+    @PreAuthorize("hasAnyAuthority('USER_DELETION','FULL_ACCESS','USER_MANAGEMENT')")
+    void deleteUser(Long userId);
 
+
+    UserDetailVm editProfile(UserUpdateVm profileVm);
+
+    UserDetailVm changePassword(UserChangePasswordVm profileVm);
+
+    @PreAuthorize("hasAnyAuthority('USER_LIST','FULL_ACCESS','USER_MANAGEMENT')")
+    PageResponse<UserRecordVm> findAllUsers(int page, int size, String sortBy, String sortDir);
+
+    @PreAuthorize("hasAnyAuthority('USER_DETAIL','FULL_ACCESS','USER_MANAGEMENT') or @userService.hasUserPermission(#userId) or @userService.isSuperAdmin()")
+    UserDetailVm findUserById(Long userId);
+
+    @PreAuthorize("hasAnyAuthority('USER_LIST','FULL_ACCESS','USER_MANAGEMENT')")
+    PageResponse<UserRecordVm> searchUsers(SpecSearchCriteria criteria, int page, int size, String sortBy, String sortDir);
 }

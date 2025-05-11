@@ -1,0 +1,103 @@
+.root {
+    -fx-base: #2b2b2b;
+    -fx-background: #3c3f41;
+    -fx-control-inner-background: #3c3f41;
+    -fx-text-fill: #ffffff;
+}
+
+.label {
+    -fx-text-fill: #ffffff;
+}
+
+.button {
+    -fx-background-color: #4b4b4b;
+    -fx-text-fill: #ffffff;
+}
+
+.text-field {
+    -fx-background-color: #3c3f41;
+    -fx-text-fill: #ffffff;
+}
+.dashboard-card {
+    -fx-background-color: #3c3f41;
+    -fx-background-radius: 8px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 3);
+}
+
+.chart-title {
+    -fx-text-fill: #e0e0e0;
+}
+
+.card-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-fill: #e0e0e0;
+}
+
+.card-value {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-fill: rgba(0, 0, 0, 0.73);
+}
+
+.metric-label {
+    -fx-font-size: 14px;
+    -fx-fill: rgba(255, 255, 255, 0.59);
+}
+
+.chart {
+    -fx-background-color: transparent;
+}
+
+.chart-plot-background {
+    -fx-background-color: transparent;
+}
+
+.chart-legend {
+    -fx-background-color: #3c3f41;
+    -fx-background-radius: 8px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 8, 0, 0, 2);
+    -fx-padding: 10px;
+}
+
+.chart-legend-item {
+    -fx-text-fill: #e0e0e0;
+}
+
+.chart-legend-item-symbol {
+    -fx-padding: 5px;
+}
+.mfx-text-field {
+    -fx-background-color: #3c3f41;
+    -fx-text-fill: #ffffff;
+    -fx-border-color: #4b4b4b;
+}
+
+.mfx-text-field:focus-within {
+    -fx-border-color: #6e7be5;
+}
+
+.mfx-text-field .floating-text {
+    -fx-text-fill: #e0e0e0;
+}
+.floating-text{
+    -fx-background-color: #3c3f41;
+}
+.mfx-password-field {
+    -fx-background-color: #3c3f41;
+    -fx-text-fill: #ffffff;
+    -fx-border-color: #4b4b4b;
+}
+
+.mfx-password-field:focus-within {
+    -fx-border-color: #6e7be5;
+}
+
+.mfx-password-field .floating-text {
+    -fx-text-fill: #e0e0e0;
+}
+.clock-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #00FFFF;
+    -fx-font-weight: bold;
+}
