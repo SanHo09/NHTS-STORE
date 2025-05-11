@@ -199,6 +199,8 @@ public class ProductDetailPanel extends javax.swing.JPanel implements RoutablePa
         this.lblImage.setPreferredSize(new Dimension(500, 500));
         if(!product.getImages().isEmpty()) {
             ImageHelper.SetLabelImage(lblImage, 500, 500, product.getImages().getFirst().getImageData());
+        } else {
+            ImageHelper.SetLabelImage(lblImage, 500, 500, null);
         }
      }
      

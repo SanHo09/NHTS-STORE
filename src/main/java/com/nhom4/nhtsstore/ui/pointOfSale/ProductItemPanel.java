@@ -32,6 +32,8 @@ public class ProductItemPanel extends javax.swing.JPanel {
             if (!product.getImages().isEmpty()) {
                 byte[] image = product.getImages().getFirst().getImageData();
                 ImageHelper.SetLabelImage(lblProductImage, 250, 100, image);
+            } else {
+                ImageHelper.SetLabelImage(lblProductImage, 250, 100, null);
             }
         }
 

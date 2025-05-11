@@ -68,6 +68,7 @@ public class CartPanel extends javax.swing.JPanel implements RoutablePanel{
         currentUser = applicationState.getCurrentUser();
         Order existingOrder = orderService.findByUserId(currentUser.getUserId());
         if(existingOrder != null) {
+            orderDetails = existingOrder.getOrderDetails();
             loadOrderDetails();
         }
         jScrollPane1.setViewportView(pnlTableContent);

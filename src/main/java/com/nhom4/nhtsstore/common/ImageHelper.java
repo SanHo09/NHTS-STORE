@@ -18,9 +18,14 @@ import javax.swing.JLabel;
 public class ImageHelper {
     public static void SetLabelImage(JLabel label, int labelWidth, int labelHeight, byte[] imageData) {
         try {
-            BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(imageData));
-            
-            // Scale image to fit label size
+            BufferedImage bufferedImage;
+
+            if (imageData == null) {
+                bufferedImage = ImageIO.read(ImageHelper.class.getResourceAsStream("/images/No_Image_Available.jpg"));
+            } else {
+                bufferedImage = ImageIO.read(new ByteArrayInputStream(imageData));
+            }
+
             Image scaledImage = bufferedImage.getScaledInstance(labelWidth, labelHeight, Image.SCALE_SMOOTH);
             label.setIcon(new ImageIcon(scaledImage));
         } catch (Exception e) {

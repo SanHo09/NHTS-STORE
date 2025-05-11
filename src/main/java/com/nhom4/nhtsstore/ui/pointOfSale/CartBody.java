@@ -35,6 +35,8 @@ public class CartBody extends javax.swing.JPanel {
         lblAmount.setText(amount + "");
         if(!product.getImages().isEmpty()) {
             ImageHelper.SetLabelImage(lblImage, 50, 50, product.getImages().getFirst().getImageData());
+        } else {
+            ImageHelper.SetLabelImage(lblImage, 50, 50, null);
         }
 
         btnDelete.addMouseListener(new MouseAdapter() {
