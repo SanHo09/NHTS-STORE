@@ -3,7 +3,7 @@
 <?import io.github.palexdev.materialfx.controls.MFXButton?>
 <?import javafx.scene.layout.FlowPane?>
 
-<FlowPane alignment="TOP_RIGHT" columnHalignment="CENTER" hgap="10.0" prefHeight="18.0" prefWidth="304.0" stylesheets="@../css/Global.css" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.nhom4.nhtsstore.ui.layout.WindowLayout">
+<FlowPane fx:id="rootPane" alignment="TOP_RIGHT" columnHalignment="CENTER" hgap="10.0" prefHeight="18.0" prefWidth="304.0" stylesheets="@../css/Global.css" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/21.0.1" fx:controller="com.nhom4.nhtsstore.ui.layout.WindowLayout">
    <children>
       <MFXButton fx:id="minimizeWindowButton" styleClass="window-control-button" />
       <MFXButton fx:id="closeWindowButton" styleClass="window-control-button" />

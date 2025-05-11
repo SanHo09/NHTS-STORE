@@ -15,8 +15,6 @@ public class PagePanel extends JPanel {
 		removeAll();
 
 		add(panel, BorderLayout.CENTER);
-
-
 		// Show the panel
 		revalidate();
 		repaint();

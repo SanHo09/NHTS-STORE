@@ -3,12 +3,15 @@ package com.nhom4.nhtsstore.ui.layout;
 
 import com.nhom4.nhtsstore.NhtsStoreApplication;
 import com.nhom4.nhtsstore.ui.LoadingDialog;
+import com.nhom4.nhtsstore.ui.shared.ThemeManager;
 import com.nhom4.nhtsstore.utils.IconUtil;
+import com.nhom4.nhtsstore.utils.JavaFxThemeUtil;
 import io.github.palexdev.materialfx.controls.MFXButton;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.FlowPane;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,10 +26,13 @@ import java.util.ResourceBundle;
 
 @Controller
 public class WindowLayout implements Initializable {
+    @FXML public FlowPane rootPane;
     @Getter
     @Setter
     private JFrame mainFrame;
-    public WindowLayout() {
+    private final ThemeManager themeManager;
+    public WindowLayout(ThemeManager themeManager) {
+        this.themeManager = themeManager;
     }
 
     @Override
@@ -56,6 +62,7 @@ public class WindowLayout implements Initializable {
         // Window control actions
         minimizeWindowButton.setOnAction(e -> minimizeWindow());
         closeWindowButton.setOnAction(e -> closeWindow());
+        JavaFxThemeUtil.setupThemeListener(rootPane, themeManager);
     }
 
     @FXML

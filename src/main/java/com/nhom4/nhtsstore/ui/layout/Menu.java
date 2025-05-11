@@ -2,39 +2,53 @@ package com.nhom4.nhtsstore.ui.layout;
 
 import com.nhom4.nhtsstore.ui.AppView;
 import com.nhom4.nhtsstore.ui.ApplicationState;
+import com.nhom4.nhtsstore.ui.shared.LanguageManager;
+import com.nhom4.nhtsstore.ui.shared.ThemeManager;
+import com.nhom4.nhtsstore.ui.shared.components.ToggleSwitch;
 import com.nhom4.nhtsstore.ui.shared.components.sidebar.EventMenuSelected;
 import com.nhom4.nhtsstore.ui.shared.components.sidebar.ListMenu;
 import com.nhom4.nhtsstore.ui.shared.components.sidebar.Model_Menu;
 import com.nhom4.nhtsstore.ui.shared.components.sidebar.SidebarManager;
+import com.nhom4.nhtsstore.utils.UIUtils;
 import com.nhom4.nhtsstore.viewmodel.user.UserSessionVm;
 
-import java.awt.Color;
-import java.awt.GradientPaint;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
+import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import javax.swing.*;
 
 @org.springframework.stereotype.Component
-public class Menu extends javax.swing.JPanel {
+public class Menu extends javax.swing.JPanel implements LanguageManager.LanguageChangeListener {
     private final SidebarManager sidebarManager;
     private final ApplicationState applicationState;
+    private final ThemeManager themeManager;
+    private final LanguageManager languageManager;
     private EventMenuSelected event;
-
+    private JToggleButton themeToggleButton;
+    
     public void addEventMenuSelected(EventMenuSelected event) {
         this.event = event;
         listMenu1.addEventMenuSelected(event);
     }
-    // Add SidebarManager to constructor
-    public Menu(SidebarManager sidebarManager, ApplicationState applicationState) {
+    
+    public Menu(SidebarManager sidebarManager, ApplicationState applicationState, 
+                ThemeManager themeManager, LanguageManager languageManager) {
         this.sidebarManager = sidebarManager;
         this.applicationState = applicationState;
+        this.themeManager = themeManager;
+        this.languageManager = languageManager;
+        
         initComponents();
         setOpaque(false);
         listMenu1.setOpaque(false);
+
+        // Register for language changes
+        languageManager.addLanguageChangeListener(this);
+        
+        // Set application title
+        jLabel1.setText(languageManager.getText("app.title"));
 
         // Initialize menu items based on user role
         refreshMenuItems();
@@ -43,8 +57,6 @@ public class Menu extends javax.swing.JPanel {
         sidebarManager.setListMenu(listMenu1);
         sidebarManager.initializeMenuMap();
     }
-
-
 
     public void refreshMenuItems() {
         // Clear existing menu items
@@ -65,13 +77,15 @@ public class Menu extends javax.swing.JPanel {
 
             // Add main menu items
             if (parent.getParent() == null) {
-                listMenu1.addItem(new Model_Menu(parent.getIcon(), parent.getName(), Model_Menu.MenuType.MENU));
+                String localizedName = getLocalizedMenuName(parent);
+                listMenu1.addItem(new Model_Menu(parent.getIcon(), localizedName, Model_Menu.MenuType.MENU));
                 sidebarManager.registerMenuItem(parent, index++);
 
                 // Check for submenu items
                 for (AppView children : AppView.values()) {
                     if (children.getParent() == parent && hasMenuPermission(children)) {
-                        listMenu1.addItem(new Model_Menu(children.getIcon(), children.getName(), Model_Menu.MenuType.MENU));
+                        String localizedChildName = getLocalizedMenuName(children);
+                        listMenu1.addItem(new Model_Menu(children.getIcon(), localizedChildName, Model_Menu.MenuType.MENU));
                         sidebarManager.registerMenuItem(children, index++);
                     }
                 }
@@ -81,6 +95,14 @@ public class Menu extends javax.swing.JPanel {
         // Refresh UI
         revalidate();
         repaint();
+    }
+    
+    /**
+     * Get the localized name for a menu item
+     */
+    private String getLocalizedMenuName(AppView view) {
+        String key = "nav." + view.name().toLowerCase();
+        return languageManager.getText(key);
     }
 
     private boolean hasMenuPermission(AppView view) {
@@ -103,6 +125,16 @@ public class Menu extends javax.swing.JPanel {
         // All other views are accessible to authenticated users
         return true;
     }
+
+    @Override
+    public void onLanguageChanged() {
+        // Update the application title
+        jLabel1.setText(languageManager.getText("app.title"));
+        
+        // Refresh menu items with new language
+        refreshMenuItems();
+    }
+
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {

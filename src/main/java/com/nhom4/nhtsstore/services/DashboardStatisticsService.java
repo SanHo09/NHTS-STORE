@@ -30,6 +30,44 @@ public class DashboardStatisticsService implements IDashboardStatisticsService {
     }
 
     @Override
+    public Map<String, Map<String, Double>> getRevenueComparisonByMonth() {
+        Map<String, Map<String, Double>> result = new LinkedHashMap<>();
+
+        // Get current and previous year
+        int currentYear = LocalDate.now().getYear();
+        int previousYear = currentYear - 1;
+
+        // Initialize all months with zero values for both years
+        for (int month = 1; month <= 12; month++) {
+            Map<String, Double> yearValues = new HashMap<>();
+            yearValues.put(String.valueOf(currentYear), 0.0);
+            yearValues.put(String.valueOf(previousYear), 0.0);
+            result.put(String.format("%02d", month), yearValues);
+        }
+
+        LocalDate startDate = LocalDate.of(previousYear, 1, 1);
+        Date sqlStartDate = Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+        LocalDate endDate = LocalDate.of(currentYear, 12, 31);
+        Date sqlEndDate = Date.from(endDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+        List<Object[]> data = orderRepository.getRevenueByMonthAndYear(sqlStartDate, sqlEndDate);
+
+        // Process query results
+        for (Object[] row : data) {
+            String month = (String) row[0];
+            String year = row[1].toString();
+            Double revenue = ((Number) row[2]).doubleValue();
+
+            if (result.containsKey(month)) {
+                result.get(month).put(year, revenue);
+            }
+        }
+
+        return result;
+    }
+
+    @Override
     public Map<String, Double> getRevenueByTimeFrame() {
         Map<String, Double> revenueByMonth = new LinkedHashMap<>();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/yyyy");
@@ -60,6 +98,17 @@ public class DashboardStatisticsService implements IDashboardStatisticsService {
     }
 
     @Override
+    public double getTotalRevenue() {
+        Double total = orderRepository.getTotalCompletedRevenue();
+        return total != null ? total : 0.0;
+    }
+
+    @Override
+    public double getTotalRevenueForYear(int year) {
+        Double total = orderRepository.getTotalCompletedRevenueForYear(year);
+        return total != null ? total : 0.0;
+    }
+    @Override
     public Map<String, Double> getRevenueByCategoryWithLimit(int topCategoriesLimit) {
         // Get total revenue by category
         Map<String, Double> revenueByCategoryMap = new HashMap<>();
@@ -74,7 +123,6 @@ public class DashboardStatisticsService implements IDashboardStatisticsService {
             revenueByCategoryMap.put(categoryName, revenue);
         }
 
-        // If we have more categories than our limit, create an "Other" category
         if (revenueByCategoryMap.size() > topCategoriesLimit) {
             // Sort categories by revenue
             List<Map.Entry<String, Double>> entries = new ArrayList<>(revenueByCategoryMap.entrySet());

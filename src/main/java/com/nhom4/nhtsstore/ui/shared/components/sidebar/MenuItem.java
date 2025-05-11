@@ -1,5 +1,7 @@
 package com.nhom4.nhtsstore.ui.shared.components.sidebar;
 
+import com.nhom4.nhtsstore.utils.UIUtils;
+
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.GradientPaint;
@@ -10,12 +12,12 @@ import java.awt.RenderingHints;
 public class MenuItem extends javax.swing.JPanel {
     private boolean selected;
     private boolean over;
-    
+
     public MenuItem(Model_Menu data) {
         initComponents();
         setOpaque(false);
         if (data.getType() == Model_Menu.MenuType.MENU) {
-            lblIcon.setIcon(data.toIcon());
+            lblIcon.setIcon(UIUtils.toIcon(data.getIcon(),null));
             lblName.setText(data.getName());
         } else if (data.getType() == Model_Menu.MenuType.TITLE) {
             lblIcon.setText(data.getName());
@@ -84,7 +86,7 @@ public class MenuItem extends javax.swing.JPanel {
         }
         super.paintComponent(g);
     }
-    
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel lblIcon;

@@ -1,6 +1,9 @@
 package com.nhom4.nhtsstore;
 
+import com.formdev.flatlaf.FlatDarculaLaf;
 import com.formdev.flatlaf.FlatIntelliJLaf;
+import com.formdev.flatlaf.themes.FlatMacDarkLaf;
+import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import com.nhom4.nhtsstore.ui.LoadingDialog;
 import com.nhom4.nhtsstore.ui.MainFrame;
 import javafx.application.Platform;
@@ -17,6 +20,8 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import javax.swing.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.concurrent.CountDownLatch;
 
 @SpringBootApplication
@@ -30,33 +35,18 @@ public class NhtsStoreApplication {
         try {
             SwingUtilities.invokeAndWait(() -> {
                 setUIFont(AppFont.DEFAULT_FONT);
-                FlatIntelliJLaf.setup();
-                new javafx.embed.swing.JFXPanel();
             });
         } catch (Exception e) {
             e.printStackTrace();
             return;
         }
+        Platform.startup(() -> {
+            loadingDialog = new LoadingDialog(null);
+            loadingDialog.setVisible(true);
 
-        // Create and show the loading dialog, wait for it to be fully visible
-        final CountDownLatch dialogReadyLatch = new CountDownLatch(1);
-
-        SwingUtilities.invokeLater(() -> {
-            Platform.runLater(() -> {
-                loadingDialog = new LoadingDialog(null);
-                loadingDialog.setVisible(true);
-
-                // Short delay to ensure dialog is fully rendered
-                javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(
-                        javafx.util.Duration.millis(200));
-                pause.setOnFinished(event -> dialogReadyLatch.countDown());
-                pause.play();
-            });
         });
 
         try {
-            // Wait until dialog is visible before starting Spring
-            dialogReadyLatch.await();
 
             // Initialize the progress animation timer
             setupProgressAnimationTimer();
@@ -120,8 +110,6 @@ public class NhtsStoreApplication {
 
 
             ConfigurableApplicationContext context = ((ApplicationReadyEvent) event).getApplicationContext();
-
-            // Short delay to see 100%
             new Timer(500, e -> {
                 ((Timer)e.getSource()).stop();
                 if (progressAnimationTimer != null) {
@@ -131,7 +119,7 @@ public class NhtsStoreApplication {
                     loadingDialog.dispose();
                     loadingDialog = null;
                     MainFrame mainFrame = context.getBean(MainFrame.class);
-                    mainFrame.setVisible(true);
+                    mainFrame.init();
                 });
             }).start();
         }
