@@ -15,7 +15,7 @@ import java.util.List;
 public class Customer extends GenericEntity {
     @Id
     @Column
-    @GenericGenerator(name="autoGenerate" , strategy="increment")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
