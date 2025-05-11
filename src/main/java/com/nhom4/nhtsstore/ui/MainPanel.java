@@ -32,7 +32,6 @@ public class MainPanel extends JPanel {
 		this.menu = menu;
 		this.navigationService = navigationService;
 		setLayout(new BorderLayout());
-		menu.initMoving(this);
 		menu.addEventMenuSelected(index -> {
 			AppView[] appViews = AppView.values();
 			int menuPosition = 0;

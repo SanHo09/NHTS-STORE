@@ -1,7 +1,7 @@
 package com.nhom4.nhtsstore.entities.rbac;
 
 
-import com.nhom4.nhtsstore.entities.audit.AbstractAuditEntity;
+import com.nhom4.nhtsstore.entities.GenericEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Nationalized;
@@ -10,6 +10,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.Serializable;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -19,7 +20,7 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 @Builder @NoArgsConstructor @AllArgsConstructor
-public class User extends AbstractAuditEntity implements Serializable, UserDetails {
+public class User extends GenericEntity implements Serializable, UserDetails {
 
     @Id
     @Column
@@ -78,5 +79,20 @@ public class User extends AbstractAuditEntity implements Serializable, UserDetai
         return this.active;
     }
 
-
+    @Override
+    public Long getId() {
+        return userId;
+    }
+    @Override
+    public Object getFieldValueByIndex(int index) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+        switch (index) {
+            case 0: return fullName;
+            case 1: return role.getRoleName();
+            case 2: return isActive() ? "Active" : "Inactive";
+            case 3: return lastModifiedOn != null ? lastModifiedOn.format(formatter) : null;
+            case 4: return lastModifiedBy;
+            default: return null;
+        }
+    }
 }

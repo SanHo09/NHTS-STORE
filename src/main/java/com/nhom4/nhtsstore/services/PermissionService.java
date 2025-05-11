@@ -8,14 +8,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 @Service
 public class PermissionService implements GenericService<Permission> {
-    private final PermissionRepository permissionRepository;
-
-    public PermissionService(PermissionRepository permissionRepository) {
-        this.permissionRepository = permissionRepository;
-    }
-
+    @Autowired
+    private PermissionRepository permissionRepository;
+    
     @Override
     public List<Permission> findAll() {
         return permissionRepository.findAll();
@@ -53,11 +54,22 @@ public class PermissionService implements GenericService<Permission> {
 
     @Override
     public Page<Permission> findAll(Pageable pageable) {
+        pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("lastModifiedOn").descending());
         return permissionRepository.findAll(pageable);
     }
 
     @Override
     public Page<Permission> search(String keyword, List<String> searchFields, Pageable pageable) {
-        return null;
+        Specification<Permission> spec = Specification.where(null);
+        if (keyword != null && !keyword.isEmpty() && searchFields != null) {
+            Specification<Permission> keywordSpec = Specification.where(null);
+            for (String field : searchFields) {
+                keywordSpec = keywordSpec.or((root, query, cb) -> 
+                    cb.like(cb.lower(root.get(field)), "%" + keyword.toLowerCase() + "%"));
+            }
+            spec = spec.and(keywordSpec);
+        }
+        pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("lastModifiedOn").descending());
+        return permissionRepository.findAll(spec, pageable);
     }
 }

@@ -2,6 +2,7 @@ package com.nhom4.nhtsstore.ui.base;
 
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.nhom4.nhtsstore.entities.GenericEntity;
+import com.nhom4.nhtsstore.entities.Invoice;
 import com.nhom4.nhtsstore.services.EventBus;
 import com.nhom4.nhtsstore.services.GenericService;
 import com.nhom4.nhtsstore.ui.ApplicationState;
@@ -46,9 +47,12 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
     private JButton newButton;
     private final Class<T> entityClass;
     private final Class<? extends JPanel> editPanelClass;
+    private final Class<? extends GenericEditDialog> editDialogClass;
+    private GenericEditDialog editDialog;
     private final String[] columnNames;
     private final String panelTitle;
     private JTextField searchField;
+    private String placeHolderMessage;
     private JComboBox<Integer> pageSizeCombo;
     private JLabel pageInfoLabel;
     private JButton firstPageBtn, prevPageBtn, nextPageBtn, lastPageBtn;
@@ -73,16 +77,20 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
         GenericService<T> service,
         Class<T> entityClass,
         Class<? extends JPanel> editPanelClass,
+        Class<? extends GenericEditDialog> editDialogClass,
         String[] columnNames,
         String panelTitle,
-        List<String> searchFields)
+        List<String> searchFields,
+        String placeHolderMessage)
     {
         this.service = service;
         this.entityClass = entityClass;
         this.editPanelClass = editPanelClass;
+        this.editDialogClass = editDialogClass;
         this.columnNames = columnNames;
         this.panelTitle = panelTitle;
         this.searchFields = searchFields;
+        this.placeHolderMessage = placeHolderMessage;
         
         initComponents();
         initPaginationComponents();
@@ -109,7 +117,9 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
         // Nút "New" để thêm record mới
         newButton = new JButton("New");
         newButton.addActionListener(e -> addEntity());
-        buttonPanel.add(newButton);
+        if (!Invoice.class.equals(this.entityClass)) {
+            buttonPanel.add(newButton);
+        }
         
         // Nút menu 3 chấm
         JButton menuButton = new JButton(new FlatSVGIcon("icons/ThreeDotsVertical.svg", 1.1f));
@@ -126,7 +136,9 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
             deleteItem.addActionListener(ev -> deleteSelectedRecords());
             
             headerMenu.add(refreshItem);
-            headerMenu.add(deleteItem);
+            if (!Invoice.class.equals(this.entityClass)) {
+                headerMenu.add(deleteItem);
+            }
             
             // Hiển thị menu tại vị trí của nút
             headerMenu.show(menuButton, 0, menuButton.getHeight());
@@ -140,7 +152,7 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
         searchField.setPreferredSize(new Dimension(100, 25));
 
         PlaceholderTextField placeholderField = (PlaceholderTextField) searchField;
-        placeholderField.setPlaceholder("Search by Name");
+        placeholderField.setPlaceholder(placeHolderMessage);
         placeholderField.setPlaceholderColor(Color.LIGHT_GRAY);
         placeholderField.setPlaceholderPadding(5); // padding kể từ lề trái
         placeholderField.setPlaceholderItalic(false);
@@ -197,7 +209,7 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
         checkboxColumn.setMaxWidth(50);
         checkboxColumn.setCellRenderer(new CheckBoxRenderer());
         checkboxColumn.setCellEditor(new CheckBoxEditor());
-        
+
         // Thiết lập checkbox cho header cột đầu tiên
         checkboxColumn.setHeaderRenderer(new CheckBoxHeaderRenderer(table, 0));
         
@@ -207,6 +219,11 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
         actionColumn.setMaxWidth(30);
         actionColumn.setCellRenderer(new ActionButtonRenderer());
         actionColumn.setCellEditor(new ActionButtonEditor());
+        
+         if (Invoice.class.equals(this.entityClass)) {
+             table.getColumnModel().removeColumn(table.getColumnModel().getColumn(lastColumnIndex));
+             table.getColumnModel().removeColumn(table.getColumnModel().getColumn(0));
+         }
         
         // Scroll pane cho bảng
         JScrollPane scrollPane = new JScrollPane(table);
@@ -492,11 +509,11 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
                             "Data Error", JOptionPane.ERROR_MESSAGE);
                     ex.printStackTrace();
                 } finally {
-                    Timer testTimer = new Timer(1000, e -> {
+                    Timer loadingTimer = new Timer(1000, e -> {
                         GlobalLoadingManager.getInstance().hideSpinner();
                     });
-                    testTimer.setRepeats(false);
-                    testTimer.start();
+                    loadingTimer.setRepeats(false);
+                    loadingTimer.start();
                 }
             }
         };
@@ -516,8 +533,19 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
      * Hiển thị dialog để tạo entity mới
      */
     private void addEntity() {
-        RouteParams params = new RouteParams();
-        this.navigationService.navigateTo(editPanelClass, params);
+        if (editDialogClass != null) {
+            try {
+//                GenericEditDialog editDialog = editDialogClass.getDeclaredConstructor().newInstance();
+                GenericEditDialog editDialog = applicationState.applicationContext.getBean(editDialogClass);
+                this.editDialog = editDialog;
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to create dialog", e);
+            }
+            editDialog.showDialog(null);
+        } else {
+            RouteParams params = new RouteParams();
+            this.navigationService.navigateTo(editPanelClass, params);
+        }
     }
     
     /**
@@ -831,9 +859,20 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
      * Mở dialog chỉnh sửa entity
      */
     private void editEntity(T entity) {
-        RouteParams params = new RouteParams();
-        params.set("entity", entity);
-        this.navigationService.navigateTo(editPanelClass, params);
+        if (editDialogClass != null) {
+            try {
+//                GenericEditDialog editDialog = editDialogClass.getDeclaredConstructor().newInstance();
+                GenericEditDialog editDialog = applicationState.applicationContext.getBean(editDialogClass);
+                this.editDialog = editDialog;
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to create dialog", e);
+            }
+            editDialog.showDialog(entity);
+        } else {
+            RouteParams params = new RouteParams();
+            params.set("entity", entity);
+            this.navigationService.navigateTo(editPanelClass, params);
+        }
     }
     
     /**

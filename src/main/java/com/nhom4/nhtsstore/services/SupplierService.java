@@ -7,7 +7,9 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
 @Service
@@ -48,6 +50,7 @@ public class SupplierService implements ISupplierService, GenericService<Supplie
     
     @Override
     public Page<Supplier> findAll(Pageable pageable) {
+        pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("lastModifiedOn").descending());
         return repository.findAll(pageable);
     }
     
@@ -62,6 +65,7 @@ public class SupplierService implements ISupplierService, GenericService<Supplie
             }
             spec = spec.and(keywordSpec);
         }
+        pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("lastModifiedOn").descending());
         return repository.findAll(spec, pageable);
     }
 }

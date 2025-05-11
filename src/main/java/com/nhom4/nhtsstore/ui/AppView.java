@@ -1,29 +1,38 @@
 package com.nhom4.nhtsstore.ui;
 
+import com.nhom4.nhtsstore.ui.page.customer.CustomerListPanel;
 import com.nhom4.nhtsstore.ui.pointOfSale.CartPanel;
 import com.nhom4.nhtsstore.ui.pointOfSale.PointOfSalePanel;
 import com.nhom4.nhtsstore.ui.page.dashboard.DashBoardPanel;
+import com.nhom4.nhtsstore.ui.page.invoice.InvoiceListPanel;
 import com.nhom4.nhtsstore.ui.page.login.LoginPanel;
+import com.nhom4.nhtsstore.ui.page.order.OrderListPanel;
 import com.nhom4.nhtsstore.ui.page.permission.PermissionListPanel;
 import com.nhom4.nhtsstore.ui.page.role.RoleListPanel;
 import com.nhom4.nhtsstore.ui.page.setting.SettingPanel;
 import com.nhom4.nhtsstore.ui.page.user.UserProfilePanel;
 import com.nhom4.nhtsstore.ui.page.product.ProductListPanel;
+import com.nhom4.nhtsstore.ui.page.productCategory.ProductCategoryListPanel;
+import com.nhom4.nhtsstore.ui.page.supplier.SupplierListPanel;
+import com.nhom4.nhtsstore.ui.page.supplierCategory.SupplierCategoryListPanel;
 import lombok.Getter;
 import javax.swing.*;
 
 @Getter
 public enum AppView {
     LOGIN("Login", "", null, LoginPanel.class, null),
-    DASHBOARD("Dashboard", "", null, DashBoardPanel.class, null),
+    DASHBOARD("Dashboard", "Speedometer2.svg", null, DashBoardPanel.class, null),
     PRODUCT("Product", "BoxSeamFill.svg", null, ProductListPanel.class, null),
-    CATEGORY("Category", "category.png", PRODUCT, Form_Home.class, null),
-    SUPPLIER("Supplier", "", null, Form_1.class, null),
-    USER("User", "BiPersonBoundingBox.svg", null, UserProfilePanel.class, "SUPER_ADMIN"),
+    CATEGORY("Product Category", "", PRODUCT, ProductCategoryListPanel.class, null),
+    SUPPLIER("Supplier", "Truck.svg", null, SupplierListPanel.class, null),
+    SUPPLIER_CATEGORY("Supplier Category", "", SUPPLIER, SupplierCategoryListPanel.class, null),
+    ORDER("Order", "FileTextFill.svg", null, OrderListPanel.class, null),
+    INVOICE("Invoice", "Coin.svg", null, InvoiceListPanel.class, null),
+    USER("User", "PersonFill.svg", null, Form_2.class, "SUPER_ADMIN"),
     USER_PROFILE("User Profile", "", USER, UserProfilePanel.class, null),
     ROLE("Role", "", USER, RoleListPanel.class, "SUPER_ADMIN"),
     PERMISSION("Permission", "", USER, PermissionListPanel.class, "SUPER_ADMIN"),
-    CUSTOMER("Customer", "user.png", USER, null, null),
+    CUSTOMER("Customer", "PeopleFill.svg", null, CustomerListPanel.class, null),
     SETTING("Setting", "MaterialSymbolsSettings.svg", null, SettingPanel.class, null),
     POINT_OF_SALE("Point Of Sale", "", null, PointOfSalePanel.class, null),
     CART("Cart", "", POINT_OF_SALE, CartPanel.class, null);

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.nhom4.nhtsstore.entities.GenericEntity;
 import com.nhom4.nhtsstore.entities.audit.AbstractAuditEntity;
 import jakarta.persistence.*;
+import java.time.format.DateTimeFormatter;
 import lombok.*;
 import org.hibernate.annotations.Nationalized;
 
@@ -37,10 +38,13 @@ public class Permission extends GenericEntity {
     }
     @Override
     public Object getFieldValueByIndex(int index) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
         switch (index) {
             case 0: return permissionName;
             case 1: return description;
             case 2: return isActive() ? "Active" : "Inactive";
+            case 3: return lastModifiedOn != null ? lastModifiedOn.format(formatter) : null;
+            case 4: return lastModifiedBy;
             default: return null;
         }
     }

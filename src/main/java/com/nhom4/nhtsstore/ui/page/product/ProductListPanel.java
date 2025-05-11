@@ -23,9 +23,10 @@ public class ProductListPanel extends GenericTablePanel<Product> {
         "Name", "Sale Price", "Category", "Availability", "Expiry Date", "Status", "Updated At ↓", "Updated By"
     };
     private static final List<String> SEARCH_FIELDS = Arrays.asList("name");
+    private static String placeHolderMessage = "Search by Name";
 
     public ProductListPanel(GenericService<Product> productService) {
-        super(productService, Product.class, ProductEditPanel.class, PRODUCT_COLUMNS, "Products", SEARCH_FIELDS);
+        super(productService, Product.class, ProductEditPanel.class, null, PRODUCT_COLUMNS, "Products", SEARCH_FIELDS, placeHolderMessage);
         
         // Cấu hình độ rộng cột cho ProductPanel
         int[] productColumnWidths = {

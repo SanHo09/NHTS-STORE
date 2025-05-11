@@ -3,9 +3,10 @@ package com.nhom4.nhtsstore.entities;
 import com.nhom4.nhtsstore.entities.rbac.User;
 import com.nhom4.nhtsstore.enums.OrderStatus;
 import jakarta.persistence.*;
+import java.text.DecimalFormat;
+import java.time.format.DateTimeFormatter;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.GenericGenerator;
 
 import java.util.Date;
 import java.util.List;
@@ -31,7 +32,7 @@ public class Order extends GenericEntity {
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<OrderDetail> orderDetails;
 
     @ManyToOne()
@@ -41,4 +42,27 @@ public class Order extends GenericEntity {
     @ManyToOne()
     @JoinColumn(name = "user_id")
     private User user;
+    
+    @Override
+    public Long getId() {
+        return id;
+    }
+    
+    @Override
+    public Object getFieldValueByIndex(int index) {
+        DateTimeFormatter auditDateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+        java.text.SimpleDateFormat dateFormatter = new java.text.SimpleDateFormat("dd/MM/yyyy");
+        DecimalFormat decimalFormatter = new DecimalFormat("###,###,###");
+
+        switch (index) {
+            case 0: return id;
+            case 1: return customer.getName();
+            case 2: return createDate != null ? dateFormatter.format(createDate) : null;
+            case 3: return decimalFormatter.format(totalAmount);
+            case 4: return status;
+            case 5: return lastModifiedOn != null ? lastModifiedOn.format(auditDateFormatter) : null;
+            case 6: return lastModifiedBy;
+            default: return null;
+        }
+    }
 }

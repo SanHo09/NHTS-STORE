@@ -4,7 +4,6 @@ import com.nhom4.nhtsstore.entities.rbac.Permission;
 import com.nhom4.nhtsstore.entities.rbac.Role;
 import com.nhom4.nhtsstore.entities.rbac.RoleHasPermission;
 import com.nhom4.nhtsstore.repositories.RoleRepository;
-import com.nhom4.nhtsstore.repositories.UserRepository;
 import com.nhom4.nhtsstore.viewmodel.role.RoleVm;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -15,19 +14,19 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 
 @Service
 public class RoleService implements IRoleService, GenericService<Role> {
-    private final RoleRepository roleRepository;
-    private final UserRepository userRepository;
-    public RoleService(RoleRepository roleRepository, UserRepository userRepository) {
-        this.roleRepository = roleRepository;
-        this.userRepository = userRepository;
-    }
+    @Autowired
+    private RoleRepository repository;
 
     @Override
     public Set<RoleVm> getAllRoles() {
-        return roleRepository.findAll()
+        return repository.findAll()
                 .stream()
                 .map(role -> RoleVm.builder().roleId(role.getRoleId()).roleName(role.getRoleName()).build())
                 .collect(Collectors.toSet());
@@ -35,18 +34,18 @@ public class RoleService implements IRoleService, GenericService<Role> {
 
     @Override
     public List<Role> findAll() {
-        return List.of();
+        return repository.findAll();
     }
 
     @Override
     public Role findById(Long id) {
-        return roleRepository.findById(id).orElse(null);
+        return repository.findById(id).orElse(null);
     }
 
     @Override
     public Role save(Role entity) {
         if(entity.getRoleId() != null) {
-            Role role = roleRepository.findById(entity.getRoleId()).orElse(null);
+            Role role = repository.findById(entity.getRoleId()).orElse(null);
             if(role == null) return null;
             role.setRoleName(entity.getRoleName());
             role.setDescription(entity.getDescription());
@@ -63,77 +62,47 @@ public class RoleService implements IRoleService, GenericService<Role> {
                 }
             }
             role.setRolePermissions(roleHasPermissions);
-            return roleRepository.save(role);
+            return repository.save(role);
         }
-        return roleRepository.save(entity);
+        return repository.save(entity);
     }
-//    public RoleVm update(RoleUpdateVm updateVm){
-//        Role role = roleRepository.findById(updateVm.getId()).orElse(null);
-//        if(role == null) return null;
-//        role.setRoleName(updateVm.getRoleName());
-//        role.setDescription(updateVm.getDescription());
-//        role.setActive(updateVm.isActive());
-//        Set<RoleHasPermission> roleHasPermissions = new HashSet<>();
-//        if(updateVm.getPermissionIds() != null){
-//            for (Long permissionId : updateVm.getPermissionIds()) {
-//                RoleHasPermission roleHasPermission = new RoleHasPermission();
-//                Permission permission = new Permission();
-//                permission.setPermissionId(permissionId);
-//                roleHasPermission.setRole(role);
-//                roleHasPermission.setPermission(permission);
-//                roleHasPermissions.add(roleHasPermission);
-//            }
-//        }
-//        role.setRolePermissions(roleHasPermissions);
-//        role = roleRepository.save(role);
-//        return RoleVm.builder()
-//                .roleId(role.getRoleId())
-//                .roleName(role.getRoleName())
-//                .build();
-//    }
-
+    
     @Override
     public void deleteById(Long id) {
         try {
-            roleRepository.deleteById(id);
-        }catch (DataIntegrityViolationException e){
-//            List<User> users = userRepository.findByRole(findById(id));
-//            if(!users.isEmpty()){
-//                users.forEach(user -> {
-//                    user.setRole(null);
-//                });
-//            }
-//            userRepository.saveAll(users);
-//            roleRepository.delete(findById(id));
+            repository.deleteById(id);
+        } catch (DataIntegrityViolationException e) {
             throw new DataIntegrityViolationException("Cannot delete this role because it is being used by other users");
-
         }
     }
 
     @Override
     public void deleteMany(List<Role> entities) {
         try {
-            roleRepository.deleteAll(entities);
-        }catch (DataIntegrityViolationException e){
-//            List<User> users = userRepository.findByRoleIn(entities);
-//            if(!users.isEmpty()){
-//                users.forEach(user -> {
-//                    user.setRole(null);
-//                });
-//            }
-//            userRepository.saveAll(users);
-//            roleRepository.deleteAll(entities);
+            repository.deleteAll(entities);
+        } catch (DataIntegrityViolationException e) {
             throw new DataIntegrityViolationException("Cannot delete these roles because they are being used by other users");
         }
     }
 
     @Override
     public Page<Role> findAll(Pageable pageable) {
-        return roleRepository.findAll(pageable);
+        pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("lastModifiedOn").descending());
+        return repository.findAll(pageable);
     }
-
+    
     @Override
     public Page<Role> search(String keyword, List<String> searchFields, Pageable pageable) {
-        return null;
+        Specification<Role> spec = Specification.where(null);
+        if (keyword != null && !keyword.isEmpty() && searchFields != null) {
+            Specification<Role> keywordSpec = Specification.where(null);
+            for (String field : searchFields) {
+                keywordSpec = keywordSpec.or((root, query, cb) -> 
+                    cb.like(cb.lower(root.get(field)), "%" + keyword.toLowerCase() + "%"));
+            }
+            spec = spec.and(keywordSpec);
+        }
+        pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("lastModifiedOn").descending());
+        return repository.findAll(spec, pageable);
     }
 }
