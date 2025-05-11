@@ -78,7 +78,6 @@ public class MainPanel extends JPanel {
 		mainContentPanel = new JPanel(new BorderLayout());
 		mainContentPanel.add(menu, BorderLayout.WEST);
 
-		// Wrap pagePanel vào JLayeredPane
 		layeredPagePanel = new JLayeredPane();
 		layeredPagePanel.setLayout(new OverlayLayout(layeredPagePanel));
 		layeredPagePanel.add(pagePanel, 0); // pagePanel nằm dưới

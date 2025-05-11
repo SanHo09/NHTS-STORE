@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="CENTER" prefHeight="663.0" prefWidth="597.0" spacing="20.0" stylesheets="@../css/Global.css" xmlns="http://javafx.com/javafx/21.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.nhom4.nhtsstore.ui.page.login.LoginPanel">
+<VBox fx:id="root" alignment="CENTER" prefHeight="663.0" prefWidth="597.0" spacing="20.0" styleClass="root" stylesheets="@../css/Global.css" xmlns="http://javafx.com/javafx/21.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.nhom4.nhtsstore.ui.page.login.LoginFxController">
    <children>
       <ImageView fitHeight="168.0" fitWidth="179.0" pickOnBounds="true" preserveRatio="true">
          <image>

@@ -1,6 +1,7 @@
 
 package com.nhom4.nhtsstore.ui;
 import com.nhom4.nhtsstore.entities.rbac.User;
+import com.nhom4.nhtsstore.ui.shared.ThemeManager;
 import com.nhom4.nhtsstore.viewmodel.user.UserSessionVm;
 import javafx.beans.property.*;
 import lombok.Getter;
@@ -12,16 +13,18 @@ import org.springframework.stereotype.Service;
 import javax.swing.*;
 
 @Service
+@Getter
 public class ApplicationState {
     // Authentication state
     private final BooleanProperty authenticated = new SimpleBooleanProperty(false);
     private final ObjectProperty<UserSessionVm> currentUser = new SimpleObjectProperty<>();
     private final MapProperty<String, Object> cachedData = new SimpleMapProperty<>();
-    @Getter
     private final ApplicationContext applicationContext;
-
-    public ApplicationState(ApplicationContext applicationContext) {
+    private final ThemeManager themeManager;
+    public ApplicationState(ApplicationContext applicationContext, ThemeManager themeManager) {
         this.applicationContext = applicationContext;
+        this.themeManager = themeManager;
+
     }
 
     public BooleanProperty authenticatedProperty() {
@@ -33,6 +36,7 @@ public class ApplicationState {
     public ObjectProperty<UserSessionVm> currentUserProperty() {
         return currentUser;
     }
+
     public UserSessionVm getCurrentUser() {
         return currentUser.getValue();
     }

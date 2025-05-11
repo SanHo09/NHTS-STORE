@@ -6,6 +6,7 @@ import com.nhom4.nhtsstore.ui.page.dashboard.DashBoardPanel;
 import com.nhom4.nhtsstore.ui.page.login.LoginPanel;
 import com.nhom4.nhtsstore.ui.page.permission.PermissionListPanel;
 import com.nhom4.nhtsstore.ui.page.role.RoleListPanel;
+import com.nhom4.nhtsstore.ui.page.setting.SettingPanel;
 import com.nhom4.nhtsstore.ui.page.user.UserProfilePanel;
 import com.nhom4.nhtsstore.ui.page.product.ProductListPanel;
 import lombok.Getter;
@@ -15,15 +16,15 @@ import javax.swing.*;
 public enum AppView {
     LOGIN("Login", "", null, LoginPanel.class, null),
     DASHBOARD("Dashboard", "", null, DashBoardPanel.class, null),
-    PRODUCT("Product", "category.png", null, ProductListPanel.class, null),
+    PRODUCT("Product", "BoxSeamFill.svg", null, ProductListPanel.class, null),
     CATEGORY("Category", "category.png", PRODUCT, Form_Home.class, null),
     SUPPLIER("Supplier", "", null, Form_1.class, null),
-    USER("User", "BiPersonBoundingBox.svg", null, PointOfSalePanel.class, "SUPER_ADMIN"),
+    USER("User", "BiPersonBoundingBox.svg", null, UserProfilePanel.class, "SUPER_ADMIN"),
     USER_PROFILE("User Profile", "", USER, UserProfilePanel.class, null),
     ROLE("Role", "", USER, RoleListPanel.class, "SUPER_ADMIN"),
     PERMISSION("Permission", "", USER, PermissionListPanel.class, "SUPER_ADMIN"),
     CUSTOMER("Customer", "user.png", USER, null, null),
-    SETTING("Setting", "hammer.png", null, null, null),
+    SETTING("Setting", "MaterialSymbolsSettings.svg", null, SettingPanel.class, null),
     POINT_OF_SALE("Point Of Sale", "", null, PointOfSalePanel.class, null),
     CART("Cart", "", POINT_OF_SALE, CartPanel.class, null);
 

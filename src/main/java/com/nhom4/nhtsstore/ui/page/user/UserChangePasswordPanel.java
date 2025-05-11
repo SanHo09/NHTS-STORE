@@ -1,128 +1,88 @@
 package com.nhom4.nhtsstore.ui.page.user;
 
-import com.nhom4.nhtsstore.common.FieldValidationError;
 import com.nhom4.nhtsstore.services.IUserService;
-import com.nhom4.nhtsstore.services.UserService;
 import com.nhom4.nhtsstore.ui.ApplicationState;
+import com.nhom4.nhtsstore.ui.base.LocalizableComponent;
 import com.nhom4.nhtsstore.ui.navigation.RoutablePanel;
 import com.nhom4.nhtsstore.ui.navigation.RouteParams;
-import com.nhom4.nhtsstore.utils.FieldErrorUtil;
+import com.nhom4.nhtsstore.ui.shared.LanguageManager;
+import com.nhom4.nhtsstore.ui.shared.ThemeManager;
 import com.nhom4.nhtsstore.utils.JavaFxSwing;
-import com.nhom4.nhtsstore.utils.ValidationHelper;
-import com.nhom4.nhtsstore.viewmodel.user.UserChangePasswordVm;
 import com.nhom4.nhtsstore.viewmodel.user.UserDetailVm;
-import io.github.palexdev.materialfx.controls.MFXButton;
-import io.github.palexdev.materialfx.controls.MFXPasswordField;
-import io.github.palexdev.materialfx.controls.MFXTextField;
+import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
 import lombok.Getter;
 import org.springframework.stereotype.Controller;
 import raven.modal.ModalDialog;
-import raven.modal.Toast;
-import raven.modal.toast.option.ToastLocation;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
 @Controller
-public class UserChangePasswordPanel extends JPanel implements RoutablePanel {
+public class UserChangePasswordPanel extends JPanel implements RoutablePanel, LanguageManager.LanguageChangeListener {
     private final IUserService userService;
     private final ApplicationState appState;
-    private final ValidationHelper validationHelper;
-    @FXML public MFXPasswordField txtFieldNewPass;
-    @FXML public MFXPasswordField txtCurrentPass;
-    @FXML public MFXPasswordField txtFieldConfirmPass;
-    @FXML public MFXButton btnUpdate;
-    @FXML public MFXButton btnCancel;
+    private final ThemeManager themeManager;
+    private final UserChangePasswordFxController userChangePasswordFxController;
+    
     private UserDetailVm userDetailVm;
     @Getter
     private final String modalId = "userChangePasswordModal";
     private JFXPanel jfxPanel;
 
-    UserChangePasswordPanel (UserService userService, ApplicationState appState, ValidationHelper validationHelper) {
+    UserChangePasswordPanel(IUserService userService, 
+                           ApplicationState appState,
+                           ThemeManager themeManager,
+                           UserChangePasswordFxController userChangePasswordFxController) {
         this.userService = userService;
         this.appState = appState;
-        this.validationHelper = validationHelper;
-        SwingUtilities.invokeLater(() -> {
+        this.themeManager = themeManager;
+        this.userChangePasswordFxController = userChangePasswordFxController;
+        
+        setLayout(new BorderLayout());
+        initComponents();
+    }
+
+    private void initComponents() {
+        Platform.runLater(() -> {
+            // Create JavaFX panel with separate controller
             jfxPanel = JavaFxSwing.createJFXPanelFromFxml(
                     "/fxml/UserChangePasswordForm.fxml",
                     appState.getApplicationContext()
             );
+            
+            // Set the parent for toast notifications
+            userChangePasswordFxController.setParent(this);
+            
+            // Configure actions
+            userChangePasswordFxController.setOnUpdateAction(isValid -> {
+                if (isValid) {
+                    ModalDialog.closeModal(this.modalId);
+                    userChangePasswordFxController.clearForm();
+                }
+            });
+            
+            userChangePasswordFxController.setOnCancelAction(() -> {
+                ModalDialog.closeModal(this.modalId);
+                userChangePasswordFxController.clearForm();
+            });
+            
             add(jfxPanel, BorderLayout.CENTER);
         });
-
     }
-
 
     @Override
     public void onNavigate(RouteParams params) {
         UserDetailVm userDetailVm = params.get("user", UserDetailVm.class);
         if (userDetailVm != null) {
             this.userDetailVm = userDetailVm;
-        }
-    }
-    private boolean handleChangePassword(UserChangePasswordVm vm){
-        if (!handleValidation(vm)) {
-            return false;
-        }
-        try {
-             userService.changePassword(vm);
-             Toast.show(this,
-                     Toast.Type.SUCCESS,
-                     "Change password successfully",
-                     ToastLocation.TOP_CENTER);
-                return true;
-         }catch (IllegalArgumentException e) {
-             Toast.show(this,
-                     Toast.Type.WARNING,
-                     e.getMessage(),
-                     ToastLocation.TOP_CENTER);
-                return false;
-         }
-
-    }
-    private void clearForm() {
-        txtCurrentPass.clear();
-        txtFieldNewPass.clear();
-        txtFieldConfirmPass.clear();
-    }
-    private <Vm> boolean handleValidation(Vm vm) {
-        List<FieldValidationError> errors = validationHelper.validateAndCollectErrors(vm);
-        if (!errors.isEmpty()) {
-            Map<String, MFXTextField> fieldMap = new HashMap<>();
-            fieldMap.put("password", txtCurrentPass);
-            fieldMap.put("newPassword", txtFieldNewPass);
-            fieldMap.put("confirmPassword", txtFieldConfirmPass);
-            FieldErrorUtil.showErrorTooltip(errors,fieldMap);
-
-            return false;
-        }
-        return true;
-    }
-    @FXML
-    public void onActionCancel(ActionEvent actionEvent) {
-        ModalDialog.closeModal(this.modalId);
-        clearForm();
-    }
-    @FXML
-    public void onActionUpdate(ActionEvent actionEvent) {
-        UserChangePasswordVm userChangePasswordVm = UserChangePasswordVm.builder()
-                .userId(userDetailVm.getUserId())
-                .password(txtCurrentPass.getText())
-                .newPassword(txtFieldNewPass.getText())
-                .confirmPassword(txtFieldConfirmPass.getText())
-                .build();
-
-        boolean isValid = handleChangePassword(userChangePasswordVm);
-        if (isValid) {
-            ModalDialog.closeModal(this.modalId);
-            clearForm();
+            userChangePasswordFxController.setUserDetailVm(userDetailVm);
         }
     }
 
+    @Override
+    public void onLanguageChanged() {
+        Platform.runLater(userChangePasswordFxController::updateTexts);
 
+    }
 }

@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<HBox depthTest="ENABLE" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" stylesheets="@../css/Global.css" xmlns="http://javafx.com/javafx/21.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.nhom4.nhtsstore.ui.page.user.UserProfilePanel">
+<HBox fx:id="rootPane" depthTest="ENABLE" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" stylesheets="@../css/Global.css" xmlns="http://javafx.com/javafx/21.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.nhom4.nhtsstore.ui.page.user.UserProfileFxController">
    <children>
       <VBox prefHeight="462.0" prefWidth="560.0">
          <children>
@@ -28,19 +28,19 @@
                <children>
                   <HBox alignment="CENTER_LEFT" GridPane.columnIndex="1">
                      <children>
-                        <Label prefHeight="27.0" prefWidth="169.0" text="Profile">
+                        <Label fx:id="lblProfileTitle" maxWidth="1.7976931348623157E308" prefHeight="35.0" prefWidth="403.0" text="Profile">
                            <font>
                               <Font name="System Bold" size="24.0" />
                            </font>
                         </Label>
                         <HBox alignment="CENTER_RIGHT" prefHeight="46.0" prefWidth="406.0" spacing="15.0">
                            <children>
-                              <MFXButton fx:id="btnChangePassword" buttonType="RAISED" onAction="#onActionChangePassword" prefHeight="35.0" prefWidth="146.0" text="Change password">
+                              <MFXButton fx:id="btnChangePassword" buttonType="RAISED" maxWidth="1.7976931348623157E308" onAction="#onActionChangePassword" prefHeight="35.0" prefWidth="146.0" text="Change password">
                                  <font>
                                     <Font name="System Bold" size="12.0" />
                                  </font>
                               </MFXButton>
-                              <MFXButton fx:id="btnEditProfile" buttonType="RAISED" onAction="#onActionEditProfile" prefHeight="35.0" prefWidth="50.0" text="Edit">
+                              <MFXButton fx:id="btnEditProfile" buttonType="RAISED" maxWidth="1.7976931348623157E308" onAction="#onActionEditProfile" prefHeight="35.0" prefWidth="111.0" text="Edit">
                                  <font>
                                     <Font name="System Bold" size="12.0" />
                                  </font>
@@ -51,12 +51,12 @@
                   </HBox>
                   <BorderPane prefHeight="294.0" prefWidth="422.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
                      <left>
-                        <VBox prefHeight="294.0" prefWidth="96.0" spacing="25.0" BorderPane.alignment="CENTER">
+                        <VBox prefHeight="294.0" prefWidth="128.0" spacing="25.0" BorderPane.alignment="CENTER">
                            <children>
-                              <Label text="Full name" />
-                              <Label layoutX="35.0" layoutY="35.0" text="Email" />
-                              <Label layoutX="35.0" layoutY="68.0" text="Username" />
-                              <Label layoutX="35.0" layoutY="100.0" text="Role" />
+                              <Label fx:id="lblFullNameLabel" maxWidth="1.7976931348623157E308" text="Full name" />
+                              <Label fx:id="lblEmailLabel" layoutX="35.0" layoutY="35.0" maxWidth="1.7976931348623157E308" text="Email" />
+                              <Label fx:id="lblUsernameLabel" layoutX="35.0" layoutY="68.0" maxWidth="1.7976931348623157E308" text="Username" />
+                              <Label fx:id="lblRoleLabel" layoutX="35.0" layoutY="100.0" maxWidth="1.7976931348623157E308" text="Role" />
                            </children>
                            <padding>
                               <Insets bottom="25.0" right="25.0" top="25.0" />
@@ -64,7 +64,7 @@
                         </VBox>
                      </left>
                      <right>
-                        <VBox prefHeight="294.0" prefWidth="407.0" spacing="25.0" BorderPane.alignment="CENTER">
+                        <VBox prefHeight="294.0" prefWidth="370.0" spacing="25.0" BorderPane.alignment="CENTER">
                            <padding>
                               <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
                            </padding>

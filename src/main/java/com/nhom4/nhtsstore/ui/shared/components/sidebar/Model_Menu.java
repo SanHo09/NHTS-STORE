@@ -47,17 +47,7 @@ public class Model_Menu {
     private String name;
     private MenuType type;
     
-    public Icon toIcon() {
-        String path = "/icons/" + icon ;
-        java.net.URL location = getClass().getResource(path);
-        if (location == null) {
-            return new ImageIcon();
-        }
-        if (icon.endsWith(".svg")) {
-            return IconUtil.createSwingIconFromSvg(path,24,24, color -> Color.WHITE);
-        }
-        return new ImageIcon(location);
-    }
+
     
     public static enum MenuType {
         TITLE, MENU, EMPTY

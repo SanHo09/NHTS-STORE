@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.data.repository.query.Param;
 
 import java.util.Date;
 import java.util.List;
@@ -13,8 +14,16 @@ import java.util.Map;
 public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecificationExecutor<Order> {
 
     List<Order> findByCreateDateBetween(Date startDate, Date endDate);
+    @Query("SELECT FUNCTION('FORMAT',o.createDate, 'MM') as month, " +
+            "YEAR(o.createDate) as year, " +
+            "SUM(o.totalAmount) as revenue " +
+            "FROM Order o " +
+            "WHERE o.createDate BETWEEN :startDate AND :endDate AND o.status = 'COMPLETED'" +
+            "GROUP BY month,year "+
+            "ORDER BY year, month")
+    List<Object[]> getRevenueByMonthAndYear(Date startDate, Date endDate);
     @Query("SELECT FUNCTION('FORMAT', o.createDate, 'MM/yyyy') as month, SUM(o.totalAmount) as revenue " +
-            "FROM Order o WHERE o.createDate BETWEEN :startDate AND :endDate " +
+            "FROM Order o WHERE o.createDate BETWEEN :startDate AND :endDate AND o.status = 'COMPLETED'" +
             "GROUP BY FUNCTION('FORMAT', o.createDate, 'MM/yyyy') " +
             "ORDER BY month")
     List<Object[]> getRevenueByTimeFrame(Date startDate, Date endDate);
@@ -40,8 +49,13 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
     @Query("SELECT s.name, SUM(p.salePrice * p.quantity) as totalSales " +
             "FROM OrderDetail od JOIN od.product p JOIN p.supplier s JOIN od.order o " +
             "WHERE o.status = 'COMPLETED' " +
-            "GROUP BY s.name ORDER BY totalSales DESC")
+            "GROUP BY s.name ORDER BY totalSales DESC limit 15")
     List<Object[]> getSalesBySupplier();
+    @Query("SELECT SUM(o.totalAmount) FROM Order o WHERE o.status = 'COMPLETED'")
+    Double getTotalCompletedRevenue();
+
+    @Query("SELECT SUM(o.totalAmount) FROM Order o WHERE o.status = 'COMPLETED' AND YEAR(o.createDate) = :year")
+    Double getTotalCompletedRevenueForYear(int year);
 
     @Query("""
     SELECT DISTINCT o FROM Order o
