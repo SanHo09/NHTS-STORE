@@ -20,9 +20,7 @@ public class NavigationService {
     private AppView currentView;
     @Getter
     private RouteParams currentParams = new RouteParams();
-
-
-
+    
     public NavigationService(PanelManager panelManager,
                              ApplicationState applicationState,
                              SidebarManager sidebarManager) {
@@ -36,50 +34,37 @@ public class NavigationService {
     }
 
     public void navigateTo(AppView view, RouteParams params) {
-
-
-        JPanel panel = applicationState.getViewPanelByBean(view.getPanelClass());
-
-        // Set the current route parameters
-        this.currentView = view;
-        this.currentParams = params;
-
-        // If panel implements RoutablePanel, pass the parameters
+        JPanel panel;
         try {
+            panel=applicationState.getViewPanelByBean(view.getPanelClass());
+            this.currentView = view;
+            this.currentParams = params;
             if (panel instanceof RoutablePanel) {
                 ((RoutablePanel) panel).onNavigate(params);
             }
+            // Navigate to the panel
+            panelManager.navigateTo(view, panel);
+
+            // Update sidebar selection
+            sidebarManager.selectMenuItem(view);
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(panel, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            return;
+            JOptionPane.showMessageDialog(panelManager.getContentContainer(), e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
 
-        // Navigate to the panel
-        panelManager.navigateTo(view, panel);
-
-        // Update sidebar selection
-        sidebarManager.selectMenuItem(view);
     }
 
     public void navigateTo(Class<? extends JPanel> panelClass, RouteParams params) {
-
-        JPanel panel = applicationState.getViewPanelByBean(panelClass);
-
-        // Set the current route parameters
-        this.currentParams = params;
-
-        // If panel implements RoutablePanel, pass the parameters
         try {
+            JPanel panel = applicationState.getViewPanelByBean(panelClass);
+            this.currentParams = params;
             if (panel instanceof RoutablePanel) {
                 ((RoutablePanel) panel).onNavigate(params);
             }
+            panelManager.navigateTo(null, panel);
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(panel, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            return;
+            JOptionPane.showMessageDialog(panelManager.getContentContainer(), e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
 
-        // Navigate to the panel
-        panelManager.navigateTo(null, panel);
     }
 
 

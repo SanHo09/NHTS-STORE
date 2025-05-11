@@ -34,7 +34,6 @@ import raven.modal.toast.option.ToastLocation;
 import javax.swing.*;
 import java.awt.*;
 import java.util.*;
-@Scope("prototype")
 @Controller
 public class UserProfileUpdatePanel extends JPanel implements RoutablePanel {
     private final IUserService userService;
@@ -58,7 +57,7 @@ public class UserProfileUpdatePanel extends JPanel implements RoutablePanel {
     private JButton btnCancel;
     private JButton btnGeneratePassword;
     private JPanel formPanel;
-
+    private JPanel buttonPanel;
     public UserProfileUpdatePanel(UserService userService, RoleService roleService, ApplicationState appState,
                                   ValidationHelper validationHelper, NavigationService navigationService) {
         this.userService = userService;
@@ -114,7 +113,10 @@ public class UserProfileUpdatePanel extends JPanel implements RoutablePanel {
 
         formPanel.add(new JLabel("Email:"), "");
         formPanel.add(txtEmail, "growx, wrap");
-
+        buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttonPanel.add(btnCancel);
+        buttonPanel.add(btnSave);
+        formPanel.add(buttonPanel, "span 2, growx, wrap");
         // Add the form panel to the main panel
         add(formPanel, BorderLayout.CENTER);
     }
@@ -298,10 +300,6 @@ public class UserProfileUpdatePanel extends JPanel implements RoutablePanel {
             formPanel.add(btnGeneratePassword, "wrap");
         }
 
-        // Add buttons
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        buttonPanel.add(btnCancel);
-        buttonPanel.add(btnSave);
         formPanel.add(buttonPanel, "span 2, growx, wrap");
 
         formPanel.revalidate();

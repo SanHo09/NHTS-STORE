@@ -167,7 +167,7 @@ public class JavaFxSwing {
 
         JFXPanel jfxPanel = createLoadingJFXPanel();
         Platform.runLater(() -> {
-            Thread loadThread = new Thread(() -> {
+            Thread.startVirtualThread(() -> {
                 try {
                     FXMLLoader loader = new FXMLLoader(JavaFxSwing.class.getResource(fxmlPath));
                     loader.setControllerFactory(applicationContext::getBean);
@@ -187,8 +187,7 @@ public class JavaFxSwing {
                     e.printStackTrace();
                 }
             });
-            loadThread.setDaemon(true);
-            loadThread.start();
+
         });
         return jfxPanel;
     }
@@ -253,5 +252,31 @@ public class JavaFxSwing {
         FutureTask<T> task = new FutureTask<>(callable);
         Platform.runLater(task);
         return task.get();
+    }
+
+    /**
+     * Creates a JFXPanel with a provided controller instance instead of creating one
+     * @param <T> the controller type
+     * @param fxmlPath the path to the FXML file
+     * @param controller the pre-instantiated controller to use
+     * @return a JFXPanel with the FXML content and controller set
+     */
+    public static <T> JFXPanel createJFXPanelWithExistingController(
+            String fxmlPath,
+            T controller) {
+
+        JFXPanel jfxPanel = new JFXPanel();
+        Platform.runLater(() -> {
+            try {
+                FXMLLoader loader = new FXMLLoader(JavaFxSwing.class.getResource(fxmlPath));
+                loader.setController(controller);
+                Parent root = loader.load();
+                Scene scene = new Scene(root);
+                jfxPanel.setScene(scene);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        return jfxPanel;
     }
 }

@@ -4,6 +4,7 @@ import com.nhom4.nhtsstore.ui.page.dashboard.DashBoardPanel;
 import com.nhom4.nhtsstore.ui.page.login.LoginPanel;
 import com.nhom4.nhtsstore.ui.page.permission.PermissionListPanel;
 import com.nhom4.nhtsstore.ui.page.role.RoleListPanel;
+import com.nhom4.nhtsstore.ui.page.setting.SettingPanel;
 import com.nhom4.nhtsstore.ui.page.user.UserProfilePanel;
 import com.nhom4.nhtsstore.ui.page.product.ProductListPanel;
 import lombok.Getter;
@@ -21,7 +22,7 @@ public enum AppView {
     ROLE("Role", "", USER, RoleListPanel.class, "SUPER_ADMIN"),
     PERMISSION("Permission", "", USER, PermissionListPanel.class, "SUPER_ADMIN"),
     CUSTOMER("Customer", "user.png", USER, null, null),
-    SETTING("Setting", "hammer.png", null, null, null);
+    SETTING("Setting", "MaterialSymbolsSettings.svg", null, SettingPanel.class, null);
 
     private final String name;
     private final String icon;

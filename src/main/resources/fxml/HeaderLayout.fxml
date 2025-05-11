@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.Cursor?>
 <?import javafx.scene.control.CustomMenuItem?>
 <?import javafx.scene.control.Label?>
@@ -8,40 +9,50 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane prefHeight="42.0" prefWidth="632.0" style="-fx-background-color: transparent;" stylesheets="@../css/Global.css" xmlns="http://javafx.com/javafx/21.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.nhom4.nhtsstore.ui.layout.Header">
+<BorderPane fx:id="root" prefHeight="42.0" prefWidth="632.0" stylesheets="@../css/Global.css" xmlns="http://javafx.com/javafx/21.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.nhom4.nhtsstore.ui.layout.Header">
    <right>
-      <MenuButton fx:id="dropDownMenu" mnemonicParsing="false" prefHeight="32.0" prefWidth="171.0" text="MenuButton" BorderPane.alignment="CENTER">
-         <graphic>
-            <ImageView fx:id="userAvatarImage" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true" />
-         </graphic>
-         <items>
-            <CustomMenuItem fx:id="menuItemProfile" mnemonicParsing="false" onAction="#onActionMenuItemProfile" text="Profile">
-               <content>
-                  <HBox alignment="CENTER_LEFT" prefWidth="169.0" spacing="9.0">
-                     <children>
-                        <ImageView fx:id="profileIcon" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true" />
-                        <Label text="Profile" />
-                     </children>
-                  </HBox>
-               </content>
-            </CustomMenuItem>
-            <CustomMenuItem fx:id="menuItemLogout" mnemonicParsing="false" onAction="#onActionMenuItemLogout" text="Logout">
-               <content>
-                  <HBox alignment="CENTER_LEFT" prefWidth="169.0" spacing="9.0">
-                     <children>
-                        <ImageView fx:id="logoutIcon" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true" />
-                        <Label text="Logout" />
-                     </children>
-                  </HBox>
-               </content>
-            </CustomMenuItem>
-         </items>
-         <cursor>
-            <Cursor fx:constant="HAND" />
-         </cursor>
-      </MenuButton>
+      <VBox alignment="CENTER_RIGHT" spacing="10.0" BorderPane.alignment="CENTER">
+         <children>
+            <Label fx:id="clockLabel" styleClass="clock-label" text="Label" textFill="#115ad9">
+               <font>
+                  <Font name="System Bold" size="18.0" />
+               </font>
+            </Label>
+            <MenuButton fx:id="dropDownMenu" mnemonicParsing="false" prefHeight="32.0" prefWidth="171.0" text="MenuButton">
+               <graphic>
+                  <ImageView fx:id="userAvatarImage" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true" />
+               </graphic>
+               <items>
+                  <CustomMenuItem fx:id="menuItemProfile" mnemonicParsing="false" onAction="#onActionMenuItemProfile" text="Profile">
+                     <content>
+                        <HBox alignment="CENTER_LEFT" prefWidth="169.0" spacing="9.0">
+                           <children>
+                              <ImageView fx:id="profileIcon" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true" />
+                              <Label text="Profile" />
+                           </children>
+                        </HBox>
+                     </content>
+                  </CustomMenuItem>
+                  <CustomMenuItem fx:id="menuItemLogout" mnemonicParsing="false" onAction="#onActionMenuItemLogout" text="Logout">
+                     <content>
+                        <HBox alignment="CENTER_LEFT" prefWidth="169.0" spacing="9.0">
+                           <children>
+                              <ImageView fx:id="logoutIcon" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true" />
+                              <Label text="Logout" />
+                           </children>
+                        </HBox>
+                     </content>
+                  </CustomMenuItem>
+               </items>
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor>
+            </MenuButton>
+         </children>
+      </VBox>
    </right>
    <left>
       <HBox alignment="CENTER" prefHeight="76.0" prefWidth="216.0" spacing="10.0" BorderPane.alignment="CENTER">
@@ -59,4 +70,7 @@
          </children>
       </HBox>
    </left>
+   <padding>
+      <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+   </padding>
 </BorderPane>
