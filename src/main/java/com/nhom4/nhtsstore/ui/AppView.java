@@ -1,5 +1,7 @@
 package com.nhom4.nhtsstore.ui;
 
+import com.nhom4.nhtsstore.ui.pointOfSale.CartPanel;
+import com.nhom4.nhtsstore.ui.pointOfSale.PointOfSalePanel;
 import com.nhom4.nhtsstore.ui.page.dashboard.DashBoardPanel;
 import com.nhom4.nhtsstore.ui.page.login.LoginPanel;
 import com.nhom4.nhtsstore.ui.page.permission.PermissionListPanel;
@@ -17,12 +19,14 @@ public enum AppView {
     PRODUCT("Product", "BoxSeamFill.svg", null, ProductListPanel.class, null),
     CATEGORY("Category", "category.png", PRODUCT, Form_Home.class, null),
     SUPPLIER("Supplier", "", null, Form_1.class, null),
-    USER("User", "BiPersonBoundingBox.svg", null, Form_2.class, "SUPER_ADMIN"),
+    USER("User", "BiPersonBoundingBox.svg", null, UserProfilePanel.class, "SUPER_ADMIN"),
     USER_PROFILE("User Profile", "", USER, UserProfilePanel.class, null),
     ROLE("Role", "", USER, RoleListPanel.class, "SUPER_ADMIN"),
     PERMISSION("Permission", "", USER, PermissionListPanel.class, "SUPER_ADMIN"),
     CUSTOMER("Customer", "user.png", USER, null, null),
-    SETTING("Setting", "MaterialSymbolsSettings.svg", null, SettingPanel.class, null);
+    SETTING("Setting", "MaterialSymbolsSettings.svg", null, SettingPanel.class, null),
+    POINT_OF_SALE("Point Of Sale", "", null, PointOfSalePanel.class, null),
+    CART("Cart", "", POINT_OF_SALE, CartPanel.class, null);
 
     private final String name;
     private final String icon;

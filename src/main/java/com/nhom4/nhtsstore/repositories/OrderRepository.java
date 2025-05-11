@@ -1,10 +1,11 @@
 package com.nhom4.nhtsstore.repositories;
 
 import com.nhom4.nhtsstore.entities.Order;
-import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.data.repository.query.Param;
 
 import java.util.Date;
 import java.util.List;
@@ -56,5 +57,11 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
     @Query("SELECT SUM(o.totalAmount) FROM Order o WHERE o.status = 'COMPLETED' AND YEAR(o.createDate) = :year")
     Double getTotalCompletedRevenueForYear(int year);
 
-
+    @Query("""
+    SELECT DISTINCT o FROM Order o
+    LEFT JOIN FETCH o.orderDetails od
+    LEFT JOIN FETCH od.product p
+    WHERE o.user.id = :userId
+    """)
+    List<Order> findByUserId(@Param("userId") Long userId);
 }

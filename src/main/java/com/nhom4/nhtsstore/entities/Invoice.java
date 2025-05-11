@@ -24,7 +24,7 @@ public class Invoice {
     @Column(nullable = false)
     private double totalAmount;
 
-    @OneToMany(mappedBy = "invoice")
+    @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<InvoiceDetail> invoiceDetail;
 
     @ManyToOne()
