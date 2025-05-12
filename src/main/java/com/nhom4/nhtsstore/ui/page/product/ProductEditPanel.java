@@ -162,7 +162,6 @@ public class ProductEditPanel extends JPanel implements RoutablePanel {
         
         saveButton.addActionListener(e -> {
             try {
-                GlobalLoadingManager.getInstance().showSpinner();
                 Product updatedProduct = product != null ? product : new Product();
                 updatedProduct.setName(nameField.getText());
                 updatedProduct.setSalePrice(((Number) salePriceField.getValue()).doubleValue());
@@ -191,8 +190,6 @@ public class ProductEditPanel extends JPanel implements RoutablePanel {
                         "Error saving product: " + ex.getMessage(),
                         "Save Error", JOptionPane.ERROR_MESSAGE);
                 ex.printStackTrace();
-            } finally {
-                GlobalLoadingManager.getInstance().hideSpinner();
             }
         });
 
@@ -252,7 +249,7 @@ public class ProductEditPanel extends JPanel implements RoutablePanel {
             try {
                 productService.deleteById(product.getId());
                 JOptionPane.showMessageDialog(this,
-                        "Delete product " + product.getName() + " successfully",
+                        "Delete product " + "'" + product.getName() + "'" + " successfully",
                         "Delete Success", JOptionPane.INFORMATION_MESSAGE);
                 EventBus.postReload(true);
                 this.returnToList();

@@ -5,8 +5,11 @@ import com.nhom4.nhtsstore.repositories.CategoryRepository;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -37,16 +40,25 @@ public class CategoryService implements GenericService<Category> {
     
     @Override
     public void deleteById(Long id) {
-        repository.deleteById(id);
+        try {
+            repository.deleteById(id);
+        } catch (DataIntegrityViolationException ex) {
+            throw new DataIntegrityViolationException("Cannot delete. This category is used by some products!");
+        }
     }
 
     @Override
     public void deleteMany(List<Category> entities) {
-        repository.deleteAll(entities);
+        try {
+            repository.deleteAll(entities);
+        } catch (DataIntegrityViolationException ex) {
+            throw new DataIntegrityViolationException("Cannot delete. Categories are used by some products!");
+        }
     }
     
     @Override
     public Page<Category> findAll(Pageable pageable) {
+        pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("lastModifiedOn").descending());
         return repository.findAll(pageable);
     }
     
@@ -61,6 +73,7 @@ public class CategoryService implements GenericService<Category> {
             }
             spec = spec.and(keywordSpec);
         }
+        pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("lastModifiedOn").descending());
         return repository.findAll(spec, pageable);
     }
 }

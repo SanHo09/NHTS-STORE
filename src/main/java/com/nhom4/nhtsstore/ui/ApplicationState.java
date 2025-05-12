@@ -19,7 +19,7 @@ public class ApplicationState {
     private final BooleanProperty authenticated = new SimpleBooleanProperty(false);
     private final ObjectProperty<UserSessionVm> currentUser = new SimpleObjectProperty<>();
     private final MapProperty<String, Object> cachedData = new SimpleMapProperty<>();
-    private final ApplicationContext applicationContext;
+    public final ApplicationContext applicationContext;
     private final ThemeManager themeManager;
     public ApplicationState(ApplicationContext applicationContext, ThemeManager themeManager) {
         this.applicationContext = applicationContext;
