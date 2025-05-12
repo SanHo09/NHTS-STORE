@@ -1,6 +1,8 @@
 package com.nhom4.nhtsstore.services;
 
 import com.nhom4.nhtsstore.entities.Order;
+import com.nhom4.nhtsstore.entities.OrderDetail;
+import com.nhom4.nhtsstore.repositories.OrderDetailRepository;
 import com.nhom4.nhtsstore.repositories.OrderRepository;
 import java.util.List;
 import java.util.stream.Collectors;

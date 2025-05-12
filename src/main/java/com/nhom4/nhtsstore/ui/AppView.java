@@ -15,6 +15,7 @@ import com.nhom4.nhtsstore.ui.page.product.ProductListPanel;
 import com.nhom4.nhtsstore.ui.page.productCategory.ProductCategoryListPanel;
 import com.nhom4.nhtsstore.ui.page.supplier.SupplierListPanel;
 import com.nhom4.nhtsstore.ui.page.supplierCategory.SupplierCategoryListPanel;
+import com.nhom4.nhtsstore.ui.page.user.UserPanel;
 import lombok.Getter;
 import javax.swing.*;
 
@@ -28,7 +29,7 @@ public enum AppView {
     SUPPLIER_CATEGORY("Supplier Category", "", SUPPLIER, SupplierCategoryListPanel.class, null),
     ORDER("Order", "FileTextFill.svg", null, OrderListPanel.class, null),
     INVOICE("Invoice", "Coin.svg", null, InvoiceListPanel.class, null),
-    USER("User", "PersonFill.svg", null, Form_2.class, "SUPER_ADMIN"),
+    USER("User", "PersonFill.svg", null, UserPanel.class, "SUPER_ADMIN"),
     USER_PROFILE("User Profile", "", USER, UserProfilePanel.class, null),
     ROLE("Role", "", USER, RoleListPanel.class, "SUPER_ADMIN"),
     PERMISSION("Permission", "", USER, PermissionListPanel.class, "SUPER_ADMIN"),
