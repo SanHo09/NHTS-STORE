@@ -29,6 +29,10 @@ import net.miginfocom.swing.MigLayout;
 
 public class ComboBoxMultiSelection<E> extends JComboBox<E> {
 
+    public List<Object> getSelectedItems() {
+        return selectedItems;
+    }
+
     public void setSelectedItems(List<Object> selectedItems) {
         // clear the internal selection to avoid duplicates
         clearSelectedItems();
@@ -61,7 +65,6 @@ public class ComboBoxMultiSelection<E> extends JComboBox<E> {
         }
     }
 
-    @Getter
     private final List<Object> selectedItems = new ArrayList<>();
     private final ComboBoxMultiCellEditor comboBoxMultiCellEditor;
     private Component comboList;
@@ -155,12 +158,15 @@ public class ComboBoxMultiSelection<E> extends JComboBox<E> {
         protected void removeItem(Object obj) {
             int count = panel.getComponentCount();
             for (int i = 0; i < count; i++) {
-                Item item = (Item) panel.getComponent(i);
-                if (item.getItem() == obj) {
-                    panel.remove(i);
-                    panel.revalidate();
-                    panel.repaint();
-                    break;
+                Component comp = panel.getComponent(i);
+                if (Item.class.isInstance(comp)) {
+                    Item item = (Item) comp;
+                    if (item.getItem().equals(obj)) {
+                        panel.remove(i);
+                        panel.revalidate();
+                        panel.repaint();
+                        break;
+                    }
                 }
             }
         }
@@ -180,14 +186,12 @@ public class ComboBoxMultiSelection<E> extends JComboBox<E> {
                     + "thumbInsets:0,0,0,1;"
                     + "hoverTrackColor:null");
             scrollBar.setUnitIncrement(10);
-
         }
 
         @Override
         public Component getEditorComponent() {
             return scroll;
         }
-
     }
 
     private class CheckBoxIcon extends FlatCheckBoxIcon {
@@ -222,7 +226,7 @@ public class ComboBoxMultiSelection<E> extends JComboBox<E> {
             putClientProperty(FlatClientProperties.STYLE, ""
                     + "border:0,5,0,20;"
                     + "background:darken($ComboBox.background,10%)");
-            JButton cmd = new JButton(new FlatSVGIcon("icons/MaterialSymbolsCloseSmall.svg", 0.6f));
+            JButton cmd = new JButton(new FlatSVGIcon("raven/combobox/close.svg", 0.6f));
             cmd.putClientProperty(FlatClientProperties.STYLE, ""
                     + "arc:999;"
                     + "margin:1,1,1,1;"
@@ -248,3 +252,7 @@ public class ComboBoxMultiSelection<E> extends JComboBox<E> {
         }
     }
 }
+
+
+
+

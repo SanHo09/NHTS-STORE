@@ -45,8 +45,7 @@ public class User extends GenericEntity implements Serializable, UserDetails {
     @ManyToOne
     @JoinColumn(name = "role_id", nullable = true)
     private Role role;
-    @Column(name = "is_active")
-    private boolean active = true;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         if (role == null) {
@@ -76,7 +75,7 @@ public class User extends GenericEntity implements Serializable, UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return this.active;
+        return this.isActive();
     }
 
     @Override

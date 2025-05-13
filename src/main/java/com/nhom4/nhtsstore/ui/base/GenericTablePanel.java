@@ -9,6 +9,7 @@ import com.nhom4.nhtsstore.ui.ApplicationState;
 import com.nhom4.nhtsstore.ui.PanelManager;
 import com.nhom4.nhtsstore.ui.navigation.NavigationService;
 import com.nhom4.nhtsstore.ui.navigation.RouteParams;
+import com.nhom4.nhtsstore.ui.shared.LanguageManager;
 import com.nhom4.nhtsstore.ui.shared.components.GlobalLoadingManager;
 import com.nhom4.nhtsstore.ui.shared.components.PlaceholderTextField;
 import com.nhom4.nhtsstore.utils.AppFont;
@@ -19,6 +20,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.*;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.stream.Collectors;
 import javax.swing.Timer;
 import javax.swing.event.DocumentEvent;
@@ -32,13 +35,16 @@ import org.springframework.data.domain.Pageable;
  * Component bảng dữ liệu tổng quát có thể tái sử dụng cho nhiều màn hình
  * @param <T> Loại entity mà bảng sẽ hiển thị
  */
-public class GenericTablePanel<T extends GenericEntity> extends JPanel {
+public class GenericTablePanel<T extends GenericEntity> extends JPanel implements LanguageManager.LanguageChangeListener {
     @Autowired
     private PanelManager panelManager;
     @Autowired
     private ApplicationState applicationState;
     @Autowired
     private NavigationService navigationService;
+    @Autowired
+    private LanguageManager languageManager;
+    
     private JTable table;
     private GenericTableModel<T> tableModel;
     private JPopupMenu tableRowMenu;
@@ -50,9 +56,11 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
     private final Class<? extends GenericEditDialog> editDialogClass;
     private GenericEditDialog editDialog;
     private final String[] columnNames;
-    private final String panelTitle;
+    private String panelTitle;
+    private String panelTitleKey; // Key for localization
     private JTextField searchField;
     private String placeHolderMessage;
+    private String placeHolderMessageKey; // Key for localization
     private JComboBox<Integer> pageSizeCombo;
     private JLabel pageInfoLabel;
     private JButton firstPageBtn, prevPageBtn, nextPageBtn, lastPageBtn;
@@ -65,6 +73,7 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
     private List<String> searchFields;
     private Long totalItems;
     private JLabel totalRecords;
+    private JLabel titleLabel;
     
     /**
      * Constructor cho GenericTablePanel
@@ -89,12 +98,146 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
         this.editDialogClass = editDialogClass;
         this.columnNames = columnNames;
         this.panelTitle = panelTitle;
-        this.searchFields = searchFields;
+        // Derive localization keys from the panel title
+        this.panelTitleKey = "panel." + panelTitle.toLowerCase().replace(" ", "");
         this.placeHolderMessage = placeHolderMessage;
+        this.placeHolderMessageKey = "search." + panelTitle.toLowerCase().replace(" ", "");
+        this.searchFields = searchFields;
         
         initComponents();
         initPaginationComponents();
         loadData();
+    }
+    
+    @Override
+    public void addNotify() {
+        super.addNotify();
+        languageManager.addLanguageChangeListener(this);
+        updateTexts(); // Initial text update
+    }
+    
+    @Override
+    public void removeNotify() {
+        super.removeNotify();
+        languageManager.removeLanguageChangeListener(this);
+    }
+    
+    @Override
+    public void onLanguageChanged() {
+        SwingUtilities.invokeLater(this::updateTexts);
+    }
+    
+    /**
+     * Update all translatable texts in the panel
+     */
+    protected void updateTexts() {
+        if (languageManager == null) return;
+        
+        // Update panel title
+        String localizedTitle = languageManager.getText(panelTitleKey);
+        if (!localizedTitle.equals(panelTitleKey)) {
+            // Only update if a translation was found
+            panelTitle = localizedTitle;
+        }
+        
+        if (titleLabel != null) {
+            titleLabel.setText(panelTitle);
+        }
+        
+        // Update placeholder text
+        String localizedPlaceholder = languageManager.getText(placeHolderMessageKey);
+        if (!localizedPlaceholder.equals(placeHolderMessageKey)) {
+            // Only update if a translation was found
+            placeHolderMessage = localizedPlaceholder;
+        }
+        if (searchField instanceof PlaceholderTextField) {
+            ((PlaceholderTextField) searchField).setPlaceholder(placeHolderMessage);
+        }
+        
+        // Update button texts
+        if (newButton != null) {
+            newButton.setText(languageManager.getText("button.new"));
+        }
+        
+        // Update pagination controls
+        updatePaginationTexts();
+        
+        // Force refresh of table column headers
+        if (table != null && tableModel != null) {
+            // Get the current localized renderer if it exists
+            LocalizedHeaderRenderer localizedRenderer = null;
+            if (table.getColumnCount() > 1) {
+                localizedRenderer = (LocalizedHeaderRenderer) 
+                    table.getColumnModel().getColumn(1).getHeaderRenderer();
+            }
+            
+            // This triggers a complete header redraw
+            tableModel.fireTableStructureChanged();
+            
+            // Re-apply special renderers and column configurations
+            if (table.getColumnCount() > 0) {
+                // Restore checkbox column
+                TableColumn checkboxColumn = table.getColumnModel().getColumn(0);
+                checkboxColumn.setMaxWidth(50);
+                checkboxColumn.setCellRenderer(new CheckBoxRenderer());
+                checkboxColumn.setCellEditor(new CheckBoxEditor());
+                checkboxColumn.setHeaderRenderer(new CheckBoxHeaderRenderer(table, 0));
+                
+                // Reapply localized renderers
+                if (localizedRenderer != null) {
+                    int lastColumnIndex = table.getColumnModel().getColumnCount() - 1;
+                    for (int i = 1; i < lastColumnIndex; i++) {
+                        table.getColumnModel().getColumn(i).setHeaderRenderer(localizedRenderer);
+                    }
+                }
+                
+                // Restore action column
+                if (table.getColumnCount() > 1) {
+                    int lastColumnIndex = table.getColumnModel().getColumnCount() - 1;
+                    TableColumn actionColumn = table.getColumnModel().getColumn(lastColumnIndex);
+                    actionColumn.setMaxWidth(30);
+                    actionColumn.setCellRenderer(new ActionButtonRenderer());
+                    actionColumn.setCellEditor(new ActionButtonEditor());
+                }
+            }
+            
+            // Request repaint
+            table.getTableHeader().repaint();
+        }
+    }
+    
+    /**
+     * Update texts in pagination controls
+     */
+    private void updatePaginationTexts() {
+        if (pageInfoLabel != null && totalItems != null) {
+            int start = currentPage * pageSize + 1;
+            int end = Math.min((currentPage + 1) * pageSize, totalItems.intValue());
+            String message = String.format(
+                languageManager.getText("pagination.info"),
+                currentPage + 1, totalPages, start, end, totalItems
+            );
+            pageInfoLabel.setText(message);
+        }
+        if (firstPageBtn != null) {
+            firstPageBtn.setToolTipText(languageManager.getText("pagination.first"));
+        }
+        if (prevPageBtn != null) {
+            prevPageBtn.setToolTipText(languageManager.getText("pagination.prev"));
+        }
+        if (nextPageBtn != null) {
+            nextPageBtn.setToolTipText(languageManager.getText("pagination.next"));
+        }
+        if (lastPageBtn != null) {
+            lastPageBtn.setToolTipText(languageManager.getText("pagination.last"));
+        }
+        if (totalRecords != null && totalItems != null) {
+            String message = String.format(
+                languageManager.getText("pagination.totalRecords"),
+                totalItems
+            );
+            totalRecords.setText(message);
+        }
     }
     
     /**
@@ -105,7 +248,7 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
         
         // Panel tiêu đề và nút
         JPanel titlePanel = new JPanel(new BorderLayout());
-        JLabel titleLabel = new JLabel(panelTitle);
+        titleLabel = new JLabel(panelTitle);
         titleLabel.setFont(AppFont.DEFAULT_FONT.deriveFont(24f));
         // Title nằm bên trái header
         titlePanel.add(titleLabel, BorderLayout.WEST);
@@ -115,7 +258,7 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         
         // Nút "New" để thêm record mới
-        newButton = new JButton("New");
+        newButton = new JButton(languageManager != null ? languageManager.getText("button.new") : "New");
         newButton.addActionListener(e -> addEntity());
         if (!Invoice.class.equals(this.entityClass)) {
             buttonPanel.add(newButton);
@@ -126,13 +269,15 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
         menuButton.addActionListener(e -> {
             headerMenu = new JPopupMenu();
             
-            JMenuItem refreshItem = new JMenuItem("Refresh");
+            JMenuItem refreshItem = new JMenuItem(languageManager != null ? 
+                languageManager.getText("menu.refresh") : "Refresh");
             refreshItem.addActionListener(ev -> {
                 GlobalLoadingManager.getInstance().showSpinner();
                 loadData();
             });
             
-            JMenuItem deleteItem = new JMenuItem("Delete");
+            JMenuItem deleteItem = new JMenuItem(languageManager != null ? 
+                languageManager.getText("menu.delete") : "Delete");
             deleteItem.addActionListener(ev -> deleteSelectedRecords());
             
             headerMenu.add(refreshItem);
@@ -203,6 +348,9 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
         table.setCellSelectionEnabled(false);
         table.setFont(AppFont.DEFAULT_FONT);
         table.getTableHeader().setFont(AppFont.DEFAULT_FONT);
+        
+        // Create custom header renderer for data columns
+        LocalizedHeaderRenderer localizedRenderer = new LocalizedHeaderRenderer();
 
         // Cấu hình cột checkbox đầu tiên
         TableColumn checkboxColumn = table.getColumnModel().getColumn(0);
@@ -220,10 +368,15 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
         actionColumn.setCellRenderer(new ActionButtonRenderer());
         actionColumn.setCellEditor(new ActionButtonEditor());
         
-         if (Invoice.class.equals(this.entityClass)) {
-             table.getColumnModel().removeColumn(table.getColumnModel().getColumn(lastColumnIndex));
-             table.getColumnModel().removeColumn(table.getColumnModel().getColumn(0));
-         }
+        // Set localized renderer for all data columns
+        for (int i = 1; i < lastColumnIndex; i++) {
+            table.getColumnModel().getColumn(i).setHeaderRenderer(localizedRenderer);
+        }
+        
+        if (Invoice.class.equals(this.entityClass)) {
+            table.getColumnModel().removeColumn(table.getColumnModel().getColumn(lastColumnIndex));
+            table.getColumnModel().removeColumn(table.getColumnModel().getColumn(0));
+        }
         
         // Scroll pane cho bảng
         JScrollPane scrollPane = new JScrollPane(table);
@@ -265,22 +418,6 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
                 return c;
             }
         });
-        
-        // Tạo hiệu ứng sọc cho header
-//        JTableHeader header = table.getTableHeader();
-        // header.setDefaultRenderer(new DefaultTableCellRenderer() {
-        //     @Override
-        //     public Component getTableCellRendererComponent(JTable table, Object value,
-        //             boolean isSelected, boolean hasFocus, int row, int column) {
-        //         super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-
-        //         // Đặt màu nền cho header
-        //         setBackground(new Color(240, 240, 240));
-        //         setBorder(BorderFactory.createMatteBorder(0, 0, 1, 1, new Color(220, 220, 220)));
-        //         setHorizontalAlignment(SwingConstants.LEFT);
-        //         return this;
-        //     }
-        // });
     }
     
     private void initPaginationComponents() {
@@ -387,6 +524,8 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
     
     protected void configureColumnWidths(int[] columnWidths) {
         TableColumnModel columnModel = table.getColumnModel();
+        LocalizedHeaderRenderer localizedRenderer = (LocalizedHeaderRenderer) 
+            table.getColumnModel().getColumn(1).getHeaderRenderer();
         
         for (int i = 0; i < columnModel.getColumnCount() && i < columnWidths.length; i++) {
             TableColumn column = columnModel.getColumn(i);
@@ -400,6 +539,11 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
             } else {
                 column.setMinWidth(width / 2);
                 column.setMaxWidth(width * 2);
+                
+                // Ensure the localized renderer is set on data columns
+                if (localizedRenderer != null) {
+                    column.setHeaderRenderer(localizedRenderer);
+                }
             }
         }
         
@@ -435,10 +579,11 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
     }
 
     private void updateTotalRecordsLabel() {
-        if (totalItems != null) {
-            totalRecords.setText(totalItems + " items");
-        } else {
-            totalRecords.setText("0 items");
+        if (totalRecords != null && totalItems != null) {
+            String message = languageManager != null ?
+                String.format(languageManager.getText("pagination.totalRecords"), totalItems) :
+                String.format("Total: %d records", totalItems);
+            totalRecords.setText(message);
         }
     }
     
@@ -521,11 +666,18 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
     }
     
     private void updatePaginationControls() {
-        pageInfoLabel.setText(String.format("Page %d of %d", currentPage + 1, totalPages));
-        firstPageBtn.setEnabled(currentPage > 0);
-        prevPageBtn.setEnabled(currentPage > 0);
-        nextPageBtn.setEnabled(currentPage < totalPages - 1);
-        lastPageBtn.setEnabled(currentPage < totalPages - 1);
+        boolean hasPrev = currentPage > 0;
+        boolean hasNext = currentPage < totalPages - 1;
+        
+        firstPageBtn.setEnabled(hasPrev);
+        prevPageBtn.setEnabled(hasPrev);
+        nextPageBtn.setEnabled(hasNext);
+        lastPageBtn.setEnabled(hasNext);
+        
+        if (pageInfoLabel != null && totalItems != null) {
+            updatePaginationTexts();
+        }
+        
         pageNumberField.setText(String.valueOf(currentPage + 1));
     }
     
@@ -587,6 +739,7 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
      */
     private class GenericTableModel<E extends GenericEntity> extends AbstractTableModel {
         private final String[] columnNames;
+        private final Map<Integer, String> columnKeyMap; // Maps column indices to i18n keys
         private List<E> data = new ArrayList<>();
         
         public GenericTableModel(String[] columnNames) {
@@ -597,6 +750,26 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
             enhancedColumns[enhancedColumns.length - 1] = ""; // Cột action
             
             this.columnNames = enhancedColumns;
+            
+            // Create column key map for internationalization
+            this.columnKeyMap = new HashMap<>();
+            String tablePrefix = panelTitle.toLowerCase().replace(" ", "");
+            for (int i = 1; i < enhancedColumns.length - 1; i++) {
+                // Create a standard key format for columns: table.column.columnname
+                String columnKey = "table." + tablePrefix + "." + 
+                    enhancedColumns[i].toLowerCase().replace(" ", "").replace("↓", "");
+                columnKeyMap.put(i, columnKey);
+            }
+        }
+        
+        /**
+         * Return the internationalization key for a specific column
+         * 
+         * @param column The column index
+         * @return The i18n key for the column, or null if not found
+         */
+        public String getColumnKey(int column) {
+            return columnKeyMap.get(column);
         }
         
         public void setData(List<E> data) {
@@ -616,6 +789,24 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
         
         @Override
         public String getColumnName(int column) {
+            if (column == 0 || column == columnNames.length - 1) {
+                // Return empty string for checkbox and action columns
+                return columnNames[column];
+            }
+            
+            // Always try to get localized column name if language manager exists
+            if (languageManager != null) {
+                String key = columnKeyMap.get(column);
+                if (key != null) {
+                    String localizedName = languageManager.getText(key);
+                    // Only use the localized name if a real translation was found
+                    if (localizedName != null && !localizedName.equals(key)) {
+                        return localizedName;
+                    }
+                }
+            }
+            
+            // Fallback to hardcoded column name
             return columnNames[column];
         }
         
@@ -833,18 +1024,22 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
     private void showRowActionMenu(JComponent component, T entity, int row) {
         JPopupMenu popup = new JPopupMenu();
         
-        JMenuItem editItem = new JMenuItem("Edit");
+        JMenuItem editItem = new JMenuItem(languageManager != null ? 
+            languageManager.getText("menu.edit") : "Edit");
         editItem.addActionListener(e -> editEntity(entity));
         
-        JMenuItem activateItem = new JMenuItem("Activate");
+        JMenuItem activateItem = new JMenuItem(languageManager != null ? 
+            languageManager.getText("menu.activate") : "Activate");
         activateItem.addActionListener(e -> activateEntity(entity));
         activateItem.setEnabled(!entity.isActive());
         
-        JMenuItem deactivateItem = new JMenuItem("Deactivate");
+        JMenuItem deactivateItem = new JMenuItem(languageManager != null ? 
+            languageManager.getText("menu.deactivate") : "Deactivate");
         deactivateItem.addActionListener(e -> deactivateEntity(entity));
         deactivateItem.setEnabled(entity.isActive());
         
-        JMenuItem deleteItem = new JMenuItem("Delete");
+        JMenuItem deleteItem = new JMenuItem(languageManager != null ? 
+            languageManager.getText("menu.delete") : "Delete");
         deleteItem.addActionListener(e -> deleteEntity(entity));
         
         popup.add(editItem);
@@ -934,6 +1129,44 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel {
                         "Delete Error", JOptionPane.ERROR_MESSAGE);
                 e.printStackTrace();
             }
+        }
+    }
+
+    /**
+     * Custom header renderer that ensures column names are always up-to-date with current language
+     */
+    private class LocalizedHeaderRenderer extends DefaultTableCellRenderer {
+        public LocalizedHeaderRenderer() {
+            setHorizontalAlignment(SwingConstants.LEFT);
+            setBackground(new Color(240, 240, 240));
+            setBorder(BorderFactory.createMatteBorder(0, 0, 1, 1, new Color(220, 220, 220)));
+            setFont(AppFont.DEFAULT_FONT);
+        }
+        
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value,
+                                                     boolean isSelected, boolean hasFocus,
+                                                     int row, int column) {
+            super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            
+            // Get the model column index which may be different from the view column index
+            int modelColumn = table.convertColumnIndexToModel(column);
+            
+            // Set the value with the latest translation if available
+            if (modelColumn > 0 && modelColumn < tableModel.getColumnCount() - 1 && languageManager != null) {
+                String key = tableModel.getColumnKey(modelColumn);
+                if (key != null) {
+                    String localizedName = languageManager.getText(key);
+                    if (localizedName != null && !localizedName.equals(key)) {
+                        setText(localizedName);
+                        return this;
+                    }
+                }
+            }
+            
+            // Default fallback
+            setText(value != null ? value.toString() : "");
+            return this;
         }
     }
 }

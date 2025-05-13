@@ -48,6 +48,7 @@ public class InvoiceService implements GenericService<Invoice> {
         for (Long invoiceId : invoiceIds) {
             repository.deleteById(invoiceId);
         }
+
     }
     
     @Override
