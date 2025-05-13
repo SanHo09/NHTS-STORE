@@ -1,8 +1,5 @@
 package com.nhom4.nhtsstore.mappers;
 
-import org.mapstruct.BeanMapping;
-import org.mapstruct.MappingTarget;
-import org.mapstruct.NullValuePropertyMappingStrategy;
 
 /**
  * A generic base interface for mapping between model and view model objects.
@@ -28,14 +25,6 @@ public interface BaseMapper<M, V> {
      */
     V toVm(M m);
 
-    /**
-     * Partially updates the provided model entity with values from the given view model.
-     * Fields in the view model that are null will be ignored.
-     *
-     * @param m    The model entity to update.
-     * @param v The view model with updated values.
-     */
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void partialUpdate(@MappingTarget M m, V v);
+
 
 }

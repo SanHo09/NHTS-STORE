@@ -18,4 +18,5 @@ public class UserSessionVm {
     byte[] avatar;
     String role;
     Set<String> permissions;
+    boolean active;
 }

@@ -34,10 +34,66 @@ public class Model_Menu {
         this.type = type;
     }
 
+    public boolean isSubmenu() {
+        return isSubmenu;
+    }
+
+    public void setSubmenu(boolean submenu) {
+        isSubmenu = submenu;
+    }
+
+    public boolean isExpanded() {
+        return expanded;
+    }
+
+    public void setExpanded(boolean expanded) {
+        this.expanded = expanded;
+    }
+
+    public boolean hasSubmenus() {
+        return hasSubmenus;
+    }
+
+    public void setHasSubmenus(boolean hasSubmenus) {
+        this.hasSubmenus = hasSubmenus;
+    }
+
+    public String getMenuId() {
+        return menuId;
+    }
+
+    public void setMenuId(String menuId) {
+        this.menuId = menuId;
+    }
+
     public Model_Menu(String icon, String name, MenuType type) {
         this.icon = icon;
         this.name = name;
         this.type = type;
+        this.isSubmenu = false;
+        this.expanded = true;
+        this.hasSubmenus = false;
+        this.menuId = "";
+    }
+
+    public Model_Menu(String icon, String name, MenuType type, boolean isSubmenu) {
+        this.icon = icon;
+        this.name = name;
+        this.type = type;
+        this.isSubmenu = isSubmenu;
+        this.expanded = true;
+        this.hasSubmenus = false;
+        this.menuId = "";
+    }
+
+    public Model_Menu(String icon, String name, MenuType type, String menuId, boolean hasSubmenus) {
+        this.icon = icon;
+        this.name = name;
+        this.type = type;
+        this.isSubmenu = false;
+        this.expanded = true;
+        this.hasSubmenus = hasSubmenus;
+        this.menuId = menuId;
     }
 
     public Model_Menu() {
@@ -46,10 +102,12 @@ public class Model_Menu {
     private String icon;
     private String name;
     private MenuType type;
-    
-
+    private boolean isSubmenu;
+    private boolean expanded;
+    private boolean hasSubmenus;
+    private String menuId;
     
     public static enum MenuType {
-        TITLE, MENU, EMPTY
+        TITLE, MENU, SUBMENU, EMPTY
     }
 }

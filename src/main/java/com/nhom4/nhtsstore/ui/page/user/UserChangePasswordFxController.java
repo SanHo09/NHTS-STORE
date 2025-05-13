@@ -2,7 +2,6 @@ package com.nhom4.nhtsstore.ui.page.user;
 
 import com.nhom4.nhtsstore.common.FieldValidationError;
 import com.nhom4.nhtsstore.services.IUserService;
-import com.nhom4.nhtsstore.ui.base.LocalizableComponent;
 import com.nhom4.nhtsstore.ui.shared.LanguageManager;
 import com.nhom4.nhtsstore.ui.shared.ThemeManager;
 import com.nhom4.nhtsstore.utils.FieldErrorUtil;

@@ -2,7 +2,6 @@ package com.nhom4.nhtsstore.ui.page.user;
 
 import com.nhom4.nhtsstore.services.IUserService;
 import com.nhom4.nhtsstore.ui.ApplicationState;
-import com.nhom4.nhtsstore.ui.base.LocalizableComponent;
 import com.nhom4.nhtsstore.ui.navigation.RoutablePanel;
 import com.nhom4.nhtsstore.ui.navigation.RouteParams;
 import com.nhom4.nhtsstore.ui.shared.LanguageManager;
@@ -13,7 +12,6 @@ import com.nhom4.nhtsstore.viewmodel.user.UserDetailVm;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.event.ActionEvent;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;
 import raven.modal.ModalDialog;
 import raven.modal.component.SimpleModalBorder;

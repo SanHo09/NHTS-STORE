@@ -32,4 +32,8 @@ public interface IUserService {
 
     @PreAuthorize("hasAnyAuthority('USER_LIST','FULL_ACCESS','USER_MANAGEMENT')")
     PageResponse<UserRecordVm> searchUsers(SpecSearchCriteria criteria, int page, int size, String sortBy, String sortDir);
+
+    boolean isSelf(Long targetUserId);
+    boolean isSuperAdmin();
+    boolean hasUserPermission(Long targetUserId);
 }
