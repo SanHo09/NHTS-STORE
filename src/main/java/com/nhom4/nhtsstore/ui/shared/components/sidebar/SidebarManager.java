@@ -56,9 +56,7 @@ public class SidebarManager {
         
         int index = 0;
         for (AppView view : AppView.values()) {
-            if (view == AppView.LOGIN) {
-                continue;
-            }
+
             menuIndexMap.put(view, index);
             menuItemsList.add(view);
             index++;

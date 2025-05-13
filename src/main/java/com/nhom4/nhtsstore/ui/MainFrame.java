@@ -128,6 +128,7 @@ public class MainFrame extends JFrame {
         appState.authenticatedProperty().addListener((obs, old, isAuthenticated) -> {
             SwingUtilities.invokeLater(() -> {
                 cardLayout.show(cardContainer, isAuthenticated ? "main" : "login");
+
             });
         });
 

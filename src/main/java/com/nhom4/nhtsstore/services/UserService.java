@@ -1,6 +1,7 @@
 package com.nhom4.nhtsstore.services;
 
 import com.nhom4.nhtsstore.common.PageResponse;
+import com.nhom4.nhtsstore.entities.Product;
 import com.nhom4.nhtsstore.entities.rbac.Role;
 import com.nhom4.nhtsstore.entities.rbac.User;
 import com.nhom4.nhtsstore.mappers.user.UserMapper;
@@ -14,7 +15,9 @@ import com.nhom4.nhtsstore.viewmodel.user.*;
 import javafx.application.Platform;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,6 +28,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -185,9 +190,17 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public PageResponse<UserRecordVm> searchUsers(SpecSearchCriteria criteria, int page, int size, String sortBy, String sortDir) {
-        Pageable pageable = PageResponseHelper.createPageable(page, size, sortBy, sortDir);
-        Specification<User> spec = new UserSpecification(criteria);
+    public PageResponse<UserRecordVm> searchUsers(String keyword, List<String> searchFields, Pageable pageable) {
+        Specification<User> spec = Specification.where(null);
+        if (keyword != null && !keyword.isEmpty() && searchFields != null) {
+            Specification<User> keywordSpec = Specification.where(null);
+            for (String field : searchFields) {
+                keywordSpec = keywordSpec.or((root, query, cb) ->
+                        cb.like(cb.lower(root.get(field)), "%" + keyword.toLowerCase() + "%"));
+            }
+            spec = spec.and(keywordSpec);
+        }
+        pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("lastModifiedOn").descending());
         Page<User> userPage = userRepository.findAll(spec, pageable);
         Page<UserRecordVm> userRecordPage = userPage.map(UserMapper::toVm);
         return PageResponseHelper.createPageResponse(userRecordPage);

@@ -184,7 +184,23 @@ public class LoginFxController extends StackPane implements Initializable {
                     Toast.show(loginPanel, Toast.Type.SUCCESS, successMessage);
                     resetFields();
                     stopLoadingState();
-                    navigationService.navigateTo(AppView.DASHBOARD);
+                    String role=applicationState.getCurrentUser().getRole();
+                    switch (role) {
+                        case "SUPER_ADMIN":
+                            navigationService.navigateTo(AppView.DASHBOARD);
+                            break;
+                        case "MANAGER":
+                            navigationService.navigateTo(AppView.DASHBOARD);
+                            break;
+                        case "SALE":
+                            navigationService.navigateTo(AppView.POINT_OF_SALE);
+                            break;
+                        default:
+                            navigationService.navigateTo(AppView.DASHBOARD);
+                            break;
+                    }
+
+
                 });
             } catch (AuthenticationException e) {
                 Platform.runLater(() -> {

@@ -23,7 +23,6 @@ import java.util.HashSet;
 
 @Getter
 public enum AppView {
-    LOGIN("Login", "", null, LoginPanel.class, Set.of()),
     DASHBOARD("Dashboard", "Speedometer2.svg", null, DashBoardPanel.class, Set.of("SUPER_ADMIN", "MANAGER")),
     PRODUCT("Product", "BoxSeamFill.svg", null, ProductListPanel.class, Set.of("SUPER_ADMIN", "MANAGER")),
     CATEGORY("Category", "", PRODUCT, ProductCategoryListPanel.class, Set.of("SUPER_ADMIN")),

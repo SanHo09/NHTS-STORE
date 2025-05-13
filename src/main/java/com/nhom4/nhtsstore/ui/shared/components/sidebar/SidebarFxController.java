@@ -140,10 +140,6 @@ public class SidebarFxController implements Initializable, LanguageManager.Langu
                 try {
                     // Go through all AppView values and categorize them
                     for (AppView view : AppView.values()) {
-                        if (view == AppView.LOGIN) {
-                            continue; // Skip LOGIN
-                        }
-                        
                         // Skip menu items the user doesn't have permission for
                         if (!hasMenuPermission(view)) {
                             continue;
@@ -469,10 +465,7 @@ public class SidebarFxController implements Initializable, LanguageManager.Langu
     }
     
     private boolean hasMenuPermission(AppView view) {
-        // If user isn't logged in, only show LOGIN
-        if (!applicationState.isAuthenticated()) {
-            return view == AppView.LOGIN;
-        }
+
 
         UserSessionVm currentUser = applicationState.getCurrentUser();
         if (currentUser == null) {

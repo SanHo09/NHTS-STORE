@@ -3,6 +3,8 @@ package com.nhom4.nhtsstore.ui.page.user;
 import com.nhom4.nhtsstore.common.PageResponse;
 import com.nhom4.nhtsstore.repositories.specification.SpecSearchCriteria;
 import com.nhom4.nhtsstore.repositories.specification.SearchOperation;
+import com.nhom4.nhtsstore.repositories.specification.UserSpecification;
+import com.nhom4.nhtsstore.repositories.specification.UserSpecificationsBuilder;
 import com.nhom4.nhtsstore.services.IUserService;
 import com.nhom4.nhtsstore.ui.ApplicationState;
 import com.nhom4.nhtsstore.ui.shared.LanguageManager;
@@ -31,9 +33,13 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Popup;
 import javafx.util.Duration;
+import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
@@ -61,7 +67,7 @@ public class UserListFxController implements Initializable {
     private int pageSize = 10;
     private int totalPages = 0;
     private long totalItems = 0;
-    
+    private final List<String> searchFields = List.of("username", "fullName", "email");
     // Callbacks
     private Consumer<UserRecordVm> onEditUser;
     private Runnable onCreateUser;
@@ -331,14 +337,8 @@ public class UserListFxController implements Initializable {
                 String searchTerm = searchField != null ? searchField.getText() : "";
                 
                 if (searchTerm != null && !searchTerm.isEmpty()) {
-                    // Search with criteria
-                    SpecSearchCriteria criteria = new SpecSearchCriteria();
-                    criteria.setOrPredicate(true);
-                    criteria.setKey("username");
-                    criteria.setKey("email");
-                    criteria.setOperation(SearchOperation.CONTAINS);
-                    criteria.setValue(searchTerm);
-                    response = userService.searchUsers(criteria, currentPage, pageSize, "lastModifiedOn", "desc");
+                    Pageable pageable = PageRequest.of(currentPage, pageSize);
+                    response = userService.searchUsers(searchTerm,searchFields,pageable );
                 } else {
                     // Get all users
                     response = userService.findAllUsers(currentPage, pageSize, "lastModifiedOn", "desc");
