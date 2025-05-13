@@ -25,9 +25,9 @@ public class InvoiceListPanel extends GenericTablePanel<Invoice> {
         // Cấu hình độ rộng cột
         int[] columnWidths = {
             250,   // Id
-            250,   // Create Date
             250,   // Total Amount
-            250    // Customer
+            250,   // Customer
+            250    // Create Date
         };
         configureColumnWidths(columnWidths);
         

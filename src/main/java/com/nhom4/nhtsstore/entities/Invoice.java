@@ -44,9 +44,9 @@ public class Invoice extends GenericEntity {
         DecimalFormat decimalFormatter = new DecimalFormat("###,###,###");
         switch (index) {
             case 0: return id;
-            case 1: return createDate != null ? dateFormatter.format(createDate) : null;
-            case 2: return decimalFormatter.format(totalAmount);
-            case 3: return customer.getName() != null ? customer.getName() : null;
+            case 1: return decimalFormatter.format(totalAmount);
+            case 2: return customer.getName() != null ? customer.getName() : null;
+            case 3: return createDate != null ? dateFormatter.format(createDate) : null;
             default: return null;
         }
     }

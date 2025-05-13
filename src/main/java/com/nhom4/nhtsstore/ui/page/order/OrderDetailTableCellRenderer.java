@@ -1,6 +1,7 @@
 package com.nhom4.nhtsstore.ui.page.order;
 
 import com.nhom4.nhtsstore.entities.Product;
+import com.nhom4.nhtsstore.utils.UIUtils;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -83,6 +84,8 @@ public class OrderDetailTableCellRenderer {
             this.spinner.addChangeListener(e -> {
                 // We don't auto-stop editing to allow the user to continue adjusting the value
             });
+            
+            UIUtils.applySelectAllOnFocus(spinner);
         }
         
         @Override
