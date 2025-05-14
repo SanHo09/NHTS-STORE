@@ -1,9 +1,10 @@
-package com.nhom4.nhtsstore.services;
+package com.nhom4.nhtsstore.services.impl;
 
 import com.nhom4.nhtsstore.entities.rbac.Permission;
 import com.nhom4.nhtsstore.entities.rbac.Role;
 import com.nhom4.nhtsstore.entities.rbac.RoleHasPermission;
 import com.nhom4.nhtsstore.repositories.RoleRepository;
+import com.nhom4.nhtsstore.services.IRoleService;
 import com.nhom4.nhtsstore.viewmodel.role.RoleVm;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -20,7 +21,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
 @Service
-public class RoleService implements IRoleService, GenericService<Role> {
+public class RoleService implements IRoleService {
     @Autowired
     private RoleRepository repository;
 
@@ -90,7 +91,12 @@ public class RoleService implements IRoleService, GenericService<Role> {
         pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("lastModifiedOn").descending());
         return repository.findAll(pageable);
     }
-    
+
+    @Override
+    public RoleRepository getRepository() {
+        return repository;
+    }
+
     @Override
     public Page<Role> search(String keyword, List<String> searchFields, Pageable pageable) {
         Specification<Role> spec = Specification.where(null);

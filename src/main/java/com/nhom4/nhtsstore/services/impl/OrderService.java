@@ -1,4 +1,4 @@
-package com.nhom4.nhtsstore.services;
+package com.nhom4.nhtsstore.services.impl;
 
 import com.nhom4.nhtsstore.entities.Order;
 import com.nhom4.nhtsstore.entities.OrderDetail;
@@ -6,6 +6,8 @@ import com.nhom4.nhtsstore.repositories.OrderDetailRepository;
 import com.nhom4.nhtsstore.repositories.OrderRepository;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import com.nhom4.nhtsstore.services.IOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,7 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class OrderService implements GenericService<Order>, IOrderService {
+public class OrderService implements IOrderService {
     
     @Autowired
     private OrderRepository repository;
@@ -61,7 +63,12 @@ public class OrderService implements GenericService<Order>, IOrderService {
         pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("lastModifiedOn").descending());
         return repository.findAll(pageable);
     }
-    
+
+    @Override
+    public OrderRepository getRepository() {
+        return this.repository;
+    }
+
     @Override
     public Page<Order> search(String keyword, List<String> searchFields, Pageable pageable) {
         Specification<Order> spec = Specification.where(null);

@@ -1,16 +1,16 @@
-package com.nhom4.nhtsstore.services;
+package com.nhom4.nhtsstore.services.impl;
 
 import com.nhom4.nhtsstore.entities.Category;
 import com.nhom4.nhtsstore.repositories.CategoryRepository;
 import java.util.List;
 
+import com.nhom4.nhtsstore.services.ICategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 /**
@@ -18,8 +18,12 @@ import org.springframework.stereotype.Service;
  * @author NamDang
  */
 @Service
-public class CategoryService implements GenericService<Category> {
-    
+public class CategoryService implements ICategoryService {
+    @Override
+    public CategoryRepository getRepository() {
+        return repository;
+    }
+
     @Autowired
     private CategoryRepository repository;
     
@@ -62,18 +66,5 @@ public class CategoryService implements GenericService<Category> {
         return repository.findAll(pageable);
     }
     
-    @Override
-    public Page<Category> search(String keyword, List<String> searchFields, Pageable pageable) {
-        Specification<Category> spec = Specification.where(null);
-        if (keyword != null && !keyword.isEmpty() && searchFields != null) {
-            Specification<Category> keywordSpec = Specification.where(null);
-            for (String field : searchFields) {
-                keywordSpec = keywordSpec.or((root, query, cb) -> 
-                    cb.like(cb.lower(root.get(field)), "%" + keyword.toLowerCase() + "%"));
-            }
-            spec = spec.and(keywordSpec);
-        }
-        pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("lastModifiedOn").descending());
-        return repository.findAll(spec, pageable);
-    }
+
 }

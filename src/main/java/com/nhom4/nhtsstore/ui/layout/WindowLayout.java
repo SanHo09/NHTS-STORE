@@ -50,7 +50,6 @@ public class WindowLayout implements Initializable {
 //        minimizeWindowButton.getStyleClass().add("window-control-button");
 //        closeWindowButton.getStyleClass().add("window-control-button");
 //
-//        // Add hover effect for close button
         closeWindowButton.setOnMouseEntered(e -> {
             closeWindowButton.setGraphic(IconUtil.createFxImageViewFromSvg("/icons/MaterialSymbolsCloseSmall.svg", 24, 24, color -> Color.RED));
         });
@@ -79,9 +78,15 @@ public class WindowLayout implements Initializable {
 
     private void closeWindow() {
         Platform.runLater(() -> {
-            mainFrame.dispose();
-            Platform.exit();
-            System.exit(0);
+            //ensures all Spring beans are properly destroyed through their lifecycle callbacks
+            // before the application shuts down completely
+            applicationContext.close();
+            if(applicationContext.isClosed()){
+                mainFrame.dispose();
+                Platform.exit();
+                System.exit(0);
+            }
+
         });
     }
 }

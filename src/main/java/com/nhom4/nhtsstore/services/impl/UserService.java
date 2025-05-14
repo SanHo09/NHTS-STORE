@@ -1,4 +1,4 @@
-package com.nhom4.nhtsstore.services;
+package com.nhom4.nhtsstore.services.impl;
 
 import com.nhom4.nhtsstore.common.PageResponse;
 import com.nhom4.nhtsstore.entities.rbac.Role;
@@ -7,14 +7,18 @@ import com.nhom4.nhtsstore.mappers.user.UserMapper;
 import com.nhom4.nhtsstore.repositories.UserRepository;
 import com.nhom4.nhtsstore.repositories.specification.SpecSearchCriteria;
 import com.nhom4.nhtsstore.repositories.specification.UserSpecification;
+import com.nhom4.nhtsstore.services.IUserService;
 import com.nhom4.nhtsstore.ui.ApplicationState;
 import com.nhom4.nhtsstore.utils.PageResponseHelper;
 import com.nhom4.nhtsstore.utils.ValidationHelper;
 import com.nhom4.nhtsstore.viewmodel.user.*;
 import javafx.application.Platform;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,10 +29,12 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 import java.util.Objects;
 
 @Service
-public class UserService implements IUserService {
+public class UserService  implements IUserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
@@ -67,40 +73,6 @@ public class UserService implements IUserService {
         return UserMapper.toUserDetailVm(savedUser);
     }
 
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public UserRecordVm updateUser(UserUpdateVm userUpdateVm) {
-        User existingUser = userRepository.findById(userUpdateVm.getUserId())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
-        // Map the update VM to the existing user entity
-        User updatedUser = UserMapper.toModel(userUpdateVm);
-
-        // Preserve the existing password if not provided in the update
-        if (updatedUser.getPassword() == null || updatedUser.getPassword().isEmpty()) {
-            updatedUser.setPassword(existingUser.getPassword());
-        } else {
-            // Encode the new password
-            updatedUser.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
-        }
-
-        // Save the updated user
-        User savedUser = userRepository.save(updatedUser);
-
-        return UserMapper.toVm(savedUser);
-    }
-
-    @Override
-    public void deleteUser(Long userId) {
-        try {
-            userRepository.deleteById(userId);
-        } catch (DataAccessException e) {
-            User existingUser = userRepository.findById(userId)
-                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-            existingUser.setActive(false);
-            userRepository.save(existingUser);
-        }
-    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -166,13 +138,7 @@ public class UserService implements IUserService {
         return UserMapper.toUserDetailVm(userRepository.save(user));
     }
 
-    @Override
-    public PageResponse<UserRecordVm> findAllUsers(int page, int size, String sortBy, String sortDir) {
-        Page<UserRecordVm> userPage = userRepository
-                .findAll(PageResponseHelper.createPageable(page, size, sortBy, sortDir))
-                .map(UserMapper::toVm);
-        return PageResponseHelper.createPageResponse(userPage);
-    }
+
 
     @Override
     public UserDetailVm findUserById(Long userId) {
@@ -184,15 +150,7 @@ public class UserService implements IUserService {
         return UserMapper.toUserDetailVm(user);
     }
 
-    @Override
-    public PageResponse<UserRecordVm> searchUsers(SpecSearchCriteria criteria, int page, int size, String sortBy, String sortDir) {
-        Pageable pageable = PageResponseHelper.createPageable(page, size, sortBy, sortDir);
-        Specification<User> spec = new UserSpecification(criteria);
-        Page<User> userPage = userRepository.findAll(spec, pageable);
-        Page<UserRecordVm> userRecordPage = userPage.map(UserMapper::toVm);
-        return PageResponseHelper.createPageResponse(userRecordPage);
-    }
-
+    
     @Override
     public boolean isSelf(Long targetUserId) {
         User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -210,4 +168,53 @@ public class UserService implements IUserService {
     public boolean hasUserPermission(Long targetUserId) {
         return isSelf(targetUserId) || isSuperAdmin();
     }
+
+
+    @Override
+    public List<User> findAll() {
+        return userRepository.findAll();
+    }
+
+
+    @Override
+    public User findById(Long id) {
+        return userRepository.findById(id).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    }
+
+    @Override
+    public User save(User entity) {
+        return userRepository.save(entity);
+    }
+
+
+    @Override
+    public void deleteById(Long id) {
+        try {
+            userRepository.deleteById(id);
+        }catch (DataIntegrityViolationException e){
+            throw new DataIntegrityViolationException("Cannot delete this user because it is being used by other entities");
+        }
+    }
+
+    @Override
+    public void deleteMany(List<User> entities) {
+        try {
+            userRepository.deleteAll(entities);
+        }catch (DataIntegrityViolationException e){
+            throw new DataIntegrityViolationException("Cannot delete these users because they are being used by other entities");
+        }
+    }
+
+    @Override
+    public Page<User> findAll(Pageable pageable) {
+        pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("lastModifiedOn").descending());
+        return userRepository.findAll(pageable);
+    }
+
+    @Override
+    public UserRepository getRepository() {
+        return userRepository;  // Return the actual repository
+    }
+
+
 }

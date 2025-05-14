@@ -4,6 +4,6 @@ import com.nhom4.nhtsstore.entities.Invoice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-public interface InvoiceRepository extends JpaRepository<Invoice, Long>, JpaSpecificationExecutor<Invoice> {
+public interface InvoiceRepository extends GenericRepository<Invoice,Long>{
     
 }

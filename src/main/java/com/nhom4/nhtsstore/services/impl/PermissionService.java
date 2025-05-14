@@ -1,7 +1,8 @@
-package com.nhom4.nhtsstore.services;
+package com.nhom4.nhtsstore.services.impl;
 
 import com.nhom4.nhtsstore.entities.rbac.Permission;
 import com.nhom4.nhtsstore.repositories.PermissionRepository;
+import com.nhom4.nhtsstore.services.IPermissionService;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,7 +14,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 @Service
-public class PermissionService implements GenericService<Permission> {
+public class PermissionService implements IPermissionService {
+    @Override
+    public PermissionRepository getRepository() {
+        return this.permissionRepository;
+    }
+
     @Autowired
     private PermissionRepository permissionRepository;
     

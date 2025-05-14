@@ -1,7 +1,8 @@
-package com.nhom4.nhtsstore.services;
+package com.nhom4.nhtsstore.services.impl;
 
 import com.nhom4.nhtsstore.entities.Supplier;
 import com.nhom4.nhtsstore.repositories.SupplierRepository;
+import com.nhom4.nhtsstore.services.ISupplierService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -10,10 +11,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 
 @Service
-public class SupplierService implements ISupplierService, GenericService<Supplier> {
+public class SupplierService implements ISupplierService {
     @Autowired
     private SupplierRepository repository;
 
@@ -53,19 +53,10 @@ public class SupplierService implements ISupplierService, GenericService<Supplie
         pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("lastModifiedOn").descending());
         return repository.findAll(pageable);
     }
-    
+
     @Override
-    public Page<Supplier> search(String keyword, List<String> searchFields, Pageable pageable) {
-        Specification<Supplier> spec = Specification.where(null);
-        if (keyword != null && !keyword.isEmpty() && searchFields != null) {
-            Specification<Supplier> keywordSpec = Specification.where(null);
-            for (String field : searchFields) {
-                keywordSpec = keywordSpec.or((root, query, cb) -> 
-                    cb.like(cb.lower(root.get(field)), "%" + keyword.toLowerCase() + "%"));
-            }
-            spec = spec.and(keywordSpec);
-        }
-        pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("lastModifiedOn").descending());
-        return repository.findAll(spec, pageable);
+    public SupplierRepository getRepository() {
+        return repository;
     }
+
 }

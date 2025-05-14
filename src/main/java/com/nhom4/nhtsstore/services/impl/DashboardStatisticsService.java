@@ -1,14 +1,13 @@
-package com.nhom4.nhtsstore.services;
+package com.nhom4.nhtsstore.services.impl;
 
 import com.nhom4.nhtsstore.entities.Category;
-import com.nhom4.nhtsstore.entities.Order;
 import com.nhom4.nhtsstore.repositories.CategoryRepository;
 import com.nhom4.nhtsstore.repositories.OrderRepository;
 import com.nhom4.nhtsstore.repositories.ProductRepository;
+import com.nhom4.nhtsstore.services.IDashboardStatisticsService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;

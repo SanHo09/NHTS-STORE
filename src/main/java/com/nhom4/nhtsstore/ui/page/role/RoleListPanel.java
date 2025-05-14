@@ -3,6 +3,7 @@ package com.nhom4.nhtsstore.ui.page.role;
 import com.nhom4.nhtsstore.entities.rbac.Role;
 import com.nhom4.nhtsstore.services.EventBus;
 import com.nhom4.nhtsstore.services.GenericService;
+import com.nhom4.nhtsstore.services.IRoleService;
 import com.nhom4.nhtsstore.ui.base.GenericTablePanel;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;
@@ -20,8 +21,8 @@ public class RoleListPanel extends GenericTablePanel<Role> {
     private static final List<String> SEARCH_FIELDS = Arrays.asList("roleName");
     private static String placeHolderMessage = "Search by Role name";
 
-    public RoleListPanel(GenericService<Role> roleService) {
-        super(roleService, Role.class, null, RoleEditDialog.class, ROLE_COLUMNS, "Roles", SEARCH_FIELDS, placeHolderMessage);
+    public RoleListPanel(IRoleService roleService) {
+        super(roleService, Role.class, null,null, RoleEditDialog.class, ROLE_COLUMNS, "Roles", SEARCH_FIELDS, placeHolderMessage);
         
         // Cấu hình độ rộng cột
         int[] columnWidths = {

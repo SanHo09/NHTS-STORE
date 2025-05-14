@@ -3,6 +3,7 @@ package com.nhom4.nhtsstore.ui.page.productCategory;
 import com.nhom4.nhtsstore.entities.Category;
 import com.nhom4.nhtsstore.services.EventBus;
 import com.nhom4.nhtsstore.services.GenericService;
+import com.nhom4.nhtsstore.services.ICategoryService;
 import com.nhom4.nhtsstore.ui.base.GenericTablePanel;
 import java.util.Arrays;
 import java.util.List;
@@ -19,8 +20,8 @@ public class ProductCategoryListPanel extends GenericTablePanel<Category> {
     private static final List<String> SEARCH_FIELDS = Arrays.asList("name");
     private static String placeHolderMessage = "Search by Name";
 
-    public ProductCategoryListPanel(GenericService<Category> service) {
-        super(service, Category.class, null, ProductCategoryEditDialog.class, CATEGORY_COLUMNS, "Product categories", SEARCH_FIELDS, placeHolderMessage);
+    public ProductCategoryListPanel(ICategoryService service) {
+        super(service, Category.class, null,null, ProductCategoryEditDialog.class, CATEGORY_COLUMNS, "Product categories", SEARCH_FIELDS, placeHolderMessage);
         
         // Cấu hình độ rộng cột
         int[] columnWidths = {

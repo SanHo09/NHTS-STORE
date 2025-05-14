@@ -12,12 +12,14 @@ import jakarta.annotation.PostConstruct;
 import javafx.embed.swing.JFXPanel;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
+
 import javax.swing.*;
 import java.awt.*;
 import javax.swing.border.EmptyBorder;
 import java.util.Optional;
 
-@Component
+@Controller
 public class MainPanel extends JPanel {
 	private final ApplicationState applicationState;
 	private final ApplicationContext applicationContext;
@@ -64,12 +66,9 @@ public class MainPanel extends JPanel {
 	private void initializeComponents() {
 		JLayeredPane layeredPagePanel;
 
-		add(JavaFxSwing.createJFXPanelWithController(
+		add(JavaFxSwing.createJFXPanelFromFxml(
 				"/fxml/HeaderLayout.fxml",
-				this.applicationContext,
-				true,
-				(Header header) -> {
-				}), BorderLayout.NORTH);
+				this.applicationContext), BorderLayout.NORTH);
 		
 		mainContentPanel = new JPanel(new BorderLayout());
 		

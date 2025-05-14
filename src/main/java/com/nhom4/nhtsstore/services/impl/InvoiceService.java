@@ -1,9 +1,11 @@
-package com.nhom4.nhtsstore.services;
+package com.nhom4.nhtsstore.services.impl;
 
 import com.nhom4.nhtsstore.entities.Invoice;
 import com.nhom4.nhtsstore.repositories.InvoiceRepository;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import com.nhom4.nhtsstore.services.IInvoiceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -14,7 +16,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class InvoiceService implements GenericService<Invoice> {
+public class InvoiceService implements IInvoiceService {
+    @Override
+    public InvoiceRepository getRepository() {
+        return this.repository;
+    }
+
     @Autowired
     private InvoiceRepository repository;
     

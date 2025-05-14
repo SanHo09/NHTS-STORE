@@ -1,4 +1,4 @@
-package com.nhom4.nhtsstore.services;
+package com.nhom4.nhtsstore.services.impl;
 
 import com.nhom4.nhtsstore.repositories.UserRepository;
 import org.springframework.security.core.userdetails.UserDetailsService;

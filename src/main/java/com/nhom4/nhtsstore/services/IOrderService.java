@@ -5,14 +5,14 @@
 package com.nhom4.nhtsstore.services;
 
 import com.nhom4.nhtsstore.entities.Order;
+import com.nhom4.nhtsstore.repositories.OrderRepository;
 
 /**
  *
  * @author Sang
  */
-public interface IOrderService {
-    Order findById(Long id);
-    Order save(Order entity);
+public interface IOrderService extends GenericService<Order,Long, OrderRepository>{
+
     Order findByUserId(Long userId);
     void removeProductFromOrderByProductId(Long userId, Long productId);
     void remove(long id);

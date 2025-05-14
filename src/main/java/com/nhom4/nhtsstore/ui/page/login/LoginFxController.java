@@ -1,20 +1,18 @@
 package com.nhom4.nhtsstore.ui.page.login;
 
 import com.nhom4.nhtsstore.services.IUserService;
-import com.nhom4.nhtsstore.services.UserService;
+import com.nhom4.nhtsstore.services.impl.UserService;
 import com.nhom4.nhtsstore.ui.AppView;
 import com.nhom4.nhtsstore.ui.ApplicationState;
 import com.nhom4.nhtsstore.ui.navigation.NavigationService;
 import com.nhom4.nhtsstore.ui.shared.LanguageManager;
 import com.nhom4.nhtsstore.ui.shared.ThemeManager;
 import com.nhom4.nhtsstore.utils.IconUtil;
-import com.nhom4.nhtsstore.utils.JavaFxSwing;
 import com.nhom4.nhtsstore.utils.JavaFxThemeUtil;
 import com.nhom4.nhtsstore.utils.MsgBox;
 import io.github.palexdev.materialfx.beans.Alignment;
 import io.github.palexdev.materialfx.controls.*;
 import javafx.application.Platform;
-import javafx.embed.swing.JFXPanel;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.HPos;
@@ -33,7 +31,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.net.URL;
 import java.util.ResourceBundle;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Controller
 public class LoginFxController extends StackPane implements Initializable {
@@ -67,7 +66,7 @@ public class LoginFxController extends StackPane implements Initializable {
     private MFXTooltip usernameTooltip;
     private MFXTooltip passwordTooltip;
     private boolean isLoading = false;
-
+    private ExecutorService executorService= Executors.newVirtualThreadPerTaskExecutor();
     @SneakyThrows
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -172,15 +171,15 @@ public class LoginFxController extends StackPane implements Initializable {
         if (!validateInputs()) return;
 
         startLoadingState();
-        CompletableFuture.runAsync(() -> {
+        executorService.submit(() -> {
             try {
                 var username = usernameField.getText().trim();
                 var password = passwordField.getText();
                 var userSessionVm = userService.authenticate(username, password);
                 Platform.runLater(() -> {
                     applicationState.login(userSessionVm);
-                    String successMessage = languageManager != null ? 
-                        languageManager.getText("login.success") : "Login successful";
+                    String successMessage = languageManager != null ?
+                            languageManager.getText("login.success") : "Login successful";
                     Toast.show(loginPanel, Toast.Type.SUCCESS, successMessage);
                     resetFields();
                     stopLoadingState();
@@ -190,21 +189,21 @@ public class LoginFxController extends StackPane implements Initializable {
                 Platform.runLater(() -> {
                     String errorMessage;
                     if (e.getMessage().equals("User is disabled")) {
-                        errorMessage = languageManager != null ? 
-                            languageManager.getText("login.error.disabled") : 
-                            "Your account is disabled. Please contact the administrator.";
+                        errorMessage = languageManager != null ?
+                                languageManager.getText("login.error.disabled") :
+                                "Your account is disabled. Please contact the administrator.";
                     } else if (e.getMessage().equals("User account is locked")) {
-                        errorMessage = languageManager != null ? 
-                            languageManager.getText("login.error.locked") : 
-                            "Your account is locked. Please contact the administrator.";
+                        errorMessage = languageManager != null ?
+                                languageManager.getText("login.error.locked") :
+                                "Your account is locked. Please contact the administrator.";
                     } else if (e.getMessage().equals("Bad credentials")) {
-                        errorMessage = languageManager != null ? 
-                            languageManager.getText("login.error.credentials") : 
-                            "Invalid username or password";
+                        errorMessage = languageManager != null ?
+                                languageManager.getText("login.error.credentials") :
+                                "Invalid username or password";
                     } else {
                         errorMessage = e.getMessage();
                     }
-                    
+
                     Toast.show(loginPanel, Toast.Type.WARNING, errorMessage, ToastLocation.TOP_CENTER);
                     stopLoadingState();
                 });
@@ -212,13 +211,16 @@ public class LoginFxController extends StackPane implements Initializable {
                 e.printStackTrace();
                 Platform.runLater(() -> {
                     MsgBox.showError(
-                        languageManager != null ? languageManager.getText("login.error.title") : "Login Error", 
-                        e.getMessage()
+                            languageManager != null ? languageManager.getText("login.error.title") : "Login Error",
+                            e.getMessage()
                     );
                     stopLoadingState();
                 });
             }
         });
+//        CompletableFuture.runAsync(() -> {
+//
+//        });
     }
 
     private void startLoadingState() {

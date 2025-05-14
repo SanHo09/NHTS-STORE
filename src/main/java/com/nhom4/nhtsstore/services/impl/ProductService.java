@@ -1,8 +1,9 @@
-package com.nhom4.nhtsstore.services;
+package com.nhom4.nhtsstore.services.impl;
 
 import com.nhom4.nhtsstore.entities.Product;
 import com.nhom4.nhtsstore.repositories.ProductImageRepository;
 import com.nhom4.nhtsstore.repositories.ProductRepository;
+import com.nhom4.nhtsstore.services.IProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -19,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @author NamDang
  */
 @Service
-public class ProductService implements GenericService<Product> {
+public class ProductService implements IProductService {
     
     @Autowired
     private ProductRepository repository;
@@ -67,7 +68,12 @@ public class ProductService implements GenericService<Product> {
         pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("lastModifiedOn").descending());
         return repository.findAll(pageable);
     }
-    
+
+    @Override
+    public ProductRepository getRepository() {
+        return this.repository;
+    }
+
     @Override
     public Page<Product> search(String keyword, List<String> searchFields, Pageable pageable) {
         Specification<Product> spec = Specification.where(null);

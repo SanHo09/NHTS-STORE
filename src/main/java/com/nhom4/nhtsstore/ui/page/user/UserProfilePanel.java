@@ -1,5 +1,6 @@
 package com.nhom4.nhtsstore.ui.page.user;
 
+import com.nhom4.nhtsstore.entities.rbac.User;
 import com.nhom4.nhtsstore.services.IUserService;
 import com.nhom4.nhtsstore.ui.ApplicationState;
 import com.nhom4.nhtsstore.ui.navigation.RoutablePanel;
@@ -66,11 +67,11 @@ public class UserProfilePanel extends JPanel implements RoutablePanel, LanguageM
 
     @Override
     public void onNavigate(RouteParams params) {
-        Long userId = params.get("userId", Long.class);
+        User user= params.get("entity", User.class);
         Platform.runLater(() -> {
-            if (userId != null) {
+            if (user != null) {
                 try {
-                    userDetailVm = userService.findUserById(userId);
+                    userDetailVm = userService.findUserById(user.getUserId());
                     // Update the controller with user data
                     if (userDetailVm != null) {
                         userProfileFxController.updateUserData(userDetailVm);
