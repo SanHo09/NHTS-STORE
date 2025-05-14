@@ -8,8 +8,10 @@ import com.nhom4.nhtsstore.entities.*;
 import com.nhom4.nhtsstore.services.impl.CustomerService;
 import com.nhom4.nhtsstore.services.impl.InvoiceService;
 import com.nhom4.nhtsstore.services.impl.OrderService;
+import com.nhom4.nhtsstore.services.*;
 import com.nhom4.nhtsstore.ui.ApplicationState;
 import com.nhom4.nhtsstore.ui.navigation.NavigationService;
+import com.nhom4.nhtsstore.ui.navigation.RoutablePanel;
 import com.nhom4.nhtsstore.ui.navigation.RouteParams;
 
 import java.util.ArrayList;
@@ -21,6 +23,8 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+
+import javax.swing.*;
 
 /**
  *
@@ -46,7 +50,10 @@ public class InvoicePanel extends javax.swing.JPanel {
 
     @Autowired
     private CustomerService customerService;
-    
+    @Autowired
+    private ProductService productService;
+
+
     @Autowired
     private NavigationService navigationService;
 
@@ -89,7 +96,7 @@ public class InvoicePanel extends javax.swing.JPanel {
         });
     }
 
-    public List<InvoiceDetail> mapOrderDetailsToInvoiceDetails(List<OrderDetail> orderDetails, Invoice invoice) {
+    private List<InvoiceDetail> mapOrderDetailsToInvoiceDetails(List<OrderDetail> orderDetails, Invoice invoice) {
         List<InvoiceDetail> invoiceDetails = new ArrayList<>();
         for (OrderDetail od : orderDetails) {
             InvoiceDetail invoiceDetail = new InvoiceDetail();
@@ -100,7 +107,7 @@ public class InvoicePanel extends javax.swing.JPanel {
         return invoiceDetails;
     }
 
-    public Customer getCustomer() {
+    private Customer getCustomer() {
         Customer customer = new Customer();
         customer.setName(txtCustomerName.getText());
         customer.setEmail(txtEmail.getText());
@@ -108,7 +115,17 @@ public class InvoicePanel extends javax.swing.JPanel {
         customer.setAddress(txtAddress.getText());
         return customer;
     }
-    
+
+    private void updateInventoryAndClearOrder() {
+        for (OrderDetail orderDetail : orderDetails) {
+            Product product = orderDetail.getProduct();
+            int remainingQuantity = product.getQuantity() - orderDetail.getQuantity();
+            product.setQuantity(Math.max(remainingQuantity, 0)); // prevent negative stock
+            productService.save(product); // Make sure productService is injected
+        }
+        orderService.remove(existingOrder.getId());
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -319,8 +336,10 @@ public class InvoicePanel extends javax.swing.JPanel {
 
         customerService.save(customer);
         invoiceService.save(invoice);
-        orderService.remove(existingOrder.getId());
+        updateInventoryAndClearOrder();
+
         RouteParams params = new RouteParams();
+
         navigationService.navigateTo(TransactionCompletedPanel.class, params);
     }//GEN-LAST:event_btnBuyNowMouseClicked
 
