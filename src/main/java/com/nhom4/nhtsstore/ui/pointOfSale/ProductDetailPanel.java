@@ -59,6 +59,17 @@ public class ProductDetailPanel extends javax.swing.JPanel implements RoutablePa
         return quantity;
     }
 
+    private boolean hasSufficientStock() {
+        if(getQuantity() > product.getQuantity()) {
+            Toast.show(ProductDetailPanel.this, Toast.Type.ERROR,
+                    "Insufficient stock. Please reduce the quantity.",
+                    ToastLocation.TOP_CENTER);
+            return false;
+        }
+
+        return true;
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -68,22 +79,60 @@ public class ProductDetailPanel extends javax.swing.JPanel implements RoutablePa
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        lblManufactor = new javax.swing.JLabel();
+        jPanel2 = new javax.swing.JPanel();
+        jPanel1 = new javax.swing.JPanel();
+        lblBack = new javax.swing.JLabel();
         lblProductName = new javax.swing.JLabel();
         btnAddToCart = new javax.swing.JButton();
-        btnBuyNow = new javax.swing.JButton();
         lblImage = new javax.swing.JLabel();
         spnQuantity = new javax.swing.JSpinner();
         jLabel1 = new javax.swing.JLabel();
         lblPrice = new javax.swing.JLabel();
+        btnBuyNow = new javax.swing.JButton();
+        lblManufactor = new javax.swing.JLabel();
+        lblRemaining = new javax.swing.JLabel();
 
         setToolTipText("");
         setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         setOpaque(false);
 
-        lblManufactor.setBackground(new java.awt.Color(255, 255, 255));
-        lblManufactor.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        lblManufactor.setText("Manufactor");
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 1161, Short.MAX_VALUE)
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 417, Short.MAX_VALUE)
+        );
+
+        lblBack.setFont(new java.awt.Font("Segoe UI", 1, 60)); // NOI18N
+        lblBack.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblBack.setText("←");
+        lblBack.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        lblBack.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                lblBackMouseClicked(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(lblBack, javax.swing.GroupLayout.PREFERRED_SIZE, 53, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(lblBack, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(20, Short.MAX_VALUE))
+        );
 
         lblProductName.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         lblProductName.setText("Product name");
@@ -98,6 +147,15 @@ public class ProductDetailPanel extends javax.swing.JPanel implements RoutablePa
             }
         });
 
+        spnQuantity.setModel(new javax.swing.SpinnerNumberModel(1, 1, null, 1));
+        spnQuantity.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+
+        jLabel1.setText("Quantity");
+
+        lblPrice.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        lblPrice.setForeground(new java.awt.Color(255, 0, 0));
+        lblPrice.setText("Price");
+
         btnBuyNow.setBackground(new java.awt.Color(246, 127, 26));
         btnBuyNow.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         btnBuyNow.setForeground(new java.awt.Color(255, 255, 255));
@@ -108,45 +166,54 @@ public class ProductDetailPanel extends javax.swing.JPanel implements RoutablePa
             }
         });
 
-        spnQuantity.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        lblManufactor.setBackground(new java.awt.Color(255, 255, 255));
+        lblManufactor.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        lblManufactor.setText("Manufactor");
 
-        jLabel1.setText("Quantity");
-
-        lblPrice.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        lblPrice.setForeground(new java.awt.Color(255, 0, 0));
-        lblPrice.setText("Price");
+        lblRemaining.setText("remaining");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addComponent(lblImage, javax.swing.GroupLayout.DEFAULT_SIZE, 362, Short.MAX_VALUE)
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(lblManufactor, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(lblProductName, javax.swing.GroupLayout.DEFAULT_SIZE, 447, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(38, 38, 38)
+                .addComponent(lblImage, javax.swing.GroupLayout.PREFERRED_SIZE, 495, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(207, 207, 207)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(btnAddToCart, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(btnBuyNow, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(spnQuantity)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 84, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblPrice, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(23, 23, 23))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(lblManufactor, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(lblProductName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(btnAddToCart, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(btnBuyNow, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(spnQuantity)
+                            .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 84, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(lblPrice, javax.swing.GroupLayout.PREFERRED_SIZE, 447, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(lblRemaining, javax.swing.GroupLayout.PREFERRED_SIZE, 156, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(43, 43, 43)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(lblImage, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(6, 6, 6)
+                        .addGap(315, 315, 315)
+                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(24, 24, 24)
                         .addComponent(lblProductName, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(lblManufactor, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGap(18, 18, 18)
+                        .addComponent(lblRemaining)
+                        .addGap(20, 20, 20)
                         .addComponent(lblPrice, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabel1)
@@ -155,33 +222,50 @@ public class ProductDetailPanel extends javax.swing.JPanel implements RoutablePa
                         .addGap(18, 18, 18)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(btnAddToCart, javax.swing.GroupLayout.PREFERRED_SIZE, 67, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(btnBuyNow, javax.swing.GroupLayout.PREFERRED_SIZE, 67, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap(1010, Short.MAX_VALUE))
+                            .addComponent(btnBuyNow, javax.swing.GroupLayout.PREFERRED_SIZE, 67, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(18, 18, 18)
+                        .addComponent(lblImage, javax.swing.GroupLayout.PREFERRED_SIZE, 461, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(1618, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnBuyNowMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnBuyNowMouseClicked
-        upsertOrder();
-        RouteParams params = new RouteParams();
-        navigationService.navigateTo(CartPanel.class, params);
+        if(hasSufficientStock()) {
+            upsertOrder();
+            RouteParams params = new RouteParams();
+            navigationService.navigateTo(CartPanel.class, params);
+        }
+
     }//GEN-LAST:event_btnBuyNowMouseClicked
 
     private void btnAddToCartMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnAddToCartMouseClicked
-        upsertOrder();
-        Toast.show(ProductDetailPanel.this, Toast.Type.SUCCESS,
-                            "Successfully add to cart!",
-                            ToastLocation.TOP_CENTER);
+        if(hasSufficientStock()) {
+            upsertOrder();
+            Toast.show(ProductDetailPanel.this, Toast.Type.SUCCESS,
+                    "Successfully add to cart!",
+                    ToastLocation.TOP_CENTER);
+        }
     }//GEN-LAST:event_btnAddToCartMouseClicked
+
+    private void lblBackMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblBackMouseClicked
+        RouteParams params = new RouteParams();
+        navigationService.navigateTo(PointOfSalePanel.class, params);
+    }//GEN-LAST:event_lblBackMouseClicked
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAddToCart;
     private javax.swing.JButton btnBuyNow;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JLabel lblBack;
     private javax.swing.JLabel lblImage;
     private javax.swing.JLabel lblManufactor;
     private javax.swing.JLabel lblPrice;
     private javax.swing.JLabel lblProductName;
+    private javax.swing.JLabel lblRemaining;
     private javax.swing.JSpinner spnQuantity;
     // End of variables declaration//GEN-END:variables
 
@@ -202,6 +286,7 @@ public class ProductDetailPanel extends javax.swing.JPanel implements RoutablePa
         } else {
             ImageHelper.SetLabelImage(lblImage, 500, 500, null);
         }
+        this.lblRemaining.setText("Remaining: " + product.getQuantity());
      }
      
      private void upsertOrder() {
