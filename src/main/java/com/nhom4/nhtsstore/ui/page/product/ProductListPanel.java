@@ -3,6 +3,7 @@ package com.nhom4.nhtsstore.ui.page.product;
 import com.nhom4.nhtsstore.entities.Product;
 import com.nhom4.nhtsstore.services.EventBus;
 import com.nhom4.nhtsstore.services.GenericService;
+import com.nhom4.nhtsstore.services.IProductService;
 import com.nhom4.nhtsstore.ui.base.GenericTablePanel;
 import java.util.Arrays;
 import java.util.List;
@@ -25,8 +26,8 @@ public class ProductListPanel extends GenericTablePanel<Product> {
     private static final List<String> SEARCH_FIELDS = Arrays.asList("name");
     private static String placeHolderMessage = "Search by Name";
 
-    public ProductListPanel(GenericService<Product> productService) {
-        super(productService, Product.class, ProductEditPanel.class, null, PRODUCT_COLUMNS, "Products", SEARCH_FIELDS, placeHolderMessage);
+    public ProductListPanel(IProductService productService) {
+        super(productService, Product.class, ProductEditPanel.class,ProductEditPanel.class, null, PRODUCT_COLUMNS, "Products", SEARCH_FIELDS, placeHolderMessage);
         
         // Cấu hình độ rộng cột cho ProductPanel
         int[] productColumnWidths = {

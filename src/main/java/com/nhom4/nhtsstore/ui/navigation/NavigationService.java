@@ -26,7 +26,7 @@ public class NavigationService {
     private AppView previousView;
     @Getter
     private RouteParams currentParams = new RouteParams();
-    
+
     public NavigationService(PanelManager panelManager,
                              ApplicationState applicationState,
                              SidebarManager sidebarManager) {
@@ -34,7 +34,7 @@ public class NavigationService {
         this.applicationState = applicationState;
         this.sidebarManager = sidebarManager;
     }
-    
+
     /**
      * Add a listener that will be called when navigation occurs
      * @param listener Consumer that will receive the AppView being navigated to
@@ -62,12 +62,13 @@ public class NavigationService {
 
             // Update sidebar selection
             sidebarManager.selectMenuItem(view);
-            
+
             // Notify navigation listeners
             for (Consumer<AppView> listener : navigationListeners) {
                 listener.accept(view);
             }
         } catch (Exception e) {
+            e.printStackTrace();
             JOptionPane.showMessageDialog(panelManager.getContentContainer(), e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
 
@@ -83,6 +84,7 @@ public class NavigationService {
             }
             panelManager.navigateTo(null, panel);
         } catch (Exception e) {
+            e.printStackTrace();
             JOptionPane.showMessageDialog(panelManager.getContentContainer(), e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
 
@@ -94,5 +96,11 @@ public class NavigationService {
             JOptionPane.showMessageDialog(panelManager.getContentContainer(), "No previous view to navigate back to.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
-
+    private void showErrorDialog(String message) {
+        //reduce length of the message
+        if (message.length() > 110) {
+            message = message.substring(0, 100) + "...";
+        }
+        JOptionPane.showMessageDialog(panelManager.getContentContainer(), message, "Error", JOptionPane.ERROR_MESSAGE);
+    }
 }

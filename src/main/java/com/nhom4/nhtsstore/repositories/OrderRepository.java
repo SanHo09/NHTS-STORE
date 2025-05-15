@@ -1,5 +1,6 @@
 package com.nhom4.nhtsstore.repositories;
 
+import com.nhom4.nhtsstore.entities.Invoice;
 import com.nhom4.nhtsstore.entities.Order;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -11,7 +12,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecificationExecutor<Order> {
+public interface OrderRepository extends GenericRepository<Order,Long>{
 
     List<Order> findByCreateDateBetween(Date startDate, Date endDate);
     @Query("SELECT FUNCTION('FORMAT',o.createDate, 'MM') as month, " +

@@ -57,7 +57,7 @@ public class LanguageManager {
         String savedLanguage = (String) settingsConfig.getUserSetting(LANGUAGE_KEY, Language.ENGLISH.getCode());
         
         // Initial setup without notification
-        currentLocale = new Locale(Language.fromCode(savedLanguage).getCode());
+        currentLocale = Locale.of(savedLanguage);
         try {
             resourceBundle = ResourceBundle.getBundle("i18n.messages", currentLocale);
         } catch (MissingResourceException e) {

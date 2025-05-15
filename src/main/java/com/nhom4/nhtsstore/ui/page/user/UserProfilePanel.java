@@ -1,5 +1,6 @@
 package com.nhom4.nhtsstore.ui.page.user;
 
+import com.nhom4.nhtsstore.entities.rbac.User;
 import com.nhom4.nhtsstore.services.IUserService;
 import com.nhom4.nhtsstore.ui.ApplicationState;
 import com.nhom4.nhtsstore.ui.navigation.RoutablePanel;
@@ -66,20 +67,31 @@ public class UserProfilePanel extends JPanel implements RoutablePanel, LanguageM
 
     @Override
     public void onNavigate(RouteParams params) {
-        Long userId = params.get("userId", Long.class);
+
         Platform.runLater(() -> {
-            if (userId != null) {
-                try {
-                    userDetailVm = userService.findUserById(userId);
-                    // Update the controller with user data
+            try {
+                User user= params.get("entity", User.class);
+                Long userId = params.get("userId", Long.class);
+                Long finalUserId;
+                if (user != null) {
+                    finalUserId = user.getUserId();
+                } else if (userId != null) {
+                    finalUserId = userId;
+                } else {
+                    finalUserId = appState.getCurrentUser().getUserId();
+                }
+                // Load and display user data
+                if (finalUserId != null) {
+                    userDetailVm = userService.findUserById(finalUserId);
                     if (userDetailVm != null) {
                         userProfileFxController.updateUserData(userDetailVm);
                     }
-                } catch (Exception e) {
-                    throw new RuntimeException("Failed to load user data: " + e.getMessage());
                 }
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to load user data: " + e.getMessage());
             }
         });
+
     }
 
 

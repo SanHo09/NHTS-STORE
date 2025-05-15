@@ -3,7 +3,7 @@ package com.nhom4.nhtsstore.ui.base;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.nhom4.nhtsstore.entities.GenericEntity;
 import com.nhom4.nhtsstore.entities.Invoice;
-import com.nhom4.nhtsstore.services.EventBus;
+import com.nhom4.nhtsstore.repositories.GenericRepository;
 import com.nhom4.nhtsstore.services.GenericService;
 import com.nhom4.nhtsstore.ui.ApplicationState;
 import com.nhom4.nhtsstore.ui.PanelManager;
@@ -49,10 +49,11 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel implement
     private GenericTableModel<T> tableModel;
     private JPopupMenu tableRowMenu;
     private JPopupMenu headerMenu;
-    private final GenericService<T> service;
+    private final GenericService service;
     private JButton newButton;
     private final Class<T> entityClass;
     private final Class<? extends JPanel> editPanelClass;
+    private final Class<? extends JPanel> createPanelClass;
     private final Class<? extends GenericEditDialog> editDialogClass;
     private GenericEditDialog editDialog;
     private final String[] columnNames;
@@ -74,7 +75,7 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel implement
     private Long totalItems;
     private JLabel totalRecords;
     private JLabel titleLabel;
-    
+
     /**
      * Constructor cho GenericTablePanel
      * @param service Service cung cấp dữ liệu và thao tác với database
@@ -83,18 +84,19 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel implement
      * @param panelTitle Tiêu đề của panel
      */
     public GenericTablePanel (
-        GenericService<T> service,
-        Class<T> entityClass,
-        Class<? extends JPanel> editPanelClass,
-        Class<? extends GenericEditDialog> editDialogClass,
-        String[] columnNames,
-        String panelTitle,
-        List<String> searchFields,
-        String placeHolderMessage)
+            GenericService service,
+            Class<T> entityClass,
+            Class<? extends JPanel> editPanelClass, Class<? extends JPanel> createPanelClass,
+            Class<? extends GenericEditDialog> editDialogClass,
+            String[] columnNames,
+            String panelTitle,
+            List<String> searchFields,
+            String placeHolderMessage)
     {
         this.service = service;
         this.entityClass = entityClass;
         this.editPanelClass = editPanelClass;
+        this.createPanelClass = createPanelClass;
         this.editDialogClass = editDialogClass;
         this.columnNames = columnNames;
         this.panelTitle = panelTitle;
@@ -210,6 +212,7 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel implement
      * Update texts in pagination controls
      */
     private void updatePaginationTexts() {
+        if (languageManager == null) return;
         if (pageInfoLabel != null && totalItems != null) {
             int start = currentPage * pageSize + 1;
             int end = Math.min((currentPage + 1) * pageSize, totalItems.intValue());
@@ -622,48 +625,56 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel implement
         }
     }
     
-    public void loadData() {
-        SwingWorker<Page<T>, Void> worker = new SwingWorker<>() {
-            @Override
-            protected Page<T> doInBackground() {
-                String keyword = searchField.getText().trim();
-                Pageable pageable = PageRequest.of(currentPage, pageSize);
-                Page<T> result;
-                
-                if (keyword.isEmpty()) {
-                    result = service.findAll(pageable);
-                } else {
-                    result = service.search(keyword, searchFields, pageable);
-                }
-                totalItems = result.getTotalElements();
-                return result;
-            }
-            
-            @Override
-            protected void done() {
-                try {
-                    Page<T> page = get();
-                    tableModel.setData(page.getContent());
-                    totalPages = page.getTotalPages();
+   public void loadData() {
 
-                    updateTotalRecordsLabel();
-                    updatePaginationControls();
-                } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(GenericTablePanel.this,
-                            "Error loading data: " + ex.getMessage(),
-                            "Data Error", JOptionPane.ERROR_MESSAGE);
-                    ex.printStackTrace();
-                } finally {
-                    Timer loadingTimer = new Timer(1000, e -> {
-                        GlobalLoadingManager.getInstance().hideSpinner();
-                    });
-                    loadingTimer.setRepeats(false);
-                    loadingTimer.start();
-                }
-            }
-        };
-        worker.execute();
-    }
+
+       Thread.startVirtualThread(() -> {
+           try {
+
+               // Background processing
+               String keyword = searchField.getText().trim();
+               Pageable pageable = PageRequest.of(currentPage, pageSize);
+               Page<T> result;
+
+               if (keyword.isEmpty()) {
+                   result = service.findAll(pageable);
+               } else {
+                   result = service.search(keyword, searchFields, pageable);
+               }
+               totalItems = result.getTotalElements();
+
+               // Update UI on EDT
+               SwingUtilities.invokeLater(() -> {
+                   try {
+                       tableModel.setData(result.getContent());
+                       totalPages = result.getTotalPages();
+
+                       updateTotalRecordsLabel();
+                       updatePaginationControls();
+                   } catch (Exception ex) {
+                       JOptionPane.showMessageDialog(GenericTablePanel.this,
+                               "Error loading data: " + ex.getMessage(),
+                               "Data Error", JOptionPane.ERROR_MESSAGE);
+                       ex.printStackTrace();
+                   } finally {
+                       Timer loadingTimer = new Timer(1000, e -> {
+                           GlobalLoadingManager.getInstance().hideSpinner();
+                       });
+                       loadingTimer.setRepeats(false);
+                       loadingTimer.start();
+                   }
+               });
+           } catch (Exception ex) {
+               SwingUtilities.invokeLater(() -> {
+                   JOptionPane.showMessageDialog(GenericTablePanel.this,
+                           "Error loading data: " + ex.getMessage(),
+                           "Data Error", JOptionPane.ERROR_MESSAGE);
+                   ex.printStackTrace();
+                   GlobalLoadingManager.getInstance().hideSpinner();
+               });
+           }
+       });
+   }
     
     private void updatePaginationControls() {
         boolean hasPrev = currentPage > 0;
@@ -696,7 +707,7 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel implement
             editDialog.showDialog(null);
         } else {
             RouteParams params = new RouteParams();
-            this.navigationService.navigateTo(editPanelClass, params);
+            this.navigationService.navigateTo(createPanelClass, params);
         }
     }
     

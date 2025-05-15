@@ -2,8 +2,8 @@ package com.nhom4.nhtsstore.ui.page.user;
 
 import com.nhom4.nhtsstore.entities.rbac.User;
 import com.nhom4.nhtsstore.services.IUserService;
-import com.nhom4.nhtsstore.services.RoleService;
-import com.nhom4.nhtsstore.services.UserService;
+import com.nhom4.nhtsstore.services.impl.RoleService;
+import com.nhom4.nhtsstore.services.impl.UserService;
 import com.nhom4.nhtsstore.ui.AppView;
 import com.nhom4.nhtsstore.ui.ApplicationState;
 import com.nhom4.nhtsstore.ui.navigation.NavigationService;
@@ -30,6 +30,7 @@ import java.awt.*;
 import java.util.*;
 
 @Controller
+@Scope("prototype")
 public class UserProfileUpdatePanel extends JPanel implements RoutablePanel {
     private final IUserService userService;
     private final RoleService roleService;

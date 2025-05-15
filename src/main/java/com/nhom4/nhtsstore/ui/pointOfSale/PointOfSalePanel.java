@@ -5,8 +5,10 @@
 package com.nhom4.nhtsstore.ui.pointOfSale;
 
 import com.nhom4.nhtsstore.entities.Product;
-import com.nhom4.nhtsstore.services.ProductService;
+import com.nhom4.nhtsstore.services.impl.ProductService;
 import com.nhom4.nhtsstore.ui.navigation.NavigationService;
+import com.nhom4.nhtsstore.ui.navigation.RoutablePanel;
+import com.nhom4.nhtsstore.ui.navigation.RouteParams;
 import jakarta.annotation.PostConstruct;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -17,7 +19,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingWorker;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,9 +28,8 @@ import org.springframework.stereotype.Component;
  *
  * @author Sang
  */
-@Scope("prototype")
 @Component
-public class PointOfSalePanel extends JPanel {
+public class PointOfSalePanel extends JPanel implements RoutablePanel {
 
     @Autowired
     private NavigationService navigationService;
@@ -79,7 +79,6 @@ public class PointOfSalePanel extends JPanel {
         // Add pagination to SOUTH
         add(paginationPanel, BorderLayout.SOUTH);
 
-        loadData();
     }
 
     private void loadData() {
@@ -117,5 +116,10 @@ public class PointOfSalePanel extends JPanel {
             currentPage = page;
             loadData();
         }
+    }
+
+    @Override
+    public void onNavigate(RouteParams params) {
+        loadData();
     }
 }

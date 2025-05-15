@@ -5,10 +5,10 @@ import com.nhom4.nhtsstore.entities.Order;
 import com.nhom4.nhtsstore.entities.OrderDetail;
 import com.nhom4.nhtsstore.entities.Product;
 import com.nhom4.nhtsstore.enums.OrderStatus;
-import com.nhom4.nhtsstore.services.CustomerService;
+import com.nhom4.nhtsstore.services.impl.CustomerService;
 import com.nhom4.nhtsstore.services.EventBus;
-import com.nhom4.nhtsstore.services.OrderService;
-import com.nhom4.nhtsstore.services.ProductService;
+import com.nhom4.nhtsstore.services.impl.OrderService;
+import com.nhom4.nhtsstore.services.impl.ProductService;
 import com.nhom4.nhtsstore.ui.ApplicationState;
 import com.nhom4.nhtsstore.ui.PanelManager;
 import com.nhom4.nhtsstore.ui.navigation.RoutablePanel;
@@ -20,8 +20,7 @@ import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -220,9 +219,9 @@ public class OrderEditPanel extends JPanel implements RoutablePanel {
     }
     
     private void updateTotalAmount() {
-        double total = 0;
+        double total =0;
         for (OrderDetail detail : orderDetails) {
-            total += detail.getProduct().getSalePrice() * detail.getQuantity();
+            total += detail.getProduct().getSalePrice().multiply(new BigDecimal(detail.getQuantity())).doubleValue();
         }
         totalAmountField.setValue(total);
     }
@@ -237,7 +236,7 @@ public class OrderEditPanel extends JPanel implements RoutablePanel {
             Order updatedOrder = order != null ? order : new Order();
             updatedOrder.setCustomer((Customer) customerCombo.getSelectedItem());
             updatedOrder.setStatus((OrderStatus) statusCombo.getSelectedItem());
-            updatedOrder.setTotalAmount(((Number) totalAmountField.getValue()).doubleValue());
+            updatedOrder.setTotalAmount(BigDecimal.valueOf(((Number) totalAmountField.getValue()).doubleValue()));
             updatedOrder.setCreateDate(new Date());
             for (OrderDetail od: orderDetails) {
                 od.setOrder(updatedOrder);

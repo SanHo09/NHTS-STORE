@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table
 @Getter
@@ -24,4 +26,15 @@ public class OrderDetail {
 
     @Column(nullable = true)
     private int quantity = 0;
+
+    @Column(nullable = true, precision = 19, scale = 2)
+    private BigDecimal unitPrice=BigDecimal.ZERO;
+
+    @Column(nullable = true, precision = 19, scale = 2)
+    private BigDecimal subtotal=BigDecimal.ZERO;
+
+
+
+
+
 }

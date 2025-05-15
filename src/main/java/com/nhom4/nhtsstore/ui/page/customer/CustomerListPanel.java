@@ -1,8 +1,10 @@
 package com.nhom4.nhtsstore.ui.page.customer;
 
 import com.nhom4.nhtsstore.entities.Customer;
+import com.nhom4.nhtsstore.repositories.CustomerRepository;
 import com.nhom4.nhtsstore.services.EventBus;
 import com.nhom4.nhtsstore.services.GenericService;
+import com.nhom4.nhtsstore.services.ICustomerService;
 import com.nhom4.nhtsstore.ui.base.GenericTablePanel;
 import java.util.Arrays;
 import java.util.List;
@@ -19,8 +21,8 @@ public class CustomerListPanel extends GenericTablePanel<Customer> {
     private static final List<String> SEARCH_FIELDS = Arrays.asList("name", "email", "phoneNumber", "address");
     private static String placeHolderMessage = "Search in Name/Email/Phone/Address";
 
-    public CustomerListPanel(GenericService<Customer> customerService) {
-        super(customerService, Customer.class, null, CustomerEditDialog.class, CUSTOMER_COLUMNS, "Customers", SEARCH_FIELDS, placeHolderMessage);
+    public CustomerListPanel(ICustomerService customerService) {
+        super(customerService, Customer.class, null,null, CustomerEditDialog.class, CUSTOMER_COLUMNS, "Customers", SEARCH_FIELDS, placeHolderMessage);
         
         // Cấu hình độ rộng cột
         int[] columnWidths = {

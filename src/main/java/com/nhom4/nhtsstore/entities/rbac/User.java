@@ -86,11 +86,13 @@ public class User extends GenericEntity implements Serializable, UserDetails {
     public Object getFieldValueByIndex(int index) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
         switch (index) {
-            case 0: return fullName;
-            case 1: return role.getRoleName();
-            case 2: return isActive() ? "Active" : "Inactive";
-            case 3: return lastModifiedOn != null ? lastModifiedOn.format(formatter) : null;
-            case 4: return lastModifiedBy;
+            case 0: return userId;
+            case 1: return fullName;
+            case 2: return username;
+            case 3: return role.getRoleName();
+            case 4: return isActive() ? "Active" : "Inactive";
+            case 5: return lastModifiedOn != null ? lastModifiedOn.format(formatter) : null;
+            case 6: return lastModifiedBy;
             default: return null;
         }
     }

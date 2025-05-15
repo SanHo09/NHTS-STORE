@@ -68,6 +68,10 @@
           <Layout>
             <DimensionLayout dim="0">
               <Group type="103" groupAlignment="0" attributes="0">
+                  <Group type="102" alignment="0" attributes="0">
+                      <Component id="cmbPaymentMethod" min="-2" pref="168" max="-2" attributes="0"/>
+                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                  </Group>
                   <Group type="102" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
@@ -79,6 +83,12 @@
                           <Component id="jLabel6" alignment="0" min="-2" max="-2" attributes="0"/>
                           <Component id="txtAddress" alignment="0" min="-2" pref="284" max="-2" attributes="0"/>
                           <Component id="jLabel7" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel1" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Group type="102" alignment="0" attributes="0">
+                              <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="jLabel3" min="-2" max="-2" attributes="0"/>
+                          </Group>
                       </Group>
                       <EmptySpace pref="30" max="32767" attributes="0"/>
                   </Group>
@@ -87,7 +97,11 @@
             <DimensionLayout dim="1">
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
-                      <EmptySpace min="-2" pref="22" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="14" max="-2" attributes="0"/>
+                      <Component id="jLabel3" min="-2" pref="31" max="-2" attributes="0"/>
+                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                      <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
                       <Component id="jLabel4" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="txtCustomerName" min="-2" max="-2" attributes="0"/>
@@ -103,7 +117,11 @@
                       <Component id="jLabel7" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="txtAddress" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace pref="226" max="32767" attributes="0"/>
+                      <EmptySpace pref="98" max="32767" attributes="0"/>
+                      <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="cmbPaymentMethod" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="35" max="-2" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -115,6 +133,9 @@
               </Properties>
             </Component>
             <Component class="javax.swing.JTextField" name="txtCustomerName">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="&#x110;&#x1eb7;ng H&#x1eef;u Ho&#xe0;i Nam"/>
+              </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="txtCustomerNameActionPerformed"/>
               </Events>
@@ -125,11 +146,17 @@
               </Properties>
             </Component>
             <Component class="javax.swing.JTextField" name="txtEmail">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="24410068@ms.uit.edu.vn"/>
+              </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="txtEmailActionPerformed"/>
               </Events>
             </Component>
             <Component class="javax.swing.JTextField" name="txtPhoneNumber">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="0987654321"/>
+              </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="txtPhoneNumberActionPerformed"/>
               </Events>
@@ -140,6 +167,9 @@
               </Properties>
             </Component>
             <Component class="javax.swing.JTextField" name="txtAddress">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Khu ph&#x1ed1; 6, P.Linh Trung, Tp.Th&#x1ee7; &#x110;&#x1ee9;c, Tp.H&#x1ed3; Ch&#xed; Minh"/>
+              </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="txtAddressActionPerformed"/>
               </Events>
@@ -148,6 +178,29 @@
               <Properties>
                 <Property name="text" type="java.lang.String" value="Address"/>
               </Properties>
+            </Component>
+            <Component class="javax.swing.JLabel" name="jLabel1">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Ph&#x1b0;&#x1a1;ng th&#x1ee9;c thanh to&#xe1;n"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JComboBox" name="cmbPaymentMethod">
+              <AuxValues>
+                <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;PaymentMethod&gt;"/>
+              </AuxValues>
+            </Component>
+            <Component class="javax.swing.JLabel" name="jLabel2">
+            </Component>
+            <Component class="javax.swing.JLabel" name="jLabel3">
+              <Properties>
+                <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+                  <Font name="Segoe UI" size="60" style="1"/>
+                </Property>
+                <Property name="text" type="java.lang.String" value="&#x2190;"/>
+              </Properties>
+              <Events>
+                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jLabel3MouseClicked"/>
+              </Events>
             </Component>
           </SubComponents>
         </Container>
@@ -179,7 +232,7 @@
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="1" attributes="0">
-                  <EmptySpace max="32767" attributes="0"/>
+                  <EmptySpace pref="674" max="32767" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Component id="lblTranportFee" min="-2" max="-2" attributes="0"/>
                       <Component id="lblTotalPrice" alignment="0" min="-2" max="-2" attributes="0"/>
@@ -193,11 +246,11 @@
         <DimensionLayout dim="1">
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
-                  <EmptySpace min="-2" pref="38" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" pref="44" max="-2" attributes="0"/>
                   <Component id="lblTotalPrice" min="-2" max="-2" attributes="0"/>
                   <EmptySpace type="separate" max="-2" attributes="0"/>
                   <Component id="lblTranportFee" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace type="separate" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" pref="26" max="-2" attributes="0"/>
                   <Component id="lblTotal" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="btnBuyNow" min="-2" max="-2" attributes="0"/>
@@ -239,7 +292,7 @@
             </Property>
           </Properties>
           <Events>
-            <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="btnBuyNowMouseClicked"/>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnBuyNowActionPerformed"/>
           </Events>
         </Component>
       </SubComponents>

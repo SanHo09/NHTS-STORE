@@ -8,6 +8,7 @@ import com.nhom4.nhtsstore.ui.shared.LanguageManager;
 import com.nhom4.nhtsstore.ui.shared.ThemeManager;
 import com.nhom4.nhtsstore.utils.SwingThemeUtil;
 import javafx.application.Platform;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;
 import javax.swing.*;
 import java.awt.*;

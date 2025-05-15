@@ -1,7 +1,7 @@
 package com.nhom4.nhtsstore.ui.page.customer;
 
 import com.nhom4.nhtsstore.entities.Customer;
-import com.nhom4.nhtsstore.services.CustomerService;
+import com.nhom4.nhtsstore.services.impl.CustomerService;
 import com.nhom4.nhtsstore.services.EventBus;
 import com.nhom4.nhtsstore.ui.base.GenericEditDialog;
 import com.nhom4.nhtsstore.ui.shared.components.ToggleSwitch;

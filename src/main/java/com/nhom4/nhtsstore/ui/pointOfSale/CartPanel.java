@@ -4,28 +4,25 @@
  */
 package com.nhom4.nhtsstore.ui.pointOfSale;
 
-import com.nhom4.nhtsstore.entities.Order;
-import com.nhom4.nhtsstore.entities.OrderDetail;
-import com.nhom4.nhtsstore.entities.Product;
-import com.nhom4.nhtsstore.services.OrderDetailService;
-import com.nhom4.nhtsstore.services.OrderService;
-import com.nhom4.nhtsstore.services.ProductService;
+import com.nhom4.nhtsstore.services.IProductImageService;
+import com.nhom4.nhtsstore.services.impl.OrderService;
 import com.nhom4.nhtsstore.ui.ApplicationState;
 import com.nhom4.nhtsstore.ui.navigation.NavigationService;
 import com.nhom4.nhtsstore.ui.navigation.RoutablePanel;
 import com.nhom4.nhtsstore.ui.navigation.RouteParams;
+import com.nhom4.nhtsstore.viewmodel.cart.CartItemVm;
+import com.nhom4.nhtsstore.viewmodel.cart.CartVm;
 import com.nhom4.nhtsstore.viewmodel.user.UserSessionVm;
 import jakarta.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+
+import java.math.BigDecimal;
+import java.util.*;
 import javax.swing.*;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import raven.modal.Toast;
+import raven.modal.toast.option.ToastLocation;
 
 /**
  *
@@ -38,92 +35,98 @@ public class CartPanel extends javax.swing.JPanel implements RoutablePanel{
     /**
      * Creates new form CartPanel
      */
-    @Autowired
-    private NavigationService navigationService;
-    
-    @Autowired
-    private OrderService orderService;
-
-    @Autowired
-    private OrderDetailService orderDetailService;
-
-    @Autowired
-    private ApplicationState applicationState;
-
-    private List<OrderDetail> orderDetails = new ArrayList<OrderDetail>();
-
-    private double totalPrice;
-    
-    private int totalNumber;
-
-    public CartPanel() {
+    private final NavigationService navigationService;
+    private final OrderService orderService;
+    private final ApplicationState applicationState;
+    private final IProductImageService productImageService;
+    private UserSessionVm currentUser;
+    private CartVm cart;
+    public CartPanel(NavigationService navigationService, OrderService orderService, ApplicationState applicationState, IProductImageService productImageService) {
+        this.navigationService = navigationService;
+        this.orderService = orderService;
+        this.applicationState = applicationState;
+        this.productImageService = productImageService;
         initComponents();
+        cart = applicationState.getCart();
     }
-
-    UserSessionVm currentUser;
 
     @PostConstruct
     public void init() {
         pnlTableContent.setLayout(new BoxLayout(pnlTableContent, BoxLayout.Y_AXIS));
         currentUser = applicationState.getCurrentUser();
-        Order existingOrder = orderService.findByUserId(currentUser.getUserId());
-        if(existingOrder != null) {
-            orderDetails = existingOrder.getOrderDetails();
-            loadOrderDetails();
-        }
+        loadCart();
         jScrollPane1.setViewportView(pnlTableContent);
         jScrollPane1.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         jScrollPane1.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        jScrollPane1.getVerticalScrollBar().setUnitIncrement(16);
+
     }
 
-    private void loadOrderDetails() {
-        pnlTableContent.removeAll(); // clear before loading
-        for (OrderDetail orderDetail : orderDetails) {
-            CartBody cartBody = new CartBody(orderDetail.getProduct(), orderDetail.getQuantity(), this::removeOrderDetail, this::setOrderDetailQuantity);
+    private void loadCart() {
+        pnlTableContent.removeAll();
+
+        // Get latest cart from application state
+        cart = applicationState.getCart();
+
+        for (CartItemVm item : cart.getItems()) {
+            var images = productImageService.findByProductId(item.getProductId());
+            CartBody cartBody = new CartBody(item, images, this::removeCartItem, this::updateCartItemQuantity);
             pnlTableContent.add(cartBody);
             pnlTableContent.add(Box.createVerticalStrut(10));
         }
+
+        updateDisplayTotals();
+
         pnlTableContent.revalidate();
         pnlTableContent.repaint();
-       
-        // Count number of product
-        Map<Product, Integer> productCounts = new HashMap<>();
-        for (OrderDetail od : orderDetails) {
-            Product product = od.getProduct();
-            productCounts.put(product, productCounts.getOrDefault(product, 0) + 1);
-        }
-        
-        totalPrice = orderDetails.stream()
-            .mapToDouble(od -> od.getProduct().getSalePrice()* od.getQuantity())
-            .sum();
-        
-        totalNumber = orderDetails.size();
-        
-        lblTotalNumber.setText("Total (" + totalNumber +"): ");
-        lblTotalPrice.setText(totalPrice + "$");
+    }
+    private void updateDisplayTotals() {
+        int totalItems = cart.getItems().size();
+        lblTotalNumber.setText("Total (" + totalItems + " products): ");
+        lblTotalPrice.setText(String.format("%.2f$", cart.getTotalAmount()));
     }
 
-    private void removeOrderDetail(Product product) {
-        // Remove the item from the list
-        orderDetails.removeIf(od -> od.getProduct().getId().equals(product.getId()));
 
-        // Delete order detail
-        orderService.removeProductFromOrderByProductId(currentUser.getUserId(), product.getId());
 
-        // Refresh UI
-        loadOrderDetails();
+
+    private void removeCartItem(CartItemVm item) {
+        cart.getItems().removeIf(i -> i.getProductId().equals(item.getProductId()));
+
+        // Update total amount
+        updateCartTotal();
+
+        // Update cart in application state which will trigger the listener to save to file
+        applicationState.setCart(cart);
+
+        loadCart();
+    }
+    private void updateCartTotal() {
+        BigDecimal total = cart.getItems().stream()
+                .map(item -> item.getPrice().multiply(BigDecimal.valueOf( item.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        cart.setTotalAmount(total);
+        cart.setLastModifiedDate(new Date());
     }
 
-    private void setOrderDetailQuantity(Long productId, int newQuantity) {
-        for (OrderDetail orderDetail : orderDetails) {
-            if (orderDetail.getProduct().getId().equals(productId)) {
-                orderDetail.setQuantity(newQuantity);
-                orderDetailService.save(orderDetail);
-                break;
-            }
-        }
-        loadOrderDetails();
+
+    private void updateCartItemQuantity(Long productId, int newQuantity) {
+        cart.getItems().stream()
+                .filter(item -> item.getProductId().equals(productId))
+                .findFirst()
+                .ifPresent(item -> {
+                    item.setQuantity(newQuantity);
+
+                    // Update total amount
+                    updateCartTotal();
+
+                    // Update cart in application state which will trigger the listener to save to file
+                    applicationState.setCart(cart);
+                });
+
+        loadCart();
     }
+
+
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -209,7 +212,7 @@ public class CartPanel extends javax.swing.JPanel implements RoutablePanel{
                 .addContainerGap(48, Short.MAX_VALUE))
         );
 
-        pnlTableHeader1.setBackground(new java.awt.Color(255, 255, 255));
+//        pnlTableHeader1.setBackground(new java.awt.Color(255, 255, 255));
 
         lblTotalNumber.setText("Total (0 products): ");
 
@@ -293,12 +296,19 @@ public class CartPanel extends javax.swing.JPanel implements RoutablePanel{
     }//GEN-LAST:event_jCheckBox1ActionPerformed
 
     private void btnBuyNowMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnBuyNowMouseClicked
-        RouteParams params = new RouteParams();
-        navigationService.navigateTo(InvoicePanel.class, params);
+
     }//GEN-LAST:event_btnBuyNowMouseClicked
 
     private void btnBuyNowActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuyNowActionPerformed
-        // TODO add your handling code here:
+        if (cart.getItems().isEmpty()) {
+            Toast.show(CartPanel.this, Toast.Type.ERROR,
+                    "Cart is empty!",
+                    ToastLocation.TOP_CENTER);
+            return;
+        }
+
+        RouteParams params = new RouteParams();
+        navigationService.navigateTo(InvoicePanel.class, params);
     }//GEN-LAST:event_btnBuyNowActionPerformed
 
 
@@ -321,6 +331,8 @@ public class CartPanel extends javax.swing.JPanel implements RoutablePanel{
 
     @Override
     public void onNavigate(RouteParams params) {
-        
+        currentUser = applicationState.getCurrentUser();
+        loadCart();
+
     }
 }

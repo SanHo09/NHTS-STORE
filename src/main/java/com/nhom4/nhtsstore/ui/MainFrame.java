@@ -95,16 +95,14 @@ public class MainFrame extends JFrame {
 
     private void addCustomWindowControls() {
         if (jfxWindowPanel == null) {
-            JavaFxSwing.runAndWait(() -> {
-                jfxWindowPanel = JavaFxSwing.createJFXPanelWithController("/fxml/WindowLayout.fxml",appState.getApplicationContext(),
-                        (WindowLayout controller) -> {
-                            controller.setMainFrame(this);
-                        }
-                );
-                add(jfxWindowPanel, BorderLayout.NORTH);
-                revalidate();
-                repaint();
-            });
+            jfxWindowPanel = JavaFxSwing.createJFXPanelWithController("/fxml/WindowLayout.fxml",appState.getApplicationContext(),
+                    (WindowLayout controller) -> {
+                        controller.setMainFrame(this);
+                    }
+            );
+            add(jfxWindowPanel, BorderLayout.NORTH);
+            revalidate();
+            repaint();
         } else {
             jfxWindowPanel.setVisible(true);
             revalidate();
