@@ -37,8 +37,7 @@ public enum AppView {
     CUSTOMER("Customer", "user.png", USER, CustomerListPanel.class, Set.of("SUPER_ADMIN")),
     POINT_OF_SALE("Point Of Sale", "", null, PointOfSalePanel.class, Set.of("SUPER_ADMIN", "MANAGER", "SALE")),
     CART("Cart", "", POINT_OF_SALE, CartPanel.class, Set.of("SUPER_ADMIN", "MANAGER", "SALE")),
-    SETTING("Setting", "MaterialSymbolsSettings.svg", null, SettingPanel.class, Set.of("SUPER_ADMIN")),
-    TEST("Test", "", null, TestZaloPayForm.class, Set.of("SUPER_ADMIN", "MANAGER"));
+    SETTING("Setting", "MaterialSymbolsSettings.svg", null, SettingPanel.class, Set.of("SUPER_ADMIN"));
     private final String name;
     private final String icon;
     private final AppView parent; // for submenus

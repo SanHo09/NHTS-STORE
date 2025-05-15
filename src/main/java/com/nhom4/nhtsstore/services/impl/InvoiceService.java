@@ -37,7 +37,7 @@ public class InvoiceService implements IInvoiceService {
     
     @Override
     public Invoice save(Invoice entity) {
-        return repository.save(entity);
+        return repository.saveAndFlush(entity);
     }
     
     @Override

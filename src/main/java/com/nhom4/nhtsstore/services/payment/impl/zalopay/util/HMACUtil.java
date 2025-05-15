@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.nhom4.nhtsstore.utils;
+package com.nhom4.nhtsstore.services.payment.impl.zalopay.util;
 
 
 import java.io.UnsupportedEncodingException;

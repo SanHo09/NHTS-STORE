@@ -20,6 +20,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Date;
@@ -161,8 +162,8 @@ public class ProductEditPanel extends JPanel implements RoutablePanel {
             try {
                 Product updatedProduct = product != null ? product : new Product();
                 updatedProduct.setName(nameField.getText());
-                updatedProduct.setSalePrice(((Number) salePriceField.getValue()).doubleValue());
-                updatedProduct.setPurchasePrice(((Number) purchasePriceField.getValue()).doubleValue());
+                updatedProduct.setSalePrice(BigDecimal.valueOf(((Number) salePriceField.getValue()).doubleValue()));
+                updatedProduct.setPurchasePrice(BigDecimal.valueOf(((Number) purchasePriceField.getValue()).doubleValue()));
                 updatedProduct.setManufacturer(manufacturerField.getText());
                 updatedProduct.setManufactureDate(manufactureDatePicker.getDate());
                 updatedProduct.setExpiryDate((Date) expiryDatePicker.getDate());

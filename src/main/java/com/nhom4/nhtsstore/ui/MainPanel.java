@@ -1,23 +1,23 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
+ */
 package com.nhom4.nhtsstore.ui;
 
-import com.nhom4.nhtsstore.ui.layout.Header;
+
 import com.nhom4.nhtsstore.ui.layout.PagePanel;
 import com.nhom4.nhtsstore.ui.navigation.NavigationService;
 import com.nhom4.nhtsstore.ui.navigation.RouteParams;
-import com.nhom4.nhtsstore.ui.page.dashboard.DashBoardPanel;
 import com.nhom4.nhtsstore.ui.shared.components.GlobalLoadingManager;
 import com.nhom4.nhtsstore.ui.shared.components.sidebar.SidebarFxController;
 import com.nhom4.nhtsstore.utils.JavaFxSwing;
 import jakarta.annotation.PostConstruct;
 import javafx.embed.swing.JFXPanel;
 import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
-
 import javax.swing.*;
 import java.awt.*;
 import javax.swing.border.EmptyBorder;
-import java.util.Optional;
 
 @Controller
 public class MainPanel extends JPanel {

@@ -24,22 +24,37 @@ public class CustomerService implements ICustomerService {
 
     @Autowired
     private CustomerRepository repository;
-    
+
+    @Override
+    public Customer findByEmail(String email) {
+        return repository.findByEmail(email);
+    }
+
+    @Override
+    public Customer findByPhoneNumber(String phoneNumber) {
+        return repository.findByPhoneNumber(phoneNumber);
+    }
+
+    @Override
+    public Customer findByEmailOrPhoneNumber(String email, String phoneNumber) {
+        return repository.findByEmailOrPhoneNumber(email, phoneNumber);
+    }
+
     @Override
     public List<Customer> findAll() {
         return repository.findAll();
     }
-    
+
     @Override
     public Customer findById(Long id) {
         return repository.findById(id).orElse(null);
     }
-    
+
     @Override
     public Customer save(Customer entity) {
         return repository.save(entity);
     }
-    
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteById(Long id) {
@@ -56,13 +71,13 @@ public class CustomerService implements ICustomerService {
             repository.deleteById(customerId);
         }
     }
-    
+
     @Override
     public Page<Customer> findAll(Pageable pageable) {
         pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("lastModifiedOn").descending());
         return repository.findAll(pageable);
     }
-    
+
     @Override
     public Page<Customer> search(String keyword, List<String> searchFields, Pageable pageable) {
         Specification<Customer> spec = Specification.where(null);

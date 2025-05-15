@@ -21,7 +21,7 @@ public class InvoiceListPanel extends GenericTablePanel<Invoice> {
     private static String placeHolderMessage = "Search by Id";
 
     public InvoiceListPanel(IInvoiceService service) {
-        super(service, Invoice.class, null,null, null, INVOICE_COLUMNS, "Invoices", SEARCH_FIELDS, placeHolderMessage);
+        super(service, Invoice.class, InvoiceViewPanel.class,null, null, INVOICE_COLUMNS, "Invoices", SEARCH_FIELDS, placeHolderMessage);
         
         // Cấu hình độ rộng cột
         int[] columnWidths = {

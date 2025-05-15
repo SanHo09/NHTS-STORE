@@ -7,4 +7,5 @@ import java.util.List;
 public interface IProductImageService {
     void deleteAll(List<ProductImage> images);
     ProductImage save(ProductImage entity);
+    List<ProductImage> findByProductId(Long productId);
 }

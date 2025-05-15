@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.nhom4.nhtsstore.services.IOrderService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -38,7 +39,7 @@ public class OrderService implements IOrderService {
     
     @Override
     public Order save(Order entity) {
-        return repository.save(entity);
+        return repository.saveAndFlush(entity);
     }
     
     @Override
@@ -56,6 +57,7 @@ public class OrderService implements IOrderService {
         for (Long orderId : orderIds) {
             repository.deleteById(orderId);
         }
+
     }
     
     @Override
@@ -129,4 +131,6 @@ public class OrderService implements IOrderService {
     public void remove(long id) {
         repository.deleteById(id);
     }
+
+
 }

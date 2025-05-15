@@ -14,7 +14,6 @@ import javax.swing.*;
 import java.awt.*;
 
 @Controller
-@Scope("prototype")
 public class DashBoardPanel extends JPanel implements RoutablePanel {
     private final NavigationService navigationService;
     private final IDashboardStatisticsService dashboardStatistics;

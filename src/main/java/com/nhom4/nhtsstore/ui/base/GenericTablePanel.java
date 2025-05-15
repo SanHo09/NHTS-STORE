@@ -75,7 +75,7 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel implement
     private Long totalItems;
     private JLabel totalRecords;
     private JLabel titleLabel;
-    
+
     /**
      * Constructor cho GenericTablePanel
      * @param service Service cung cấp dữ liệu và thao tác với database
@@ -212,6 +212,7 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel implement
      * Update texts in pagination controls
      */
     private void updatePaginationTexts() {
+        if (languageManager == null) return;
         if (pageInfoLabel != null && totalItems != null) {
             int start = currentPage * pageSize + 1;
             int end = Math.min((currentPage + 1) * pageSize, totalItems.intValue());

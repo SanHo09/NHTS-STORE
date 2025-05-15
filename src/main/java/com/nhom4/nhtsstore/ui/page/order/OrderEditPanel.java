@@ -20,6 +20,7 @@ import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -218,9 +219,9 @@ public class OrderEditPanel extends JPanel implements RoutablePanel {
     }
     
     private void updateTotalAmount() {
-        double total = 0;
+        double total =0;
         for (OrderDetail detail : orderDetails) {
-            total += detail.getProduct().getSalePrice() * detail.getQuantity();
+            total += detail.getProduct().getSalePrice().multiply(new BigDecimal(detail.getQuantity())).doubleValue();
         }
         totalAmountField.setValue(total);
     }
@@ -235,7 +236,7 @@ public class OrderEditPanel extends JPanel implements RoutablePanel {
             Order updatedOrder = order != null ? order : new Order();
             updatedOrder.setCustomer((Customer) customerCombo.getSelectedItem());
             updatedOrder.setStatus((OrderStatus) statusCombo.getSelectedItem());
-            updatedOrder.setTotalAmount(((Number) totalAmountField.getValue()).doubleValue());
+            updatedOrder.setTotalAmount(BigDecimal.valueOf(((Number) totalAmountField.getValue()).doubleValue()));
             updatedOrder.setCreateDate(new Date());
             for (OrderDetail od: orderDetails) {
                 od.setOrder(updatedOrder);

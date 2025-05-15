@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package com.nhom4.nhtsstore.utils;
+package com.nhom4.nhtsstore.services.payment.impl.zalopay.util;
 
 import java.util.Locale;
 

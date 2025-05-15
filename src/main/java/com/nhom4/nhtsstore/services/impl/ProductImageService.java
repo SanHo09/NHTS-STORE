@@ -20,4 +20,9 @@ public class ProductImageService implements IProductImageService {
     public ProductImage save(ProductImage entity) {
         return repository.save(entity);
     }
+
+    @Override
+    public List<ProductImage> findByProductId(Long productId) {
+        return repository.findProductImagesByProduct_Id(productId);
+    }
 }
