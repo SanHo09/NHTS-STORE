@@ -18,13 +18,17 @@ import javafx.scene.layout.StackPane;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.task.VirtualThreadTaskExecutor;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -76,23 +80,20 @@ public class JavaFxSwing {
      */
     public static JFXPanel createJFXPanelFromFxml(String fxmlPath, ApplicationContext applicationContext) {
         JFXPanel jfxPanel = createLoadingJFXPanel();
-        Platform.runLater(() -> {
-            Thread loadThread = new Thread(() -> {
-                try {
-                    FXMLLoader loader = new FXMLLoader(JavaFxSwing.class.getResource(fxmlPath));
-                    loader.setControllerFactory(applicationContext::getBean);
-                    Parent root = loader.load();
-                    Platform.runLater(() -> {
-                        Scene actualScene = new Scene(root);
-                        jfxPanel.setScene(actualScene);
+        VirtualThreadTaskExecutor virtualThread=new VirtualThreadTaskExecutor();
+        virtualThread.execute(() -> {
+            try {
+                FXMLLoader loader = new FXMLLoader(JavaFxSwing.class.getResource(fxmlPath));
+                loader.setControllerFactory(applicationContext::getBean);
+                Parent root = loader.load();
+                Platform.runLater(() -> {
+                    Scene actualScene = new Scene(root);
+                    jfxPanel.setScene(actualScene);
 
-                    });
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
-            loadThread.setDaemon(true);
-            loadThread.start();
+                });
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         });
         return jfxPanel;
     }
@@ -126,23 +127,7 @@ public class JavaFxSwing {
             Consumer<T> controllerConsumer) {
 
         JFXPanel jfxPanel = new JFXPanel();
-        Platform.runLater(() -> {
-            try {
-                FXMLLoader loader = new FXMLLoader(JavaFxSwing.class.getResource(fxmlPath));
-                loader.setControllerFactory(applicationContext::getBean);
-                Parent root = loader.load();
-                Scene scene = new Scene(root);
-                jfxPanel.setScene(scene);
-
-                @SuppressWarnings("unchecked")
-                T controller = (T) loader.getController();
-                if (controllerConsumer != null) {
-                    controllerConsumer.accept(controller);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
+        loadFxmlOnVirtualThread(fxmlPath, applicationContext, jfxPanel, controllerConsumer);
         return jfxPanel;
     }
 
@@ -166,29 +151,7 @@ public class JavaFxSwing {
         }
 
         JFXPanel jfxPanel = createLoadingJFXPanel();
-        Platform.runLater(() -> {
-            Thread.startVirtualThread(() -> {
-                try {
-                    FXMLLoader loader = new FXMLLoader(JavaFxSwing.class.getResource(fxmlPath));
-                    loader.setControllerFactory(applicationContext::getBean);
-                    Parent root = loader.load();
-
-                    Platform.runLater(() -> {
-                        Scene actualScene = new Scene(root);
-                        jfxPanel.setScene(actualScene);
-
-                        @SuppressWarnings("unchecked")
-                        T controller = (T) loader.getController();
-                        if (controllerConsumer != null) {
-                            controllerConsumer.accept(controller);
-                        }
-                    });
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
-
-        });
+        loadFxmlOnVirtualThread(fxmlPath, applicationContext, jfxPanel, controllerConsumer);
         return jfxPanel;
     }
 
@@ -207,6 +170,43 @@ public class JavaFxSwing {
 
         return createJFXPanelWithController(fxmlPath, applicationContext, true, controllerConsumer);
     }
+    /**
+     * Helper method to load FXML content using a virtual thread
+     * @param <T> the controller type
+     * @param fxmlPath the path to the FXML file
+     * @param applicationContext Spring application context for controller creation
+     * @param jfxPanel the JFXPanel to update with the scene
+     * @param controllerConsumer a consumer that will receive the controller instance
+     */
+    private static <T> void loadFxmlOnVirtualThread(
+            String fxmlPath,
+            ApplicationContext applicationContext,
+            JFXPanel jfxPanel,
+            Consumer<T> controllerConsumer) {
+
+        Thread.startVirtualThread(() -> {
+            Platform.runLater(() -> {
+                try {
+                    FXMLLoader loader = new FXMLLoader(JavaFxSwing.class.getResource(fxmlPath));
+                    loader.setControllerFactory(applicationContext::getBean);
+                    Parent root = loader.load();
+
+                    // Create scene
+                    Scene actualScene = new Scene(root);
+                    jfxPanel.setScene(actualScene);
+
+
+                    if (controllerConsumer != null) {
+                        controllerConsumer.accept(loader.getController());
+                    }
+                } catch (IOException e) {
+                    log.error("Error getting controller", e);
+                }
+            });
+        });
+
+    }
+
     /**
      * Runs a task on the JavaFX thread and waits for completion
      * @param runnable The task to run
@@ -249,34 +249,38 @@ public class JavaFxSwing {
             }
         }
 
-        FutureTask<T> task = new FutureTask<>(callable);
-        Platform.runLater(task);
-        return task.get();
-    }
+        CompletableFuture<T> future = new CompletableFuture<>();
 
-    /**
-     * Creates a JFXPanel with a provided controller instance instead of creating one
-     * @param <T> the controller type
-     * @param fxmlPath the path to the FXML file
-     * @param controller the pre-instantiated controller to use
-     * @return a JFXPanel with the FXML content and controller set
-     */
-    public static <T> JFXPanel createJFXPanelWithExistingController(
-            String fxmlPath,
-            T controller) {
-
-        JFXPanel jfxPanel = new JFXPanel();
-        Platform.runLater(() -> {
+        Thread.startVirtualThread(() -> {
             try {
-                FXMLLoader loader = new FXMLLoader(JavaFxSwing.class.getResource(fxmlPath));
-                loader.setController(controller);
-                Parent root = loader.load();
-                Scene scene = new Scene(root);
-                jfxPanel.setScene(scene);
-            } catch (IOException e) {
-                e.printStackTrace();
+                CountDownLatch latch = new CountDownLatch(1);
+                AtomicReference<T> result = new AtomicReference<>();
+                AtomicReference<Throwable> exception = new AtomicReference<>();
+
+                Platform.runLater(() -> {
+                    try {
+                        result.set(callable.call());
+                    } catch (Throwable e) {
+                        exception.set(e);
+                    } finally {
+                        latch.countDown();
+                    }
+                });
+
+                latch.await();
+
+                if (exception.get() != null) {
+                    future.completeExceptionally(exception.get());
+                } else {
+                    future.complete(result.get());
+                }
+            } catch (Throwable e) {
+                future.completeExceptionally(e);
             }
         });
-        return jfxPanel;
+
+        return future.get();
     }
+
+
 }

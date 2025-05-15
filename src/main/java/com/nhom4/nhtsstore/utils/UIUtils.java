@@ -7,6 +7,8 @@ import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import javafx.scene.image.Image;
+import java.io.InputStream;
 
 /**
  *
@@ -57,5 +59,23 @@ public class UIUtils {
             return IconUtil.createSwingIconFromSvg(path,24,24, color1 -> color);
         }
         return new ImageIcon(location);
+    }
+    
+    /**
+     * Load a JavaFX Image from a resource path
+     * @param iconName Name of the icon file (will be loaded from /icons/ directory)
+     * @return JavaFX Image object, or null if the image couldn't be loaded
+     */
+    public static Image loadJavaFXImage(String iconName) {
+        try {
+            String path = "/icons/" + iconName;
+            InputStream is = NhtsStoreApplication.class.getResourceAsStream(path);
+            if (is != null) {
+                return new Image(is);
+            }
+        } catch (Exception e) {
+            System.err.println("Error loading JavaFX image: " + e.getMessage());
+        }
+        return null;
     }
 }    

@@ -1,47 +1,38 @@
-// package com.nhom4.nhtsstore.ui.page.user;
+package com.nhom4.nhtsstore.ui.page.user;
 
-// import com.nhom4.nhtsstore.entities.rbac.User;
-// import com.nhom4.nhtsstore.services.EventBus;
-// import com.nhom4.nhtsstore.services.GenericService;
-// import com.nhom4.nhtsstore.ui.base.GenericTablePanel;
-// import java.util.Arrays;
-// import java.util.List;
-// import javax.swing.SwingConstants;
-// import org.springframework.context.annotation.Scope;
-// import org.springframework.stereotype.Controller;
+import com.nhom4.nhtsstore.entities.rbac.User;
+import com.nhom4.nhtsstore.services.IUserService;
+import com.nhom4.nhtsstore.ui.base.GenericTablePanel;
+import com.nhom4.nhtsstore.ui.navigation.RoutablePanel;
+import com.nhom4.nhtsstore.ui.navigation.RouteParams;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Controller;
 
+import java.util.Arrays;
+import java.util.List;
 
-// @Scope("prototype")
-// @Controller
-// public class UserListPanel extends GenericTablePanel<User> {
-//    private static final String[] USER_COLUMNS = {
-//        "Name", "Role", "Status", "Updated At ↓", "Updated By"
-//    };
-//    private static final List<String> SEARCH_FIELDS = Arrays.asList("fullName");
-//    private static String placeHolderMessage = "Search by User Name";
+@Controller
+@Scope("prototype")
+public class UserListPanel extends GenericTablePanel<User> implements RoutablePanel {
+	private static final String[] USER_COLUMNS = {
+			"Id", "Full name", "Username","Role", "Status", "Updated At ↓", "Updated By"
+	};
+	private static final List<String> SEARCH_FIELDS = Arrays.asList("username", "fullName", "email");
+	private static final String placeHolderMessage = "Search by Username/Full name/Email";
+	private static final long serialVersionUID = 1L;
 
-   
-//    public UserListPanel(GenericService<User> service) {
-//        super(service, User.class, null, UserEditDialog.class, USER_COLUMNS, "Users", SEARCH_FIELDS, placeHolderMessage);
-       
-//        // Cấu hình độ rộng cột
-//        int[] columnWidths = {
-//            40,    // checkbox
-//            150,   // FullName
-//            150,   // Role
-//            80,   // Status
-//            150,   // Updated At
-//            150    // Updated By
-//        };
-//        configureColumnWidths(columnWidths);
-       
-//        setHeaderAlignment(SwingConstants.LEFT);
-       
-//        EventBus.getReloadSubject().subscribe(isReload -> {
-//            if ((Boolean) isReload) {
-//                this.loadData();
-//                EventBus.postReload(false);
-//            }
-//        });
-//    }
-// }
+	/**
+	 * Constructor cho GenericTablePanel
+	 *
+	 * @param service            Service cung cấp dữ liệu và thao tác với database
+
+	 */
+	public UserListPanel(IUserService service) {
+		super(service, User.class, UserProfilePanel.class, UserCreatePanel.class,null, USER_COLUMNS, "Users", SEARCH_FIELDS, placeHolderMessage);
+	}
+
+	@Override
+	public void onNavigate(RouteParams params) {
+
+	}
+}

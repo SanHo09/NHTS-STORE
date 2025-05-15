@@ -1,22 +1,23 @@
 package com.nhom4.nhtsstore.entities;
 
 import jakarta.persistence.*;
+
+import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import lombok.Getter;
-import lombok.Setter;
+
+import lombok.*;
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Nationalized;
 
 import java.util.Date;
 import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 
 @Entity
 @Table
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Product extends GenericEntity {
@@ -29,11 +30,11 @@ public class Product extends GenericEntity {
     @Nationalized
     private String name;
 
-    @Column(nullable = false)
-    private double salePrice;
+    @Column(nullable = false,precision = 19, scale = 2)
+    private BigDecimal salePrice= BigDecimal.ZERO;
 
-    @Column(nullable = true)
-    private double purchasePrice;
+    @Column(nullable = true,precision = 19, scale = 2)
+    private BigDecimal purchasePrice= BigDecimal.ZERO;
 
     @Temporal(TemporalType.DATE)
     @Column(nullable = true)

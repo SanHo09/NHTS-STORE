@@ -2,7 +2,7 @@ package com.nhom4.nhtsstore.ui.page.permission;
 
 import com.nhom4.nhtsstore.entities.rbac.Permission;
 import com.nhom4.nhtsstore.services.EventBus;
-import com.nhom4.nhtsstore.services.PermissionService;
+import com.nhom4.nhtsstore.services.impl.PermissionService;
 import com.nhom4.nhtsstore.ui.AppView;
 import com.nhom4.nhtsstore.ui.navigation.NavigationService;
 import com.nhom4.nhtsstore.ui.navigation.RoutablePanel;

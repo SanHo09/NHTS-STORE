@@ -5,13 +5,16 @@
 package com.nhom4.nhtsstore.ui.pointOfSale;
 
 import com.nhom4.nhtsstore.common.ImageHelper;
-import com.nhom4.nhtsstore.entities.Product;
+import com.nhom4.nhtsstore.entities.ProductImage;
 import com.nhom4.nhtsstore.ui.pointOfSale.ActionListener.DeleteCartItemListener;
 import com.nhom4.nhtsstore.ui.pointOfSale.ActionListener.SetCartQuantityListener;
+import com.nhom4.nhtsstore.viewmodel.cart.CartItemVm;
 
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.math.BigDecimal;
+import java.util.List;
 
 /**
  *
@@ -22,19 +25,27 @@ public class CartBody extends javax.swing.JPanel {
     /**
      * Creates new form CartBody
      */
-    public CartBody(Product product, int Currentquantity, DeleteCartItemListener listener, SetCartQuantityListener setCartQuantityListener) {
+    public CartBody(CartItemVm itemVm, List<ProductImage> images, DeleteCartItemListener listener, SetCartQuantityListener setCartQuantityListener) {
         initComponents();
         this.setMaximumSize(new Dimension(Integer.MAX_VALUE, 150));
-        lblName.setText(product.getName());
-        lblHeader.setText(product.getManufacturer());
-        lblPrice.setText(product.getSalePrice() + "");
-        spnQuantity.setValue(Currentquantity);
+        lblName.setText(itemVm.getProductName());
+        lblHeader.setText(itemVm.getManufacturer());
+        lblPrice.setText(itemVm.getPrice() + "");
+        spnQuantity.setValue(itemVm.getQuantity());
         Number number  = (Number)spnQuantity.getValue();
         double quantity = number.doubleValue();
-        double amount = quantity * product.getSalePrice();
+        BigDecimal amount = itemVm.getPrice().multiply(BigDecimal.valueOf(quantity));
         lblAmount.setText(amount + "");
-        if(!product.getImages().isEmpty()) {
-            ImageHelper.SetLabelImage(lblImage, 50, 50, product.getImages().getFirst().getImageData());
+        if(!images.isEmpty()) {
+            ProductImage image= images.stream().
+                    filter(ProductImage::isThumbnail).
+                    findFirst().
+                    orElse(null);
+            if (image == null) {
+                ImageHelper.SetLabelImage(lblImage, 50, 50, null);
+                return;
+            }
+            ImageHelper.SetLabelImage(lblImage, 50, 50, image.getImageData());
         } else {
             ImageHelper.SetLabelImage(lblImage, 50, 50, null);
         }
@@ -43,7 +54,7 @@ public class CartBody extends javax.swing.JPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (listener != null) {
-                    listener.onRemove(product);
+                    listener.onRemove(itemVm);
                 }
             }
 
@@ -54,7 +65,7 @@ public class CartBody extends javax.swing.JPanel {
         });
 
         spnQuantity.addChangeListener(e -> {
-            setCartQuantityListener.setQuantity(product.getId(), (int)spnQuantity.getValue());
+            setCartQuantityListener.setQuantity(itemVm.getProductId(), (int)spnQuantity.getValue());
         });
     }
 

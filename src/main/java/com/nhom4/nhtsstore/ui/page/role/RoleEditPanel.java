@@ -4,11 +4,12 @@ import com.nhom4.nhtsstore.entities.rbac.Permission;
 import com.nhom4.nhtsstore.entities.rbac.Role;
 import com.nhom4.nhtsstore.entities.rbac.RoleHasPermission;
 import com.nhom4.nhtsstore.services.EventBus;
-import com.nhom4.nhtsstore.services.PermissionService;
-import com.nhom4.nhtsstore.services.RoleService;
+import com.nhom4.nhtsstore.services.impl.PermissionService;
+import com.nhom4.nhtsstore.services.impl.RoleService;
 import com.nhom4.nhtsstore.ui.navigation.NavigationService;
 import com.nhom4.nhtsstore.ui.navigation.RoutablePanel;
 import com.nhom4.nhtsstore.ui.navigation.RouteParams;
+import com.nhom4.nhtsstore.ui.shared.LanguageManager;
 import com.nhom4.nhtsstore.ui.shared.components.ComboBoxMultiSelection;
 import com.nhom4.nhtsstore.ui.shared.components.ToggleSwitch;
 import raven.modal.Toast;
@@ -28,10 +29,11 @@ import org.springframework.stereotype.Controller;
 
 @Scope("prototype")
 @Controller
-public class RoleEditPanel extends JPanel implements RoutablePanel {
+public class RoleEditPanel extends JPanel implements RoutablePanel, LanguageManager.LanguageChangeListener {
     private final RoleService roleService;
     private final PermissionService permissionService;
     private final NavigationService navigationService;
+    private final LanguageManager languageManager;
 
     private Role role;
     private JTextField roleNameField;
@@ -40,25 +42,96 @@ public class RoleEditPanel extends JPanel implements RoutablePanel {
     private ComboBoxMultiSelection<PermissionWrapper> permissionsCombo;
     private JButton saveButton;
     private JButton cancelButton;
+    private JButton deleteButton;
     private boolean isNewRole = false;
+    
+    // UI components for localization
+    private JLabel titleLabel;
+    private JLabel roleNameLabel;
+    private JLabel descriptionLabel;
+    private JLabel activeLabel;
+    private JLabel permissionsLabel;
+    
 
-    public RoleEditPanel(RoleService roleService, PermissionService permissionService, NavigationService navigationService) {
+    public RoleEditPanel(
+            RoleService roleService, 
+            PermissionService permissionService, 
+            NavigationService navigationService,
+            LanguageManager languageManager) {
         this.roleService = roleService;
         this.permissionService = permissionService;
         this.navigationService = navigationService;
+        this.languageManager = languageManager;
 
         setLayout(new BorderLayout(10, 10));
         initComponents();
-    }
 
+    }
+    
+    @Override
+    public void addNotify() {
+        super.addNotify();
+        languageManager.addLanguageChangeListener(this);
+        updateTexts();
+    }
+    
+    @Override
+    public void removeNotify() {
+        super.removeNotify();
+        languageManager.removeLanguageChangeListener(this);
+    }
+    
+
+    public void updateTexts() {
+        SwingUtilities.invokeLater(() -> {
+            // Update all text elements
+            titleLabel.setText(languageManager.getText("role.edit.title"));
+            roleNameLabel.setText(languageManager.getText("role.edit.name") + ":");
+            descriptionLabel.setText(languageManager.getText("role.edit.description") + ":");
+            activeLabel.setText(languageManager.getText("role.edit.active") + ":");
+            permissionsLabel.setText(languageManager.getText("role.edit.permissions") + ":");
+            saveButton.setText(languageManager.getText("role.edit.save"));
+            cancelButton.setText(languageManager.getText("role.edit.cancel"));
+
+            if (deleteButton != null) {
+                deleteButton.setText(languageManager.getText("role.edit.delete"));
+            }
+        });
+
+    }
+    @Override
+    public void onLanguageChanged() {
+        updateTexts();
+    }
     @Override
     public void onNavigate(RouteParams params) {
         if (params.get("entity") != null) {
             role = params.get("entity", Role.class);
             isNewRole = false;
+            
+            // Add delete button if not already added
+            if (deleteButton == null) {
+                deleteButton = new JButton(languageManager != null ? 
+                    languageManager.getText("role.edit.delete") : "Delete");
+                deleteButton.addActionListener(e -> deleteRole());
+                
+                JPanel buttonPanel = (JPanel) saveButton.getParent();
+                buttonPanel.add(deleteButton, 0); // Add at beginning
+                buttonPanel.revalidate();
+                buttonPanel.repaint();
+            }
         } else {
             role = new Role();
             isNewRole = true;
+            
+            // Remove delete button if it exists
+            if (deleteButton != null) {
+                JPanel buttonPanel = (JPanel) deleteButton.getParent();
+                buttonPanel.remove(deleteButton);
+                deleteButton = null;
+                buttonPanel.revalidate();
+                buttonPanel.repaint();
+            }
         }
 
         loadPermissions();
@@ -69,7 +142,8 @@ public class RoleEditPanel extends JPanel implements RoutablePanel {
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        JLabel titleLabel = new JLabel("Role Details");
+        titleLabel = new JLabel(languageManager != null ? 
+            languageManager.getText("role.edit.title") : "Role Details");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 16));
         headerPanel.add(titleLabel, BorderLayout.WEST);
         add(headerPanel, BorderLayout.NORTH);
@@ -81,16 +155,24 @@ public class RoleEditPanel extends JPanel implements RoutablePanel {
         gbc.anchor = GridBagConstraints.WEST;
         gbc.insets = new Insets(5, 5, 5, 5);
 
-        formPanel.add(new JLabel("Role Name:"), gbc);
+        roleNameLabel = new JLabel(languageManager != null ? 
+            languageManager.getText("role.edit.name") + ":" : "Role Name:");
+        formPanel.add(roleNameLabel, gbc);
 
         gbc.gridy++;
-        formPanel.add(new JLabel("Description:"), gbc);
+        descriptionLabel = new JLabel(languageManager != null ? 
+            languageManager.getText("role.edit.description") + ":" : "Description:");
+        formPanel.add(descriptionLabel, gbc);
 
         gbc.gridy++;
-        formPanel.add(new JLabel("Active:"), gbc);
+        activeLabel = new JLabel(languageManager != null ? 
+            languageManager.getText("role.edit.active") + ":" : "Active:");
+        formPanel.add(activeLabel, gbc);
 
         gbc.gridy++;
-        formPanel.add(new JLabel("Permissions:"), gbc);
+        permissionsLabel = new JLabel(languageManager != null ? 
+            languageManager.getText("role.edit.permissions") + ":" : "Permissions:");
+        formPanel.add(permissionsLabel, gbc);
 
         gbc.gridx = 1;
         gbc.gridy = 0;
@@ -119,10 +201,12 @@ public class RoleEditPanel extends JPanel implements RoutablePanel {
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 
-        saveButton = new JButton("Save");
+        saveButton = new JButton(languageManager != null ? 
+            languageManager.getText("role.edit.save") : "Save");
         saveButton.addActionListener(e -> saveRole());
 
-        cancelButton = new JButton("Cancel");
+        cancelButton = new JButton(languageManager != null ? 
+            languageManager.getText("role.edit.cancel") : "Cancel");
         cancelButton.addActionListener(e -> navigateBack());
 
         buttonPanel.add(saveButton);
@@ -133,6 +217,48 @@ public class RoleEditPanel extends JPanel implements RoutablePanel {
 
     private void navigateBack() {
         navigationService.navigateTo(RoleListPanel.class, new RouteParams());
+    }
+    
+    private void deleteRole() {
+        int result = JOptionPane.showConfirmDialog(
+                this,
+                "Are you sure you want to delete this role?",
+                "Confirm Deletion",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE
+        );
+
+        if (result == JOptionPane.YES_OPTION) {
+            setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            
+            SwingWorker<Void, Void> worker = new SwingWorker<>() {
+                @Override
+                protected Void doInBackground() throws Exception {
+                    roleService.deleteById(role.getId());
+                    return null;
+                }
+
+                @Override
+                protected void done() {
+                    try {
+                        get(); // Check for exceptions
+                        EventBus.postReload(true);
+                        navigateBack();
+                        
+                        Toast.show(RoleEditPanel.this, Toast.Type.SUCCESS,
+                                "Role deleted successfully",
+                                ToastLocation.TOP_CENTER);
+                    } catch (Exception e) {
+                        Toast.show(RoleEditPanel.this, Toast.Type.ERROR,
+                                "Error deleting role: " + e.getMessage(),
+                                ToastLocation.TOP_CENTER);
+                    } finally {
+                        setCursor(Cursor.getDefaultCursor());
+                    }
+                }
+            };
+            worker.execute();
+        }
     }
 
     private void loadPermissions() {
@@ -231,7 +357,11 @@ public class RoleEditPanel extends JPanel implements RoutablePanel {
                         rolePermissions.add(rolePermission);
                     }
                 }
-                role.getRolePermissions().clear();
+                if (role.getRolePermissions() == null) {
+                    role.setRolePermissions(new HashSet<>());
+                } else {
+                    role.getRolePermissions().clear();
+                }
                 // Set the permissions
                 role.getRolePermissions().addAll(rolePermissions);
 
@@ -248,9 +378,10 @@ public class RoleEditPanel extends JPanel implements RoutablePanel {
 
                     EventBus.postReload(true);
                     navigateBack();
-                } catch (InterruptedException | ExecutionException ex) {
+                } catch (Exception e) {
+                    e.printStackTrace();
                     Toast.show(RoleEditPanel.this, Toast.Type.ERROR,
-                            "Error saving role: " + ex.getMessage(),
+                            "Error saving role: " + e.getMessage(),
                             ToastLocation.TOP_CENTER);
                 } finally {
                     setCursor(Cursor.getDefaultCursor());
@@ -263,13 +394,14 @@ public class RoleEditPanel extends JPanel implements RoutablePanel {
 
     private boolean validateForm() {
         if (roleNameField.getText().trim().isEmpty()) {
-            Toast.show(this, Toast.Type.WARNING,
-                    "Role name is required",
-                    ToastLocation.TOP_CENTER);
+            Toast.show(this, Toast.Type.WARNING, "Role name is required", ToastLocation.TOP_CENTER);
+            roleNameField.requestFocus();
             return false;
         }
         return true;
     }
+
+
 
     @Getter
     static class PermissionWrapper {

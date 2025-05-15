@@ -254,6 +254,16 @@ public class SettingPanel extends JPanel implements RoutablePanel, LanguageManag
                 
             // Set the new language
             languageManager.setLanguage(language);
+            
+            // Show confirmation
+            SwingUtilities.invokeLater(() -> {
+                JOptionPane.showMessageDialog(
+                    this, 
+                    languageManager.getText("notify.saved"),
+                    languageManager.getText("settings.language"),
+                    JOptionPane.INFORMATION_MESSAGE
+                );
+            });
         });
         
         languageSection.add(languageLabel);

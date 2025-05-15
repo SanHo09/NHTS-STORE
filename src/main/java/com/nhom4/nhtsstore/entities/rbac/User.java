@@ -45,8 +45,7 @@ public class User extends GenericEntity implements Serializable, UserDetails {
     @ManyToOne
     @JoinColumn(name = "role_id", nullable = true)
     private Role role;
-    @Column(name = "is_active")
-    private boolean active = true;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         if (role == null) {
@@ -76,7 +75,7 @@ public class User extends GenericEntity implements Serializable, UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return this.active;
+        return this.isActive();
     }
 
     @Override
@@ -87,11 +86,13 @@ public class User extends GenericEntity implements Serializable, UserDetails {
     public Object getFieldValueByIndex(int index) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
         switch (index) {
-            case 0: return fullName;
-            case 1: return role.getRoleName();
-            case 2: return isActive() ? "Active" : "Inactive";
-            case 3: return lastModifiedOn != null ? lastModifiedOn.format(formatter) : null;
-            case 4: return lastModifiedBy;
+            case 0: return userId;
+            case 1: return fullName;
+            case 2: return username;
+            case 3: return role.getRoleName();
+            case 4: return isActive() ? "Active" : "Inactive";
+            case 5: return lastModifiedOn != null ? lastModifiedOn.format(formatter) : null;
+            case 6: return lastModifiedBy;
             default: return null;
         }
     }

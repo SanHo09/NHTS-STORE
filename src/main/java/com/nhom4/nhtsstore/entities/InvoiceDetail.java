@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table
 @Getter
@@ -21,4 +23,13 @@ public class InvoiceDetail {
     @ManyToOne()
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
+
+    @Column(nullable = false)
+    private int quantity;
+
+    @Column(nullable = false, precision = 19, scale = 2)
+    private BigDecimal unitPrice;
+
+    @Column(nullable = false, precision = 19, scale = 2)
+    private BigDecimal subtotal;
 }

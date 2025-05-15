@@ -1,18 +1,30 @@
 package com.nhom4.nhtsstore.ui.page.role;
 
+import com.nhom4.nhtsstore.entities.rbac.Permission;
 import com.nhom4.nhtsstore.entities.rbac.Role;
+import com.nhom4.nhtsstore.entities.rbac.RoleHasPermission;
 import com.nhom4.nhtsstore.services.EventBus;
-import com.nhom4.nhtsstore.services.RoleService;
+import com.nhom4.nhtsstore.services.impl.PermissionService;
+import com.nhom4.nhtsstore.services.impl.RoleService;
 import com.nhom4.nhtsstore.ui.base.GenericEditDialog;
+import com.nhom4.nhtsstore.ui.shared.components.ComboBoxMultiSelection;
 import com.nhom4.nhtsstore.ui.shared.components.ToggleSwitch;
 import com.nhom4.nhtsstore.utils.UIUtils;
+
 import java.awt.BorderLayout;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -21,6 +33,9 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingWorker;
+
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 
@@ -30,9 +45,13 @@ public class RoleEditDialog extends JDialog implements GenericEditDialog<Role> {
     @Autowired
     private RoleService roleService;
     
+    @Autowired
+    private PermissionService permissionService;
+    
     private Role role;
     private JTextField nameField, descriptionField;
     private ToggleSwitch activeToggle;
+    private ComboBoxMultiSelection<PermissionWrapper> permissionsCombo;
     
     public RoleEditDialog() {
         super((Frame) null, "", true);
@@ -50,6 +69,7 @@ public class RoleEditDialog extends JDialog implements GenericEditDialog<Role> {
         nameField = new JTextField();
         descriptionField = new JTextField();
         activeToggle = new ToggleSwitch();
+        permissionsCombo = new ComboBoxMultiSelection<>();
 
         if (role != null) {
             nameField.setText(role.getRoleName());
@@ -57,13 +77,17 @@ public class RoleEditDialog extends JDialog implements GenericEditDialog<Role> {
             activeToggle.setSelected(role.isActive());
         }
         
-        int fieldWidth = 220;
+        // Load permissions
+        loadPermissions();
+        
+        int fieldWidth = 500;
         int row = 0;
         int column = 0;
         
         addFieldToForm(formPanel, createLabeledField("Name:", nameField, fieldWidth), gbc, column, row++);
         addFieldToForm(formPanel, createLabeledField("Description:", descriptionField, fieldWidth), gbc, column, row++);
         addFieldToForm(formPanel, createLabeledField("Visible:", activeToggle, fieldWidth), gbc, column, row++);
+        addFieldToForm(formPanel, createLabeledField("Permissions:", permissionsCombo, fieldWidth), gbc, column, row++);
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
         JButton saveButton = new JButton("Save");
@@ -91,12 +115,68 @@ public class RoleEditDialog extends JDialog implements GenericEditDialog<Role> {
 
         add(formPanel, BorderLayout.CENTER);
         add(buttonPanel, BorderLayout.SOUTH);
+        
+        // Set a reasonable size for the dialog
+        setPreferredSize(new Dimension(700, 350));
         pack();
         
         setLocationRelativeTo(null);
                 
         revalidate();
         repaint();
+    }
+    
+    private void loadPermissions() {
+        permissionsCombo.removeAllItems();
+        setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
+        SwingWorker<List<Permission>, Void> worker = new SwingWorker<>() {
+            @Override
+            protected List<Permission> doInBackground() {
+                return permissionService.findAll();
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    List<Permission> permissions = get();
+                    for (Permission permission : permissions) {
+                        permissionsCombo.addItem(new PermissionWrapper(
+                                permission.getId(),
+                                permission.getPermissionName()
+                        ));
+                    }
+
+                    if (role != null && role.getRolePermissions() != null) {
+                        loadRolePermissions();
+                    }
+
+                } catch (InterruptedException | ExecutionException e) {
+                    JOptionPane.showMessageDialog(RoleEditDialog.this, 
+                            "Error loading permissions: " + e.getMessage(),
+                            "Error", JOptionPane.ERROR_MESSAGE);
+                } finally {
+                    setCursor(Cursor.getDefaultCursor());
+                }
+            }
+        };
+        worker.execute();
+    }
+
+    private void loadRolePermissions() {
+        List<Object> selectedPermissions = new ArrayList<>();
+
+        if (role.getRolePermissions() != null) {
+            for (RoleHasPermission rhp : role.getRolePermissions()) {
+                // Create a PermissionWrapper for each permission
+                selectedPermissions.add(new PermissionWrapper(
+                        rhp.getPermission().getId(),
+                        rhp.getPermission().getPermissionName()
+                ));
+            }
+        }
+
+        permissionsCombo.setSelectedItems(selectedPermissions);
     }
 
     private void save() {
@@ -105,6 +185,35 @@ public class RoleEditDialog extends JDialog implements GenericEditDialog<Role> {
            updatedRole.setRoleName(nameField.getText());
            updatedRole.setDescription(descriptionField.getText());
            updatedRole.setActive(activeToggle.isSelected());
+           
+           // Update permissions
+           List<PermissionWrapper> selectedPermissions = permissionsCombo.getSelectedItems()
+                   .stream()
+                   .map(item -> (PermissionWrapper) item)
+                   .toList();
+           
+           // Create or update role permissions
+           Set<RoleHasPermission> rolePermissions = new HashSet<>();
+           
+           for (PermissionWrapper wrapper : selectedPermissions) {
+               Permission permission = permissionService.findById(wrapper.getId());
+               if (permission != null) {
+                   RoleHasPermission rolePermission = RoleHasPermission.builder()
+                           .role(updatedRole)
+                           .permission(permission)
+                           .build();
+                   rolePermissions.add(rolePermission);
+               }
+           }
+           
+           if (updatedRole.getRolePermissions() == null) {
+               updatedRole.setRolePermissions(new HashSet<>());
+           } else {
+               updatedRole.getRolePermissions().clear();
+           }
+           
+           // Set the permissions
+           updatedRole.getRolePermissions().addAll(rolePermissions);
 
            roleService.save(updatedRole);
            JOptionPane.showMessageDialog(this,
@@ -170,5 +279,34 @@ public class RoleEditDialog extends JDialog implements GenericEditDialog<Role> {
         panel.add(rightPanel, BorderLayout.CENTER);
 
         return panel;
+    }
+    
+    @Getter
+    static class PermissionWrapper {
+        private Long id;
+        private String name;
+
+        public PermissionWrapper(Long id, String name) {
+            this.id = id;
+            this.name = name;
+        }
+
+        @Override
+        public String toString() {
+            return name;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) return true;
+            if (obj == null || getClass() != obj.getClass()) return false;
+            PermissionWrapper that = (PermissionWrapper) obj;
+            return id.equals(that.id);
+        }
+
+        @Override
+        public int hashCode() {
+            return id.hashCode();
+        }
     }
 }

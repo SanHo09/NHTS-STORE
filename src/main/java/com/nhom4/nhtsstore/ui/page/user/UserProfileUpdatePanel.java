@@ -2,26 +2,20 @@ package com.nhom4.nhtsstore.ui.page.user;
 
 import com.nhom4.nhtsstore.entities.rbac.User;
 import com.nhom4.nhtsstore.services.IUserService;
-import com.nhom4.nhtsstore.services.RoleService;
-import com.nhom4.nhtsstore.services.UserService;
+import com.nhom4.nhtsstore.services.impl.RoleService;
+import com.nhom4.nhtsstore.services.impl.UserService;
 import com.nhom4.nhtsstore.ui.AppView;
 import com.nhom4.nhtsstore.ui.ApplicationState;
 import com.nhom4.nhtsstore.ui.navigation.NavigationService;
 import com.nhom4.nhtsstore.ui.navigation.RoutablePanel;
 import com.nhom4.nhtsstore.ui.navigation.RouteParams;
+import com.nhom4.nhtsstore.ui.shared.components.ToggleSwitch;
 import com.nhom4.nhtsstore.utils.ValidationHelper;
 import com.nhom4.nhtsstore.viewmodel.role.RoleVm;
 import com.nhom4.nhtsstore.viewmodel.role.RoleVmWrapper;
 import com.nhom4.nhtsstore.viewmodel.role.RoleWithPermissionVm;
 import com.nhom4.nhtsstore.viewmodel.user.UserDetailVm;
 import com.nhom4.nhtsstore.viewmodel.user.UserUpdateVm;
-import io.github.palexdev.materialfx.controls.MFXPasswordField;
-import io.github.palexdev.materialfx.enums.FloatMode;
-import javafx.application.Platform;
-import javafx.embed.swing.JFXPanel;
-import javafx.scene.Scene;
-import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
 import lombok.Getter;
 import net.miginfocom.swing.MigLayout;
 import org.springframework.context.annotation.Scope;
@@ -34,7 +28,9 @@ import raven.modal.toast.option.ToastLocation;
 import javax.swing.*;
 import java.awt.*;
 import java.util.*;
+
 @Controller
+@Scope("prototype")
 public class UserProfileUpdatePanel extends JPanel implements RoutablePanel {
     private final IUserService userService;
     private final RoleService roleService;
@@ -49,8 +45,7 @@ public class UserProfileUpdatePanel extends JPanel implements RoutablePanel {
     private JTextField txtFullName;
     private JTextField txtUsername;
     private JTextField txtEmail;
-    private JFXPanel passwordPanel;
-    private MFXPasswordField txtPassword;
+    private JPasswordField txtPassword;
     private JComboBox<RoleVmWrapper> cmbRoles;
     private JPanel boxRoles;
     private JButton btnSave;
@@ -58,6 +53,10 @@ public class UserProfileUpdatePanel extends JPanel implements RoutablePanel {
     private JButton btnGeneratePassword;
     private JPanel formPanel;
     private JPanel buttonPanel;
+    
+    // Active status toggle
+    private ToggleSwitch toggleActive;
+    
     public UserProfileUpdatePanel(UserService userService, RoleService roleService, ApplicationState appState,
                                   ValidationHelper validationHelper, NavigationService navigationService) {
         this.userService = userService;
@@ -69,7 +68,7 @@ public class UserProfileUpdatePanel extends JPanel implements RoutablePanel {
         setLayout(new BorderLayout());
         initComponents();
         setPreferredSize(new Dimension(491, getPreferredSize().height));
-        setMinimumSize(new Dimension(491, 250)); // Minimum height for scrolling
+        setMinimumSize(new Dimension(491, 350)); // Minimum height for scrolling
     }
 
     private void initComponents() {
@@ -78,6 +77,11 @@ public class UserProfileUpdatePanel extends JPanel implements RoutablePanel {
         txtUsername = new JTextField();
         txtEmail = new JTextField();
         txtUsername.setEditable(false);
+        txtPassword = new JPasswordField();
+        
+        // Setup active status toggle
+        toggleActive = new ToggleSwitch();
+        
         // Setup roles component
         cmbRoles = new JComboBox<>();
         cmbRoles.setRenderer(new DefaultListCellRenderer() {
@@ -98,25 +102,20 @@ public class UserProfileUpdatePanel extends JPanel implements RoutablePanel {
         // Setup buttons
         btnSave = new JButton("Save");
         btnCancel = new JButton("Cancel");
+        btnGeneratePassword = new JButton("Generate");
+        btnGeneratePassword.addActionListener(e -> generateRandomPassword());
+        
         btnSave.addActionListener(e -> onSave());
         btnCancel.addActionListener(e -> onCancel());
 
         // Create form layout
         formPanel = new JPanel(new MigLayout("fillx, insets 10", "[100]20[grow]", ""));
 
-        // Add basic components
-        formPanel.add(new JLabel("Full name:"), "");
-        formPanel.add(txtFullName, "growx, wrap");
-
-        formPanel.add(new JLabel("Username:"), "");
-        formPanel.add(txtUsername, "growx, wrap");
-
-        formPanel.add(new JLabel("Email:"), "");
-        formPanel.add(txtEmail, "growx, wrap");
+        // Buttons panel
         buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         buttonPanel.add(btnCancel);
         buttonPanel.add(btnSave);
-        formPanel.add(buttonPanel, "span 2, growx, wrap");
+        
         // Add the form panel to the main panel
         add(formPanel, BorderLayout.CENTER);
     }
@@ -135,24 +134,6 @@ public class UserProfileUpdatePanel extends JPanel implements RoutablePanel {
         return result.toString().trim();
     }
 
-    private void setupPasswordField() {
-        passwordPanel = new JFXPanel();
-        btnGeneratePassword = new JButton("Generate");
-        btnGeneratePassword.addActionListener(e -> generateRandomPassword());
-
-        Platform.runLater(() -> {
-            MFXPasswordField passwordField = new MFXPasswordField();
-            passwordField.setFloatingText("Password");
-            passwordField.setPrefWidth(350);
-            passwordField.setPrefHeight(30);
-            passwordField.setShowPassword(true);
-            passwordField.setFloatMode(FloatMode.DISABLED);
-            Scene scene = new Scene(new StackPane(passwordField), Color.TRANSPARENT);
-            passwordPanel.setScene(scene);
-            txtPassword = passwordField;
-        });
-    }
-
     private void generateRandomPassword() {
         String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         Random random = new Random();
@@ -161,7 +142,7 @@ public class UserProfileUpdatePanel extends JPanel implements RoutablePanel {
             sb.append(chars.charAt(random.nextInt(chars.length())));
         }
 
-        Platform.runLater(() -> txtPassword.setText(sb.toString()));
+        txtPassword.setText(sb.toString());
     }
 
     private void onSave() {
@@ -170,7 +151,7 @@ public class UserProfileUpdatePanel extends JPanel implements RoutablePanel {
         if(wrapper != null) {
             role = wrapper.getRoleVm();
         }else {
-            RoleWithPermissionVm roleWithPermission =userDetailVm.getRole();
+            RoleWithPermissionVm roleWithPermission = userDetailVm.getRole();
             role.setRoleId(roleWithPermission.getId());
         }
 
@@ -179,25 +160,33 @@ public class UserProfileUpdatePanel extends JPanel implements RoutablePanel {
                 .fullName(txtFullName.getText())
                 .email(txtEmail.getText())
                 .role(role)
+                .active(toggleActive.isSelected())
                 .build();
 
-        if (txtPassword != null) {
-            String password = txtPassword.getText();
-            if (!password.isBlank()) {
-                updateVm.setPassword(password);
-            }
+        // Get password if provided
+        String password = new String(txtPassword.getPassword());
+        if (!password.isBlank()) {
+            updateVm.setPassword(password);
         }
 
         if (handleUpdateProfile(updateVm)) {
             RouteParams params = new RouteParams();
             params.set("userId", userDetailVm.getUserId());
-            navigationService.navigateTo(AppView.USER_PROFILE, params);
-            ModalDialog.closeModal(getModalId());
+            if (checkIsInModal()){
+                navigationService.navigateTo(AppView.USER_PROFILE, params);
+                ModalDialog.closeModal(getModalId());
+            }else {
+                navigationService.navigateBack();
+            }
         }
     }
 
     private void onCancel() {
-        ModalDialog.closeModal(getModalId());
+        if (checkIsInModal()) {
+            ModalDialog.closeModal(getModalId());
+        } else {
+            navigationService.navigateBack();
+        }
     }
 
     private boolean handleUpdateProfile(UserUpdateVm vm) {
@@ -219,6 +208,12 @@ public class UserProfileUpdatePanel extends JPanel implements RoutablePanel {
     @Override
     public void onNavigate(RouteParams params) {
         UserDetailVm user = params.get("user", UserDetailVm.class);
+        if (user == null) {
+            Long userId = params.get("userId", Long.class);
+            if (userId != null) {
+                user = userService.findUserById(userId);
+            }
+        }
         if (user != null) {
             this.userDetailVm = user;
             setFormData();
@@ -241,7 +236,6 @@ public class UserProfileUpdatePanel extends JPanel implements RoutablePanel {
         boolean showPassword = isSuperAdmin && !isSelf && !targetHasSuperAdminRole;
         boolean enableEditing = isSuperAdmin || isSelf;
 
-
         formPanel.removeAll();
 
         formPanel.add(new JLabel("Full name:"), "");
@@ -257,6 +251,8 @@ public class UserProfileUpdatePanel extends JPanel implements RoutablePanel {
         txtFullName.setText(userDetailVm.getFullName());
         txtUsername.setText(userDetailVm.getUsername());
         txtEmail.setText(userDetailVm.getEmail());
+        toggleActive.setSelected(userDetailVm.isActive());
+        
         txtFullName.setEditable(enableEditing);
         txtEmail.setEditable(enableEditing);
 
@@ -293,16 +289,28 @@ public class UserProfileUpdatePanel extends JPanel implements RoutablePanel {
 
         // Add password if needed
         if (showPassword) {
-            setupPasswordField();
             formPanel.add(new JLabel("Password:"), "");
-            formPanel.add(passwordPanel, "growx, h 40, wrap");
+            formPanel.add(txtPassword, "growx, wrap");
             formPanel.add(new JLabel(""), "");
             formPanel.add(btnGeneratePassword, "wrap");
         }
+        
+        // Add active status toggle
+        JPanel togglePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        togglePanel.add(toggleActive);
+        togglePanel.add(new JLabel("  Active"));
+        toggleActive.setEnabled(enableEditing);
+        
+        formPanel.add(new JLabel("Status:"), "");
+        formPanel.add(togglePanel, "growx, wrap");
 
         formPanel.add(buttonPanel, "span 2, growx, wrap");
 
         formPanel.revalidate();
         formPanel.repaint();
+    }
+    
+    private boolean checkIsInModal() {
+        return ModalDialog.isIdExist(this.modalId);
     }
 }

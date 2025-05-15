@@ -1,7 +1,7 @@
 package com.nhom4.nhtsstore.ui.page.productCategory;
 
 import com.nhom4.nhtsstore.entities.Category;
-import com.nhom4.nhtsstore.services.CategoryService;
+import com.nhom4.nhtsstore.services.impl.CategoryService;
 import com.nhom4.nhtsstore.services.EventBus;
 import com.nhom4.nhtsstore.ui.base.GenericEditDialog;
 import com.nhom4.nhtsstore.ui.shared.components.ToggleSwitch;

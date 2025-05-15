@@ -2,7 +2,11 @@ package com.nhom4.nhtsstore.entities;
 
 import com.nhom4.nhtsstore.entities.rbac.User;
 import com.nhom4.nhtsstore.enums.OrderStatus;
+import com.nhom4.nhtsstore.enums.PaymentMethod;
+import com.nhom4.nhtsstore.enums.PaymentStatus;
 import jakarta.persistence.*;
+
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.time.format.DateTimeFormatter;
 import lombok.Getter;
@@ -25,12 +29,23 @@ public class Order extends GenericEntity {
     @Column(nullable = false)
     private Date createDate;
 
-    @Column(nullable = false)
-    private double totalAmount;
+    @Column(nullable = false,  precision = 19, scale = 2)
+    private BigDecimal totalAmount= BigDecimal.ZERO;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
+
+    @Column
+    @Enumerated(EnumType.STRING)
+    private PaymentMethod paymentMethod;
+
+    @Column
+    @Enumerated(EnumType.STRING)
+    private PaymentStatus paymentStatus;
+    
+    @Column
+    private String paymentTransactionId;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<OrderDetail> orderDetails;
@@ -52,16 +67,18 @@ public class Order extends GenericEntity {
     public Object getFieldValueByIndex(int index) {
         DateTimeFormatter auditDateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
         java.text.SimpleDateFormat dateFormatter = new java.text.SimpleDateFormat("dd/MM/yyyy");
-        DecimalFormat decimalFormatter = new DecimalFormat("###,###,###");
+
 
         switch (index) {
             case 0: return id;
             case 1: return customer.getName();
-            case 2: return createDate != null ? dateFormatter.format(createDate) : null;
-            case 3: return decimalFormatter.format(totalAmount);
+            case 2: return getLastModifiedOn() != null ? dateFormatter.format(createDate) : null;
+            case 3: return totalAmount;
             case 4: return status;
-            case 5: return lastModifiedOn != null ? lastModifiedOn.format(auditDateFormatter) : null;
-            case 6: return lastModifiedBy;
+            case 5: return paymentMethod;
+            case 6: return paymentStatus;
+            case 7: return lastModifiedOn != null ? lastModifiedOn.format(auditDateFormatter) : null;
+            case 8: return lastModifiedBy;
             default: return null;
         }
     }

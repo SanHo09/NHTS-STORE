@@ -1,5 +1,6 @@
 package com.nhom4.nhtsstore.repositories;
 
+import com.nhom4.nhtsstore.entities.Invoice;
 import com.nhom4.nhtsstore.entities.Product;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,7 +13,7 @@ import java.util.List;
  *
  * @author NamDang
  */
-public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
+public interface ProductRepository extends GenericRepository<Product,Long> {
     @Query("SELECT p.category.name, p.active, SUM(p.quantity) FROM Product p " +
             "GROUP BY p.category.name, p.active")
     List<Object[]> getInventoryByCategoryAndStatus();

@@ -2,7 +2,7 @@ package com.nhom4.nhtsstore.ui.page.supplierCategory;
 
 import com.nhom4.nhtsstore.entities.SupplierCategory;
 import com.nhom4.nhtsstore.services.EventBus;
-import com.nhom4.nhtsstore.services.SupplierCategoryService;
+import com.nhom4.nhtsstore.services.impl.SupplierCategoryService;
 import com.nhom4.nhtsstore.ui.base.GenericEditDialog;
 import com.nhom4.nhtsstore.ui.shared.components.ToggleSwitch;
 import com.nhom4.nhtsstore.utils.UIUtils;

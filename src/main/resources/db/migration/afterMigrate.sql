@@ -4,24 +4,16 @@ IF NOT EXISTS (SELECT 1 FROM permissions)
         SET IDENTITY_INSERT permissions ON;
         INSERT INTO permissions (permission_id, permission_name, description)
         VALUES (1, N'FULL_ACCESS', N'Toàn quyền truy cập'),
-               (2, N'USER_MANAGEMENT', N'Quản lý người dùng'),
-               (3, N'ROLE_MANAGEMENT', N'Quản lý vai trò'),
-               (4, N'PERMISSION_MANAGEMENT', N'Quản lý quyền truy cập'),
-               (5, N'PRODUCT_MANAGEMENT', N'Quản lý sản phẩm'),
-               (6, N'ORDER_MANAGEMENT', N'Quản lý đơn hàng'),
-               (7, N'CUSTOMER_MANAGEMENT', N'Quản lý khách hàng'),
-               (8,N'USER_CREATION', N'Tạo người dùng'),
-               (9,N'USER_UPDATE', N'Cập nhật người dùng'),
-               (10,N'USER_DELETION', N'Xóa người dùng'),
-               (11,N'ROLE_CREATION', N'Tạo vai trò'),
-               (12,N'ROLE_UPDATE', N'Cập nhật vai trò'),
-               (13,N'ROLE_DELETION', N'Xóa vai trò'),
-               (14,N'PERMISSION_CREATION', N'Tạo quyền truy cập'),
-               (15,N'PERMISSION_UPDATE', N'Cập nhật quyền truy cập'),
-               (16,N'PERMISSION_DELETION', N'Xóa quyền truy cập'),
-                (17,N'USER_LIST', N'Xem danh sách người dùng'),
-                (18,N'USER_DETAIL', N'Xem chi tiết người dùng');
-          ;
+               (2,N'PRODUCT_MANAGEMENT', N'Quản lý sản phẩm'),
+               (3,N'ORDER_MANAGEMENT', N'Quản lý đơn hàng'),
+               (4,N'CUSTOMER_MANAGEMENT', N'Quản lý khách hàng'),
+               (5,N'SUPPLIER_MANAGEMENT', N'Quản lý nhà cung cấp'),
+               (6,N'USER_MANAGEMENT', N'Quản lý người dùng'),
+               (7,N'ROLE_MANAGEMENT', N'Quản lý vai trò'),
+               (8,N'STATISTICS', N'Thống kê'),
+               (9,N'INVENTORY_MANAGEMENT', N'Quản lý tồn kho'),
+               (10,N'SYSTEM_SETTINGS', N'Cài đặt hệ thống'),
+               (13,N'POS_SALE', N'Bán hàng tại POS');
 
         SET IDENTITY_INSERT permissions OFF;
 
@@ -32,12 +24,8 @@ IF NOT EXISTS (SELECT 1 FROM roles)
         SET IDENTITY_INSERT roles ON;
         INSERT INTO roles (role_id, role_name, description)
         VALUES (1, N'SUPER_ADMIN', N'Quản trị toàn hệ thống'),
-                (2, N'ADMIN', N'Quản trị viên'),
-                (3, N'GENERAL_MANAGER', N'Trưởng phòng'),
-                (4,N'PRODUCT_MANAGER', N'Quản lý sản phẩm'),
-                (5,N'EMPLOYEE', N'Nhân viên'),
-                (6,N'CUSTOMER', N'Khách hàng'),
-                (7,N'SUPPLIER', N'Nhà cung cấp');
+                (2,N'MANAGER', N'Quản lý cửa hàng'),
+                (3,N'SALE', N'Nhân viên bán hàng');
         SET IDENTITY_INSERT roles OFF;
     END
 
@@ -46,16 +34,28 @@ IF NOT EXISTS (SELECT 1 FROM role_permissions)
         INSERT INTO role_permissions (role_id, permission_id)
         VALUES
              (1, 1),
-              (2, 2),
-              (2, 3),
-              (2, 4),
-              (2, 5),
-              (2, 6),
-              (2, 7),
-              (3, 8),
-              (3, 9),
-              (3, 10),
-              (4, 5);
+             (1, 2),
+                (1, 3),
+                (1, 4),
+                (1, 5),
+                (1, 6),
+                (1, 7),
+                (1, 8),
+                (1, 9),
+                (1, 10),
+                (1, 13),
+                (2, 2),
+                (2, 3),
+                (2, 4),
+                (2, 5),
+                (2, 6),
+                (2, 7),
+                (2, 8),
+                (2, 9),
+                (2, 10),
+                (2, 13),
+                (3, 10),
+                (3, 13);
     END
 
 IF NOT EXISTS (SELECT 1 FROM users)

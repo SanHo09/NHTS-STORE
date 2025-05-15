@@ -3,6 +3,7 @@ package com.nhom4.nhtsstore.ui.page.supplier;
 import com.nhom4.nhtsstore.entities.Supplier;
 import com.nhom4.nhtsstore.services.EventBus;
 import com.nhom4.nhtsstore.services.GenericService;
+import com.nhom4.nhtsstore.services.ISupplierService;
 import com.nhom4.nhtsstore.ui.base.GenericTablePanel;
 import java.util.Arrays;
 import java.util.List;
@@ -19,8 +20,8 @@ public class SupplierListPanel extends GenericTablePanel<Supplier> {
    private static final List<String> SEARCH_FIELDS = Arrays.asList("name", "address", "email", "phoneNumber");
    private static String placeHolderMessage = "Search by Name/Address/Email/Phone";
 
-   public SupplierListPanel(GenericService<Supplier> service) {
-       super(service, Supplier.class, null, SupplierEditDialog.class, SUPPLIER_COLUMNS, "Suppliers", SEARCH_FIELDS, placeHolderMessage);
+   public SupplierListPanel(ISupplierService service) {
+       super(service, Supplier.class, null, null,SupplierEditDialog.class, SUPPLIER_COLUMNS, "Suppliers", SEARCH_FIELDS, placeHolderMessage);
        
        // Cấu hình độ rộng cột
        int[] columnWidths = {

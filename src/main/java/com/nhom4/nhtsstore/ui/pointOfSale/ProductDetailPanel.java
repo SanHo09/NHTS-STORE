@@ -5,24 +5,20 @@
 package com.nhom4.nhtsstore.ui.pointOfSale;
 
 import com.nhom4.nhtsstore.common.ImageHelper;
-import com.nhom4.nhtsstore.entities.Order;
-import com.nhom4.nhtsstore.entities.OrderDetail;
 import com.nhom4.nhtsstore.entities.Product;
-import com.nhom4.nhtsstore.entities.rbac.User;
-import com.nhom4.nhtsstore.enums.OrderStatus;
-import com.nhom4.nhtsstore.services.OrderService;
-import com.nhom4.nhtsstore.services.ProductService;
+import com.nhom4.nhtsstore.services.impl.OrderService;
+import com.nhom4.nhtsstore.services.impl.ProductService;
+import com.nhom4.nhtsstore.ui.AppView;
 import com.nhom4.nhtsstore.ui.ApplicationState;
 import com.nhom4.nhtsstore.ui.navigation.NavigationService;
 import com.nhom4.nhtsstore.ui.navigation.RoutablePanel;
 import com.nhom4.nhtsstore.ui.navigation.RouteParams;
-import com.nhom4.nhtsstore.viewmodel.user.UserSessionVm;
+import com.nhom4.nhtsstore.viewmodel.cart.CartItemVm;
+import com.nhom4.nhtsstore.viewmodel.cart.CartVm;
 import java.awt.Dimension;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import raven.modal.Toast;
 import raven.modal.toast.option.ToastLocation;
@@ -34,20 +30,25 @@ import raven.modal.toast.option.ToastLocation;
 @Component
 public class ProductDetailPanel extends javax.swing.JPanel implements RoutablePanel{
     private Product product;
-    
-    @Autowired
-    private NavigationService navigationService;
-    
-    @Autowired
-    private ProductService productService;
-    
-    @Autowired
-    private OrderService orderService;
-    
-    @Autowired
-    private ApplicationState applicationState;
-     
-    public ProductDetailPanel() {
+
+    private final NavigationService navigationService;
+    private final ProductService productService;
+    private final OrderService orderService;
+    private final ApplicationState applicationState;
+    private CartVm cart;
+    @Override
+    public void onNavigate(RouteParams params) {
+        var id = params.get("product", Product.class);
+        this.product = productService.findById(id.getId());
+        this.cart = applicationState.getCart();
+        setValue();
+    }
+
+    public ProductDetailPanel(NavigationService navigationService, ProductService productService, OrderService orderService, ApplicationState applicationState) {
+        this.navigationService = navigationService;
+        this.productService = productService;
+        this.orderService = orderService;
+        this.applicationState = applicationState;
         initComponents();
         // default value for spiner
         spnQuantity.setValue(1);
@@ -66,8 +67,60 @@ public class ProductDetailPanel extends javax.swing.JPanel implements RoutablePa
                     ToastLocation.TOP_CENTER);
             return false;
         }
-
         return true;
+    }
+
+    private void setValue() {
+        this.lblProductName.setText(this.product.getName());
+        this.lblPrice.setText(this.product.getSalePrice() + "$");
+        this.lblManufactor.setText(this.product.getManufacturer()+ "");
+        this.spnQuantity.setValue(1);
+        this.lblImage.setPreferredSize(new Dimension(500, 500));
+        if(!product.getImages().isEmpty()) {
+            ImageHelper.SetLabelImage(lblImage, 500, 500, product.getImages().getFirst().getImageData());
+        } else {
+            ImageHelper.SetLabelImage(lblImage, 500, 500, null);
+        }
+        this.lblRemaining.setText("Remaining: " + product.getQuantity());
+    }
+
+    private void upsertCart() {
+        // Create cart item
+        CartItemVm newItem = CartItemVm.builder()
+                .productId(product.getId())
+                .productName(product.getName())
+                .quantity(getQuantity())
+                .price(product.getSalePrice())
+                .manufacturer(product.getManufacturer())
+                .addedDate(new Date())
+                .build();
+
+        boolean itemUpdated = false;
+
+        for (CartItemVm existingItem : cart.getItems()) {
+            if (existingItem.getProductId().equals(product.getId())) {
+                existingItem.setQuantity(existingItem.getQuantity() + getQuantity());
+                itemUpdated = true;
+                break;
+            }
+        }
+
+        // Add new item if not found
+        if (!itemUpdated) {
+            cart.getItems().add(newItem);
+        }
+
+        // Update cart metadata
+        cart.setTotalAmount(calculateTotal(cart.getItems()));
+        cart.setLastModifiedDate(new Date());
+
+        // Save cart through ApplicationState
+        applicationState.setCart(cart);
+    }
+    private BigDecimal calculateTotal(List<CartItemVm> items) {
+        return items.stream()
+                .map(item -> item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     /**
@@ -232,28 +285,26 @@ public class ProductDetailPanel extends javax.swing.JPanel implements RoutablePa
 
     private void btnBuyNowMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnBuyNowMouseClicked
         if(hasSufficientStock()) {
-            upsertOrder();
+            upsertCart();
             RouteParams params = new RouteParams();
             navigationService.navigateTo(CartPanel.class, params);
         }
-
     }//GEN-LAST:event_btnBuyNowMouseClicked
 
     private void btnAddToCartMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnAddToCartMouseClicked
         if(hasSufficientStock()) {
-            upsertOrder();
+            upsertCart();
             Toast.show(ProductDetailPanel.this, Toast.Type.SUCCESS,
-                    "Successfully add to cart!",
+                    "Successfully added to cart!",
                     ToastLocation.TOP_CENTER);
         }
+
     }//GEN-LAST:event_btnAddToCartMouseClicked
 
     private void lblBackMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblBackMouseClicked
-        RouteParams params = new RouteParams();
-        navigationService.navigateTo(PointOfSalePanel.class, params);
+        navigationService.navigateTo(AppView.POINT_OF_SALE);
+
     }//GEN-LAST:event_lblBackMouseClicked
-
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAddToCart;
     private javax.swing.JButton btnBuyNow;
@@ -269,74 +320,4 @@ public class ProductDetailPanel extends javax.swing.JPanel implements RoutablePa
     private javax.swing.JSpinner spnQuantity;
     // End of variables declaration//GEN-END:variables
 
-    @Override
-    public void onNavigate(RouteParams params) {
-        var id = params.get("product", Product.class);
-        this.product = productService.findById(id.getId());
-        setValue();
-    }
-    
-     private void setValue() {
-        this.lblProductName.setText(this.product.getName());
-        this.lblPrice.setText(this.product.getSalePrice() + "$");
-        this.lblManufactor.setText(this.product.getManufacturer()+ "");
-        this.lblImage.setPreferredSize(new Dimension(500, 500));
-        if(!product.getImages().isEmpty()) {
-            ImageHelper.SetLabelImage(lblImage, 500, 500, product.getImages().getFirst().getImageData());
-        } else {
-            ImageHelper.SetLabelImage(lblImage, 500, 500, null);
-        }
-        this.lblRemaining.setText("Remaining: " + product.getQuantity());
-     }
-     
-     private void upsertOrder() {
-        UserSessionVm currentUser = applicationState.getCurrentUser();
-        var existingOrder = orderService.findByUserId(currentUser.getUserId());
-        if (existingOrder == null) {
-            // Create new Order
-            Order newOrder = new Order();
-
-            User user = new User();
-            user.setUserId(currentUser.getUserId());
-            newOrder.setUser(user);
-
-            newOrder.setStatus(OrderStatus.IN_PROGRESS);
-            newOrder.setActive(true);
-            newOrder.setCreateDate(new Date());
-            newOrder.setTotalAmount(getQuantity() * product.getSalePrice());
-
-            // Check if order detail is already in order, just update quantity, unless, create new order detail
-
-            OrderDetail orderDetail = new OrderDetail();
-            orderDetail.setProduct(product);
-            orderDetail.setQuantity(getQuantity());
-            orderDetail.setOrder(newOrder); // back-reference
-
-            newOrder.setOrderDetails(List.of(orderDetail)); // assign one detail
-
-            orderService.save(newOrder);
-        } else {
-            // Check if product already in orderDetails
-            Optional<OrderDetail> existingDetailOpt = existingOrder.getOrderDetails().stream()
-                    .filter(od -> od.getProduct().getId().equals(product.getId()))
-                    .findFirst();
-
-            if (existingDetailOpt.isPresent()) {
-                // Update quantity
-                OrderDetail existingDetail = existingDetailOpt.get();
-                existingDetail.setQuantity(existingDetail.getQuantity() + getQuantity());
-            } else {
-                // Create new detail
-                OrderDetail orderDetail = new OrderDetail();
-                orderDetail.setProduct(product);
-                orderDetail.setQuantity(getQuantity());
-                orderDetail.setOrder(existingOrder);
-                existingOrder.getOrderDetails().add(orderDetail);
-            }
-
-            existingOrder.setTotalAmount(existingOrder.getTotalAmount() + getQuantity());
-
-            orderService.save(existingOrder);
-        }
-     }
 }

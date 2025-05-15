@@ -83,8 +83,8 @@ public class Header extends StackPane implements Initializable, LanguageManager.
             
             // Update menu item text
             updateMenuTexts();
-            logoutIcon.setImage(IconUtil.createFxImageFromSvg("/icons/MaterialSymbolsLogout.svg", 20, 20, color -> Color.decode("#A280FF")));
-            profileIcon.setImage( IconUtil.createFxImageFromSvg("/icons/MaterialSymbolsArticlePerson.svg", 20, 20, color -> Color.decode("#A280FF")));
+            logoutIcon.setImage(IconUtil.createFxImageFromSvg("/icons/MaterialSymbolsLogout.svg", 20, 20, color -> Color.decode("#0f156d")));
+            profileIcon.setImage( IconUtil.createFxImageFromSvg("/icons/MaterialSymbolsArticlePerson.svg", 20, 20, color -> Color.decode("#0f156d")));
             initializeClock();
             
             // Apply theme and listen for theme changes

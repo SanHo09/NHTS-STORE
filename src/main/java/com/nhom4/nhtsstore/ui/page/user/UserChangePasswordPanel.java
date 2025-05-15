@@ -2,7 +2,6 @@ package com.nhom4.nhtsstore.ui.page.user;
 
 import com.nhom4.nhtsstore.services.IUserService;
 import com.nhom4.nhtsstore.ui.ApplicationState;
-import com.nhom4.nhtsstore.ui.base.LocalizableComponent;
 import com.nhom4.nhtsstore.ui.navigation.RoutablePanel;
 import com.nhom4.nhtsstore.ui.navigation.RouteParams;
 import com.nhom4.nhtsstore.ui.shared.LanguageManager;

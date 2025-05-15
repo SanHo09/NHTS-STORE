@@ -8,6 +8,6 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
  *
  * @author NamDang
  */
-public interface CategoryRepository extends JpaRepository<Category, Long>, JpaSpecificationExecutor<Category> {
+public interface CategoryRepository extends GenericRepository<Category, Long>{
     
 }

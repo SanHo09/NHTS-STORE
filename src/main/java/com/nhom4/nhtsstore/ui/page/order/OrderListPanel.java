@@ -3,6 +3,7 @@ package com.nhom4.nhtsstore.ui.page.order;
 import com.nhom4.nhtsstore.entities.Order;
 import com.nhom4.nhtsstore.services.EventBus;
 import com.nhom4.nhtsstore.services.GenericService;
+import com.nhom4.nhtsstore.services.IOrderService;
 import com.nhom4.nhtsstore.ui.base.GenericTablePanel;
 import java.util.Arrays;
 import java.util.List;
@@ -14,13 +15,13 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class OrderListPanel extends GenericTablePanel<Order> {
     private static final String[] ORDER_COLUMNS = {
-        "Id", "Customer", "Create Date", "Total Amount", "Status", "Updated At ↓", "Updated By"
+        "Id", "Customer", "Create Date", "Total Amount", "Shipping status","Payment method","Payment status", "Updated At ↓", "Updated By"
     };
     private static final List<String> SEARCH_FIELDS = Arrays.asList("id", "status");
     private static String placeHolderMessage = "Search in Id/Status";
 
-    public OrderListPanel(GenericService<Order> service) {
-        super(service, Order.class, OrderEditPanel.class, null, ORDER_COLUMNS, "Orders", SEARCH_FIELDS, placeHolderMessage);
+    public OrderListPanel(IOrderService service) {
+        super(service, Order.class, OrderEditPanel.class, OrderEditPanel.class,null, ORDER_COLUMNS, "Orders", SEARCH_FIELDS, placeHolderMessage);
         
         // Cấu hình độ rộng cột
         int[] columnWidths = {
@@ -30,6 +31,8 @@ public class OrderListPanel extends GenericTablePanel<Order> {
             100,   // Create Date
             100,   // Total Amount
             100,   // Status
+            100,   // Payment Method
+            100,   // Payment Status
             150,   // Updated At
             150    // Updated By
         };

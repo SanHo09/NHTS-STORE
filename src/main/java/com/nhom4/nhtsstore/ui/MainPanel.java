@@ -1,52 +1,40 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
+ */
 package com.nhom4.nhtsstore.ui;
 
-import com.nhom4.nhtsstore.ui.layout.Header;
-import com.nhom4.nhtsstore.ui.layout.Menu;
+
 import com.nhom4.nhtsstore.ui.layout.PagePanel;
 import com.nhom4.nhtsstore.ui.navigation.NavigationService;
 import com.nhom4.nhtsstore.ui.navigation.RouteParams;
-import com.nhom4.nhtsstore.ui.page.dashboard.DashBoardPanel;
 import com.nhom4.nhtsstore.ui.shared.components.GlobalLoadingManager;
+import com.nhom4.nhtsstore.ui.shared.components.sidebar.SidebarFxController;
 import com.nhom4.nhtsstore.utils.JavaFxSwing;
 import jakarta.annotation.PostConstruct;
+import javafx.embed.swing.JFXPanel;
 import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 import javax.swing.*;
 import java.awt.*;
 import javax.swing.border.EmptyBorder;
 
-@Component
+@Controller
 public class MainPanel extends JPanel {
 	private final ApplicationState applicationState;
 	private final ApplicationContext applicationContext;
 	private final NavigationService navigationService;
 	private final PagePanel pagePanel;
-	private final Menu menu;
+	private SidebarFxController sidebarController;
 	private JPanel mainContentPanel;
 
 	public MainPanel(ApplicationState applicationState, ApplicationContext applicationContext,
-					 PagePanel pagePanel, Menu menu, NavigationService navigationService) {
+					 PagePanel pagePanel, NavigationService navigationService) {
 		this.applicationState = applicationState;
 		this.applicationContext = applicationContext;
 		this.pagePanel = pagePanel;
-		this.menu = menu;
 		this.navigationService = navigationService;
 		setLayout(new BorderLayout());
-		menu.addEventMenuSelected(index -> {
-			AppView[] appViews = AppView.values();
-			int menuPosition = 0;
-			for (AppView appView : appViews) {
-				if (appView == AppView.LOGIN) {
-					continue; // Skip LOGIN
-				}
-				if (menuPosition == index) {
-					// Navigate to the selected view
-					navigationService.navigateTo(appView, new RouteParams());
-					break;
-				}
-				menuPosition++;
-			}
-		});
 
 		// Add listener to detect when user logs in
 		applicationState.authenticatedProperty().addListener((obs, oldValue, newValue) -> {
@@ -55,10 +43,20 @@ public class MainPanel extends JPanel {
 				SwingUtilities.invokeLater(this::refreshMenu);
 			}
 		});
+		
+		// Listen for navigation events to highlight the correct menu item
+		navigationService.addNavigationListener(view -> {
+			if (sidebarController != null) {
+				SwingUtilities.invokeLater(() -> sidebarController.setSelectedView(view));
+			}
+		});
 	}
+	
 	private void refreshMenu() {
 		// Clear and rebuild the menu based on current user role
-		menu.refreshMenuItems();
+		if (sidebarController != null) {
+			sidebarController.refreshMenuItems();
+		}
 
 		// Navigate to default view (typically dashboard)
 		navigationService.navigateTo(AppView.DASHBOARD, new RouteParams());
@@ -68,14 +66,25 @@ public class MainPanel extends JPanel {
 	private void initializeComponents() {
 		JLayeredPane layeredPagePanel;
 
-		add(JavaFxSwing.createJFXPanelWithController(
+		add(JavaFxSwing.createJFXPanelFromFxml(
 				"/fxml/HeaderLayout.fxml",
-				this.applicationContext,
-				true,
-				(Header header) -> {
-				}), BorderLayout.NORTH);
+				this.applicationContext), BorderLayout.NORTH);
+		
 		mainContentPanel = new JPanel(new BorderLayout());
-		mainContentPanel.add(menu, BorderLayout.WEST);
+		
+		// Create JavaFX sidebar instead of Swing one
+		JFXPanel sidebarPanel = JavaFxSwing.createJFXPanelWithController(
+			"/fxml/SidebarMenu.fxml",
+			this.applicationContext,
+			false,
+			(SidebarFxController controller) -> {
+				this.sidebarController = controller;
+			}
+		);
+		
+		// Set preferred width for sidebar
+		sidebarPanel.setPreferredSize(new Dimension(250, getHeight()));
+		mainContentPanel.add(sidebarPanel, BorderLayout.WEST);
 
 		layeredPagePanel = new JLayeredPane();
 		layeredPagePanel.setLayout(new OverlayLayout(layeredPagePanel));

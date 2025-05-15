@@ -17,6 +17,6 @@ public class UserDetailVm {
     String email;
     String fullName;
     byte[] avatar;
-    boolean status;
+    boolean active;
     RoleWithPermissionVm role;
 }
