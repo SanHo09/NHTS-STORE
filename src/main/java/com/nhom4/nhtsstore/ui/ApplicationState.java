@@ -54,19 +54,18 @@ public class ApplicationState {
         return cart.getValue();
     }
     public void setOrderQrCodeByTransactionId(String transactionId, String qrCode) {
-        System.out.println("ApplicationState.setOrderQrCodeByTransactionId called with transactionId: " + transactionId);
         if (transactionId != null && qrCode != null) {
-            System.out.println("Putting order_url in map: " + qrCode);
+            log.debug("Putting order_url in map: {}", qrCode);
             orderQrCodeByTransactionId.put(transactionId, qrCode);
-            System.out.println("Successfully put order_url in map. Map size: " + orderQrCodeByTransactionId.size());
+            log.debug("Successfully put order_url in map. Map size: {}", orderQrCodeByTransactionId.size());
         } else {
-            System.out.println("Not putting order_url in map because transactionId or qrCode is null");
+            log.debug("Not putting order_url in map because transactionId or qrCode is null");
         }
     }
     public String getOrderQrCodeByTransactionId(String transactionId) {
-        System.out.println("ApplicationState.getOrderQrCodeByTransactionId called with transactionId: " + transactionId);
+        log.debug("ApplicationState.getOrderQrCodeByTransactionId called with transactionId: {}", transactionId);
         String qrCode = orderQrCodeByTransactionId.get(transactionId);
-        System.out.println("Retrieved order_url from map: " + qrCode);
+        log.debug("Retrieved order_url from map: {}", qrCode);
         return qrCode;
     }
 

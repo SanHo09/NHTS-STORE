@@ -15,10 +15,12 @@ import com.nhom4.nhtsstore.ui.navigation.RoutablePanel;
 import com.nhom4.nhtsstore.ui.navigation.RouteParams;
 import com.nhom4.nhtsstore.viewmodel.cart.CartItemVm;
 import com.nhom4.nhtsstore.viewmodel.cart.CartVm;
+
 import java.awt.Dimension;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+
 import org.springframework.stereotype.Component;
 import raven.modal.Toast;
 import raven.modal.toast.option.ToastLocation;
@@ -67,6 +69,7 @@ public class ProductDetailPanel extends javax.swing.JPanel implements RoutablePa
                     ToastLocation.TOP_CENTER);
             return false;
         }
+
         return true;
     }
 
@@ -122,7 +125,6 @@ public class ProductDetailPanel extends javax.swing.JPanel implements RoutablePa
                 .map(item -> item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
-
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -289,6 +291,8 @@ public class ProductDetailPanel extends javax.swing.JPanel implements RoutablePa
             RouteParams params = new RouteParams();
             navigationService.navigateTo(CartPanel.class, params);
         }
+
+
     }//GEN-LAST:event_btnBuyNowMouseClicked
 
     private void btnAddToCartMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnAddToCartMouseClicked
@@ -303,8 +307,9 @@ public class ProductDetailPanel extends javax.swing.JPanel implements RoutablePa
 
     private void lblBackMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblBackMouseClicked
         navigationService.navigateTo(AppView.POINT_OF_SALE);
-
     }//GEN-LAST:event_lblBackMouseClicked
+
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAddToCart;
     private javax.swing.JButton btnBuyNow;
@@ -319,5 +324,7 @@ public class ProductDetailPanel extends javax.swing.JPanel implements RoutablePa
     private javax.swing.JLabel lblRemaining;
     private javax.swing.JSpinner spnQuantity;
     // End of variables declaration//GEN-END:variables
+
+
 
 }

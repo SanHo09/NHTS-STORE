@@ -17,6 +17,7 @@ import com.nhom4.nhtsstore.ui.ApplicationState;
 import com.nhom4.nhtsstore.ui.navigation.NavigationService;
 import com.nhom4.nhtsstore.ui.navigation.RoutablePanel;
 import com.nhom4.nhtsstore.ui.navigation.RouteParams;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
@@ -47,7 +48,6 @@ public class InvoicePanel extends javax.swing.JPanel implements RoutablePanel {
     /**
      * Creates new form InvoicePanel
      */
-
     private final ApplicationState applicationState;
     private final IOrderService orderService;
     private final IPaymentService paymentService;
@@ -178,7 +178,6 @@ public class InvoicePanel extends javax.swing.JPanel implements RoutablePanel {
     }
 
     private List<InvoiceDetail> mapCartItemsToInvoiceDetails(List<CartItemVm> items, Invoice invoice) {
-
         List<InvoiceDetail> invoiceDetails = new ArrayList<>();
         for (CartItemVm item : items) {
             InvoiceDetail invoiceDetail = new InvoiceDetail();
@@ -215,7 +214,6 @@ public class InvoicePanel extends javax.swing.JPanel implements RoutablePanel {
         }
 
         // Create new customer if no existing customer found
-
         Customer customer = new Customer();
         customer.setName(txtCustomerName.getText().trim());
         customer.setEmail(email);
@@ -480,7 +478,6 @@ public class InvoicePanel extends javax.swing.JPanel implements RoutablePanel {
         orderService.save(order);
     }
 
-
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -700,7 +697,6 @@ public class InvoicePanel extends javax.swing.JPanel implements RoutablePanel {
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
     }// </editor-fold>//GEN-END:initComponents
-
 
     private void btnBuyNowActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuyNowActionPerformed
         if (!validateForm()) {
