@@ -9,6 +9,7 @@ import com.nhom4.nhtsstore.enums.PaymentStatus;
 import com.nhom4.nhtsstore.services.payment.PaymentStrategy;
 import com.nhom4.nhtsstore.services.payment.impl.zalopay.util.HMACUtil;
 import com.nhom4.nhtsstore.ui.ApplicationState;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -21,6 +22,7 @@ import java.util.*;
 
 
 @Service
+@Slf4j
 public class ZaloPayPaymentStrategy implements PaymentStrategy {
     private final ObjectMapper objectMapper;
     private final ApplicationState applicationState;
@@ -75,7 +77,7 @@ public class ZaloPayPaymentStrategy implements PaymentStrategy {
         String mac = HMACUtil.HMacHexStringEncode(HMACUtil.HMACSHA256, ZalopayConfig.config.get("key1"), data);
         order.put("mac", mac);
 
-        System.out.println("Generated MAC: " + mac);
+        log.debug("Generated MAC: {}", mac);
 
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         for (Map.Entry<String, Object> entry : order.entrySet()) {
@@ -90,7 +92,7 @@ public class ZaloPayPaymentStrategy implements PaymentStrategy {
                     .retrieve()
                     .body(String.class);
 
-            System.out.println("Zalopay Response: " + response);
+            log.debug("Zalopay Response: {}", response);
             return response;
         } catch (Exception e) {
             e.printStackTrace();
@@ -160,26 +162,23 @@ public class ZaloPayPaymentStrategy implements PaymentStrategy {
             String response = createOrder(orderRequest);
             Map<String, Object> jsonResponse = objectMapper.readValue(response,
                     new TypeReference<Map<String, Object>>() {});
-            System.out.println("Is contain order_url " + jsonResponse.containsKey(getQRCodeFieldName()));
             if (jsonResponse.containsKey(getQRCodeFieldName())) {
-                System.out.println("Inside if block - order_url exists");
                 String orderUrl = jsonResponse.get(getQRCodeFieldName()).toString();
-                System.out.println("Retrieved order_url: " + orderUrl);
                 order.setPaymentTransactionId(appTransId);
-                System.out.println("Set payment transaction ID: " + appTransId);
+                log.debug("Set payment transaction ID: {}", appTransId);
                 order.setPaymentStatus(PaymentStatus.PENDING);
-                System.out.println("Set payment status to PENDING");
+                log.debug("Set payment status to PENDING");
                 // Store the order_url for later use
 //                orderUrlMap.put(appTransId, orderUrl);
                 try {
-                    System.out.println("About to store order_url in ApplicationState");
+                    log.debug("About to store order_url in ApplicationState");
                     applicationState.setOrderQrCodeByTransactionId(appTransId, orderUrl);
-                    System.out.println("Successfully stored order_url in ApplicationState");
+                    log.debug("Successfully stored order_url in ApplicationState");
                 } catch (Exception e) {
-                    System.out.println("Error storing order_url in ApplicationState: " + e.getMessage());
+                    log.error("Error storing order_url in ApplicationState: {}", e.getMessage());
                     e.printStackTrace();
                 }
-                System.out.println("Stored order_url for transaction " + appTransId + ": " + orderUrl);
+                log.debug("Stored order_url for transaction {}: {}", appTransId, orderUrl);
                 return true;
             } else {
                 order.setPaymentStatus(PaymentStatus.FAILED);
@@ -237,24 +236,24 @@ public class ZaloPayPaymentStrategy implements PaymentStrategy {
         // First try to get the order_url from ApplicationState
         if(applicationState.getOrderQrCodeByTransactionId(transactionId) != null) {
             String orderUrl = applicationState.getOrderQrCodeByTransactionId(transactionId);
-            System.out.println("Retrieved order_url from ApplicationState for transaction " + transactionId + ": " + orderUrl);
+            log.debug("Retrieved order_url from ApplicationState for transaction {}: {}", transactionId, orderUrl);
             return Optional.of(orderUrl);
         }
         // If not found in ApplicationState, try to get it from the order status as a fallback
         try {
             Map<String, Object> details = getPaymentDetails(transactionId);
-            System.out.println("is contains order_url: " + details.containsKey("order_url"));
+            log.debug("is contains order_url: {}", details.containsKey("order_url"));
             if (details.containsKey("order_url")) {
                 String orderUrl = details.get("order_url").toString();
                 // Store it in ApplicationState for future use
                 applicationState.setOrderQrCodeByTransactionId(transactionId, orderUrl);
-                System.out.println("Retrieved order_url from API for transaction " + transactionId + ": " + orderUrl);
+                log.debug("Retrieved order_url from API for transaction {}: {}", transactionId, orderUrl);
                 return Optional.of(orderUrl);
             }
-            System.out.println("No order_url found for transaction " + transactionId);
+            log.debug("No order_url found for transaction {}", transactionId);
             return Optional.empty();
         } catch (Exception e) {
-            System.out.println("Error getting order_url for transaction " + transactionId + ": " + e.getMessage());
+            log.error("Error getting order_url for transaction {}: {}", transactionId, e.getMessage());
             return Optional.empty();
         }
     }

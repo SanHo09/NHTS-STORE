@@ -14,7 +14,9 @@ import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 import javax.swing.SwingUtilities;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class ListMenu<E extends Object> extends JList<E> implements MenuItem.MenuItemListener {
     private final DefaultListModel model;
     private int selectedIndex = -1;
@@ -24,15 +26,15 @@ public class ListMenu<E extends Object> extends JList<E> implements MenuItem.Men
     private final Map<String, Boolean> expandStateMap = new HashMap<>();
     private final Map<String, List<Integer>> submenuIndexMap = new HashMap<>();
     private Consumer<String> accordionListener;
-    
+
     public void addEventMenuSelected(EventMenuSelected event) {
         this.event = event;
     }
-    
+
     public void setAccordionListener(Consumer<String> listener) {
         this.accordionListener = listener;
     }
-    
+
     public ListMenu() {
         model = new DefaultListModel();
         setModel(model);
@@ -85,7 +87,7 @@ public class ListMenu<E extends Object> extends JList<E> implements MenuItem.Men
             }
         });
     }
-    
+
     @Override
     public ListCellRenderer<? super E> getCellRenderer() {
         return new DefaultListCellRenderer() {
@@ -101,59 +103,59 @@ public class ListMenu<E extends Object> extends JList<E> implements MenuItem.Men
                 item.setSelected(selectedIndex == index);
                 item.setOver(overIndex == index);
                 item.setMenuItemListener(ListMenu.this);
-                
+
                 // Set expanded state from our map
                 if (data.hasSubmenus() && expandStateMap.containsKey(data.getMenuId())) {
                     item.setExpanded(expandStateMap.get(data.getMenuId()));
                 }
-                
+
                 return item;
             }
         };
     }
-    
+
     public void insertItemAt(Model_Menu data, int index) {
         model.add(index, data);
     }
-    
+
     public DefaultListModel getModel() {
         return model;
     }
-    
+
     public void addItem(Model_Menu data) {
         model.addElement(data);
     }
-    
+
     @Override
     public void onAccordionToggled(String menuId, boolean expanded) {
-        System.out.println("ListMenu received toggle for: " + menuId + ", expanded: " + expanded);
+        log.debug("ListMenu received toggle for: {} expanded: {}", menuId, expanded);
         expandStateMap.put(menuId, expanded);
         toggleSubmenuVisibility(menuId, expanded);
     }
-    
+
     private void toggleSubmenuVisibility(String menuId, boolean expanded) {
-        System.out.println("Toggle submenu visibility for: " + menuId + ", expanded: " + expanded);
-        System.out.println("Has submenu mapping: " + submenuIndexMap.containsKey(menuId));
-        
+        log.debug("Toggle submenu visibility for: {}, expanded: {}", menuId, expanded);
+        log.debug("Has submenu mapping: {}", submenuIndexMap.containsKey(menuId));
+
         if (submenuIndexMap.containsKey(menuId)) {
             List<Integer> submenuIndices = submenuIndexMap.get(menuId);
-            System.out.println("Submenu indices: " + submenuIndices);
-            
+            log.debug("Submenu indices: {}", submenuIndices);
+
             if (!expanded) {
                 // Hide submenus - we need to build a new model without the submenu items
                 DefaultListModel newModel = new DefaultListModel();
                 int currentIndex = 0;
-                
+
                 // Copy all items except the submenus of this parent
                 for (int i = 0; i < model.size(); i++) {
                     if (!submenuIndices.contains(i)) {
                         newModel.addElement(model.getElementAt(i));
                         currentIndex++;
                     } else {
-                        System.out.println("Hiding submenu at index: " + i);
+                        log.debug("Hiding submenu at index: {}", i);
                     }
                 }
-                
+
                 // Replace the model
                 model.clear();
                 for (int i = 0; i < newModel.size(); i++) {
@@ -173,35 +175,35 @@ public class ListMenu<E extends Object> extends JList<E> implements MenuItem.Men
                         }
                     }
                 }
-                
+
                 if (parentIndex >= 0) {
-                    System.out.println("Found parent at index: " + parentIndex);
+                    log.debug("Found parent at index: {}", parentIndex);
                     // We need to re-insert all submenu items after the parent
                     if (accordionListener != null) {
                         accordionListener.accept(menuId);
                     }
                 }
             }
-            
+
             // Update submenu indices after toggling
             updateSubmenuIndices();
-            
+
             repaint();
         }
     }
-    
+
     public void registerParentSubmenuRelationship(String parentId, int parentIndex, List<Integer> submenuIndices) {
         submenuIndexMap.put(parentId, new ArrayList<>(submenuIndices));
         expandStateMap.put(parentId, true); // Default to expanded
     }
-    
+
     private void updateSubmenuIndices() {
         // Rebuild submenuIndexMap based on current model state
         Map<String, List<Integer>> newMap = new HashMap<>();
-        
+
         for (String parentId : submenuIndexMap.keySet()) {
             List<Integer> newIndices = new ArrayList<>();
-            
+
             // Find the parent index
             int parentIndex = -1;
             for (int i = 0; i < model.size(); i++) {
@@ -214,7 +216,7 @@ public class ListMenu<E extends Object> extends JList<E> implements MenuItem.Men
                     }
                 }
             }
-            
+
             // If parent is found, find its submenus
             if (parentIndex >= 0) {
                 for (int i = parentIndex + 1; i < model.size(); i++) {
@@ -229,11 +231,11 @@ public class ListMenu<E extends Object> extends JList<E> implements MenuItem.Men
                         }
                     }
                 }
-                
+
                 newMap.put(parentId, newIndices);
             }
         }
-        
+
         submenuIndexMap.clear();
         submenuIndexMap.putAll(newMap);
     }
@@ -267,7 +269,7 @@ public class ListMenu<E extends Object> extends JList<E> implements MenuItem.Men
             }
         }
     }
-    
+
     public void clearMenuItems() {
         model.clear();
         selectedIndex = -1;

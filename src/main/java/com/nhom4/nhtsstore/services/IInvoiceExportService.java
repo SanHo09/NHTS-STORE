@@ -43,4 +43,12 @@ public interface IInvoiceExportService {
      * @return The invoices directory
      */
     File getInvoicesDirectory();
+
+    /**
+     * Finds an existing invoice PDF file by invoice ID
+     * 
+     * @param invoiceId The invoice ID
+     * @return The existing file, or null if not found
+     */
+    File findExistingInvoicePdf(Long invoiceId);
 }

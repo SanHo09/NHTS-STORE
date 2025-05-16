@@ -87,7 +87,9 @@ public class InvoiceExportService implements IInvoiceExportService {
 
             //invoice number and date
             document.add(new Paragraph("Số hóa đơn: " + invoice.getId(), HEADER_FONT));
-            document.add(new Paragraph("Ngày: " + DATE_FORMAT.format(invoice.getCreateDate()), HEADER_FONT));
+            document.add(new Paragraph("Ngày: " + (invoice.getLastModifiedOn() != null ? 
+                invoice.getLastModifiedOn().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")) : 
+                (invoice.getCreateDate() != null ? DATE_FORMAT.format(invoice.getCreateDate()) : "")), HEADER_FONT));
             document.add(Chunk.NEWLINE);
 
             //seller information
@@ -206,6 +208,39 @@ public class InvoiceExportService implements IInvoiceExportService {
     @Override
     public File getInvoicesDirectory() {
         return new File(invoiceExportDirectory);
+    }
+
+
+    @Override
+    public File findExistingInvoicePdf(Long invoiceId) {
+        // Get the invoices directory
+        File invoicesDir = getInvoicesDirectory();
+        if (!invoicesDir.exists()) {
+            return null;
+        }
+
+        // Get all files in the directory
+        File[] files = invoicesDir.listFiles();
+        if (files == null || files.length == 0) {
+            return null;
+        }
+
+        // Filter files that match the pattern "invoice_[invoiceId]_*.pdf"
+        String prefix = "invoice_" + invoiceId + "_";
+        File mostRecentFile = null;
+        long mostRecentTime = 0;
+
+        for (File file : files) {
+            if (file.isFile() && file.getName().startsWith(prefix) && file.getName().endsWith(".pdf")) {
+                // Check if this file is more recent than the current most recent file
+                if (file.lastModified() > mostRecentTime) {
+                    mostRecentFile = file;
+                    mostRecentTime = file.lastModified();
+                }
+            }
+        }
+
+        return mostRecentFile;
     }
 
     private void addTableHeader(PdfPTable table) {

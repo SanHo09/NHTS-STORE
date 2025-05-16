@@ -153,9 +153,9 @@ public class InvoiceViewPanel extends JPanel implements RoutablePanel {
         txtPaymentMethod = createReadOnlyTextField();
         formPanel.add(txtPaymentMethod);
 
-        formPanel.add(createLabelPanel("Payment Status:"));
-        txtPaymentStatus = createReadOnlyTextField();
-        formPanel.add(txtPaymentStatus);
+//        formPanel.add(createLabelPanel("Payment Status:"));
+//        txtPaymentStatus = createReadOnlyTextField();
+//        formPanel.add(txtPaymentStatus);
 
         formPanel.add(createLabelPanel("Transaction ID:"));
         txtPaymentTransactionId = createReadOnlyTextField();
@@ -250,10 +250,10 @@ public class InvoiceViewPanel extends JPanel implements RoutablePanel {
         txtShippingAddress.setText(invoice.getShippingAddress());
 
         // Set payment information
-        txtPaymentMethod.setText(invoice.getPaymentMethod() != null ? 
+        txtPaymentMethod.setText(invoice.getPaymentMethod() != null ?
                 invoice.getPaymentMethod().getDisplayName() : "");
-        txtPaymentStatus.setText(invoice.getPaymentStatus() != null ? 
-                invoice.getPaymentStatus().getDisplayName() : "");
+//        txtPaymentStatus.setText(invoice.getPaymentStatus() != null ?
+//                invoice.getPaymentStatus().getDisplayName() : "");
         txtPaymentTransactionId.setText(invoice.getPaymentTransactionId());
         txtTotalAmount.setText(invoice.getTotalAmount() + " USD");
 
@@ -261,7 +261,7 @@ public class InvoiceViewPanel extends JPanel implements RoutablePanel {
         tableModel.setRowCount(0);
         if (invoice.getInvoiceDetail() != null) {
             for (InvoiceDetail detail : invoice.getInvoiceDetail()) {
-                String productName = detail.getProduct() != null && detail.getProduct().getName() != null ? 
+                String productName = detail.getProduct() != null && detail.getProduct().getName() != null ?
                         detail.getProduct().getName() : "Unknown Product";
                 Object[] row = {
                     productName,
@@ -272,36 +272,40 @@ public class InvoiceViewPanel extends JPanel implements RoutablePanel {
                 tableModel.addRow(row);
             }
         }
-        // Try to generate the invoice PDF file
-        try {
-            invoiceFile = invoiceExportService.exportInvoiceToPdf(invoice);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
+        invoiceFile = invoiceExportService.findExistingInvoicePdf(invoice.getId());
+
     }
 
     private void openInvoice() {
         try {
             if (invoiceFile != null && invoiceFile.exists() && Desktop.isDesktopSupported()) {
                 Desktop.getDesktop().open(invoiceFile);
-            } else {
-                // If the file doesn't exist, try to generate it again
-                try {
-                    invoiceFile = invoiceExportService.exportInvoiceToPdf(invoice);
-                    if (invoiceFile.exists()) {
-                        Desktop.getDesktop().open(invoiceFile);
-                    } else {
-                        JOptionPane.showMessageDialog(this, 
-                                "Could not generate invoice PDF file.", 
-                                "Error", 
-                                JOptionPane.ERROR_MESSAGE);
-                    }
-                } catch (Exception ex) {
+                return;
+            }
+
+            invoiceFile = invoiceExportService.findExistingInvoicePdf(invoice.getId());
+            if (invoiceFile != null && invoiceFile.exists() && Desktop.isDesktopSupported()) {
+                Desktop.getDesktop().open(invoiceFile);
+                return;
+            }
+
+            // If no existing file is found, generate a new one in the invoices directory
+            try {
+                invoiceFile = invoiceExportService.exportInvoiceToPdfInInvoicesDir(invoice);
+                if (invoiceFile.exists() && Desktop.isDesktopSupported()) {
+                    Desktop.getDesktop().open(invoiceFile);
+                } else {
                     JOptionPane.showMessageDialog(this, 
-                            "Error generating invoice PDF: " + ex.getMessage(), 
+                            "Could not generate invoice PDF file.", 
                             "Error", 
                             JOptionPane.ERROR_MESSAGE);
                 }
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, 
+                        "Error generating invoice PDF: " + ex.getMessage(), 
+                        "Error", 
+                        JOptionPane.ERROR_MESSAGE);
             }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, 
