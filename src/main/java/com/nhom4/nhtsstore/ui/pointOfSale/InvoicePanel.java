@@ -557,6 +557,13 @@ public class InvoicePanel extends javax.swing.JPanel implements RoutablePanel {
                     isFieldEmpty(txtAddress, "Address is required")) {
                 return false;
             }
+        } else {
+            // Pickup validation - require at least contact method for customer identification
+            if (txtEmail.getText().trim().isEmpty() && txtPhoneNumber.getText().trim().isEmpty()) {
+                showError("Either email or phone number is required for customer identification");
+                txtPhoneNumber.requestFocus();
+                return false;
+            }
         }
 
         if (cart.getItems().isEmpty()) {
