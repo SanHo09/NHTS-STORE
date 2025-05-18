@@ -156,7 +156,7 @@ public class ZaloPayPaymentStrategy implements PaymentStrategy {
             orderRequest.put("item", objectMapper.writeValueAsString(items));
             orderRequest.put("embed_data", "");
             orderRequest.put("currency", "USD");
-            orderRequest.put("app_user",  applicationState.getCurrentUser().getFullName());
+            orderRequest.put("app_user", applicationState.getCurrentUser().getFullName());
 
             // Create order and process response
             String response = createOrder(orderRequest);
@@ -164,21 +164,19 @@ public class ZaloPayPaymentStrategy implements PaymentStrategy {
                     new TypeReference<Map<String, Object>>() {});
             if (jsonResponse.containsKey(getQRCodeFieldName())) {
                 String orderUrl = jsonResponse.get(getQRCodeFieldName()).toString();
-                order.setPaymentTransactionId(appTransId);
-                log.debug("Set payment transaction ID: {}", appTransId);
+                // Add prefix to transaction ID
+                String prefixedTransId = "ZL_" + appTransId;
+                order.setPaymentTransactionId(prefixedTransId);
+                log.debug("Set payment transaction ID: {}", prefixedTransId);
                 order.setPaymentStatus(PaymentStatus.PENDING);
-                log.debug("Set payment status to PENDING");
-                // Store the order_url for later use
-//                orderUrlMap.put(appTransId, orderUrl);
+
                 try {
-                    log.debug("About to store order_url in ApplicationState");
-                    applicationState.setOrderQrCodeByTransactionId(appTransId, orderUrl);
+                    applicationState.setOrderQrCodeByTransactionId(prefixedTransId, orderUrl);
                     log.debug("Successfully stored order_url in ApplicationState");
                 } catch (Exception e) {
                     log.error("Error storing order_url in ApplicationState: {}", e.getMessage());
                     e.printStackTrace();
                 }
-                log.debug("Stored order_url for transaction {}: {}", appTransId, orderUrl);
                 return true;
             } else {
                 order.setPaymentStatus(PaymentStatus.FAILED);
@@ -197,7 +195,13 @@ public class ZaloPayPaymentStrategy implements PaymentStrategy {
         }
 
         try {
-            String statusResponse = getOrderStatus(transactionId);
+            // Remove prefix if present
+            String actualTransId = transactionId;
+            if (transactionId.startsWith("ZL_")) {
+                actualTransId = transactionId.substring(3);
+            }
+
+            String statusResponse = getOrderStatus(actualTransId);
             Map<String, Object> jsonResponse = objectMapper.readValue(statusResponse,
                     new TypeReference<Map<String, Object>>() {});
 

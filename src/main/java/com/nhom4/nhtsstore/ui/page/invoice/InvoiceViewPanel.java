@@ -2,8 +2,12 @@ package com.nhom4.nhtsstore.ui.page.invoice;
 
 import com.nhom4.nhtsstore.entities.Invoice;
 import com.nhom4.nhtsstore.entities.InvoiceDetail;
+import com.nhom4.nhtsstore.enums.FulfilmentMethod;
 import com.nhom4.nhtsstore.services.IInvoiceExportService;
 import com.nhom4.nhtsstore.services.IInvoiceService;
+import com.nhom4.nhtsstore.ui.AppView;
+import com.nhom4.nhtsstore.ui.ApplicationState;
+import com.nhom4.nhtsstore.ui.PanelManager;
 import com.nhom4.nhtsstore.ui.navigation.NavigationService;
 import com.nhom4.nhtsstore.ui.navigation.RoutablePanel;
 import com.nhom4.nhtsstore.ui.navigation.RouteParams;
@@ -23,14 +27,15 @@ import java.text.SimpleDateFormat;
 public class InvoiceViewPanel extends JPanel implements RoutablePanel {
 
     @Autowired
-    private NavigationService navigationService;
+    private PanelManager panelManager;
 
     @Autowired
     private IInvoiceService invoiceService;
 
     @Autowired
     private IInvoiceExportService invoiceExportService;
-
+    @Autowired
+    private ApplicationState applicationState;
     private Invoice invoice;
     private File invoiceFile;
 
@@ -43,6 +48,8 @@ public class InvoiceViewPanel extends JPanel implements RoutablePanel {
     private JTextField txtPaymentMethod;
     private JTextField txtPaymentStatus;
     private JTextField txtPaymentTransactionId;
+    private JTextField txtDeliveryFee;
+    private JTextField txtFulfilmentMethod;
     private JTextField txtTotalAmount;
     private JTable tblInvoiceDetails;
     private DefaultTableModel tableModel;
@@ -61,7 +68,7 @@ public class InvoiceViewPanel extends JPanel implements RoutablePanel {
         headerPanel.add(titleLabel, BorderLayout.WEST);
 
         JButton backButton = new JButton("Back to List");
-        backButton.addActionListener(e -> navigationService.navigateBack());
+        backButton.addActionListener(e -> panelManager.navigateTo(null,applicationState.getViewPanelByBean(InvoiceListPanel.class)));
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         buttonPanel.add(backButton);
         headerPanel.add(buttonPanel, BorderLayout.EAST);
@@ -147,19 +154,27 @@ public class InvoiceViewPanel extends JPanel implements RoutablePanel {
     private JPanel createPaymentInfoPanel() {
         JPanel panel = createSectionPanel("Payment Information");
 
-        JPanel formPanel = new JPanel(new GridLayout(4, 2, 10, 10));
+        JPanel formPanel = new JPanel(new GridLayout(6, 2, 10, 10)); // Increased rows to 6
 
         formPanel.add(createLabelPanel("Payment Method:"));
         txtPaymentMethod = createReadOnlyTextField();
         formPanel.add(txtPaymentMethod);
 
-//        formPanel.add(createLabelPanel("Payment Status:"));
-//        txtPaymentStatus = createReadOnlyTextField();
-//        formPanel.add(txtPaymentStatus);
+        formPanel.add(createLabelPanel("Payment Status:"));
+        txtPaymentStatus = createReadOnlyTextField();
+        formPanel.add(txtPaymentStatus);
 
         formPanel.add(createLabelPanel("Transaction ID:"));
         txtPaymentTransactionId = createReadOnlyTextField();
         formPanel.add(txtPaymentTransactionId);
+
+        formPanel.add(createLabelPanel("Fulfillment Method:"));
+        txtFulfilmentMethod = createReadOnlyTextField();
+        formPanel.add(txtFulfilmentMethod);
+
+        formPanel.add(createLabelPanel("Delivery Fee:"));
+        txtDeliveryFee = createReadOnlyTextField();
+        formPanel.add(txtDeliveryFee);
 
         formPanel.add(createLabelPanel("Total Amount:"));
         txtTotalAmount = createReadOnlyTextField();
@@ -247,14 +262,22 @@ public class InvoiceViewPanel extends JPanel implements RoutablePanel {
             txtCustomerEmail.setText(invoice.getCustomer().getEmail());
             txtCustomerPhone.setText(invoice.getPhoneNumber());
         }
-        txtShippingAddress.setText(invoice.getShippingAddress());
-
-        // Set payment information
         txtPaymentMethod.setText(invoice.getPaymentMethod() != null ?
                 invoice.getPaymentMethod().getDisplayName() : "");
-//        txtPaymentStatus.setText(invoice.getPaymentStatus() != null ?
-//                invoice.getPaymentStatus().getDisplayName() : "");
+        txtPaymentStatus.setText(invoice.getPaymentStatus() != null ?
+                invoice.getPaymentStatus().getDisplayName() : "");
         txtPaymentTransactionId.setText(invoice.getPaymentTransactionId());
+
+        txtFulfilmentMethod.setText(invoice.getFulfilmentMethod() != null ?
+                invoice.getFulfilmentMethod().getDisplayName() : "");
+
+        boolean isCustomerTakeaway = invoice.getFulfilmentMethod() == FulfilmentMethod.CUSTOMER_TAKEAWAY;
+        if (isCustomerTakeaway || invoice.getDeliveryFee() == null) {
+            txtDeliveryFee.setText("N/A");
+        } else {
+            txtDeliveryFee.setText(invoice.getDeliveryFee() + " USD");
+        }
+
         txtTotalAmount.setText(invoice.getTotalAmount() + " USD");
 
         // Clear and populate invoice details table

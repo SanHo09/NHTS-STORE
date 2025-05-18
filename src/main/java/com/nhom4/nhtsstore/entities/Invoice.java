@@ -2,11 +2,12 @@ package com.nhom4.nhtsstore.entities;
 
 import com.nhom4.nhtsstore.enums.PaymentMethod;
 import com.nhom4.nhtsstore.enums.PaymentStatus;
+import com.nhom4.nhtsstore.enums.FulfilmentMethod;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
-import java.time.format.DateTimeFormatter;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -34,7 +35,7 @@ public class Invoice extends GenericEntity {
     private List<InvoiceDetail> invoiceDetail;
 
     @ManyToOne()
-    @JoinColumn(name = "customer_id", nullable = false)
+    @JoinColumn(name = "customer_id", nullable = true)
     private Customer customer;
     
     @Column
@@ -49,7 +50,14 @@ public class Invoice extends GenericEntity {
     private String paymentTransactionId;
 
     @Column
-    private String shippingAddress;
+    @Enumerated(EnumType.STRING)
+    private FulfilmentMethod fulfilmentMethod;
+
+    @Column(nullable = true, precision = 19, scale = 2)
+    private BigDecimal deliveryFee = BigDecimal.valueOf(5.0); // Default value for shipping cost
+
+    @Column(nullable = true, name = "delivery_address")
+    private String deliveryAddress;
 
     @Column
     private String phoneNumber;

@@ -17,7 +17,9 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.swing.*;
 import java.awt.event.WindowAdapter;
@@ -25,6 +27,7 @@ import java.awt.event.WindowEvent;
 import java.util.concurrent.CountDownLatch;
 
 @SpringBootApplication
+@EnableScheduling
 public class NhtsStoreApplication {
     private static LoadingDialog loadingDialog;
     private static Timer progressAnimationTimer;

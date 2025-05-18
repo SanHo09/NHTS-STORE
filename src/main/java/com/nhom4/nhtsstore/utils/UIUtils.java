@@ -28,10 +28,35 @@ public class UIUtils {
                 JComponent editor = spinner.getEditor();
                 if (editor instanceof JSpinner.DefaultEditor defaultEditor) {
                     JTextField textField = defaultEditor.getTextField();
+                    // Select all text when focused
                     textField.addFocusListener(new FocusAdapter() {
                         @Override
                         public void focusGained(FocusEvent e) {
                             SwingUtilities.invokeLater(textField::selectAll);
+                        }
+
+                        @Override
+                        public void focusLost(FocusEvent e) {
+                            try {
+                                defaultEditor.commitEdit();
+                            } catch (java.text.ParseException ex) {
+                                // Restore the original value if parsing fails
+                                textField.setText(spinner.getValue().toString());
+                            }
+                        }
+                    });
+
+                    // Also commit when Enter is pressed
+                    textField.addKeyListener(new java.awt.event.KeyAdapter() {
+                        @Override
+                        public void keyPressed(java.awt.event.KeyEvent evt) {
+                            if (evt.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
+                                try {
+                                    defaultEditor.commitEdit();
+                                } catch (java.text.ParseException ex) {
+                                    textField.setText(spinner.getValue().toString());
+                                }
+                            }
                         }
                     });
                 }

@@ -6,7 +6,6 @@ import com.nhom4.nhtsstore.ui.navigation.NavigationService;
 import com.nhom4.nhtsstore.ui.navigation.RouteParams;
 import com.nhom4.nhtsstore.ui.shared.LanguageManager;
 import com.nhom4.nhtsstore.ui.shared.ThemeManager;
-import com.nhom4.nhtsstore.ui.shared.components.sidebar.SidebarManager;
 import com.nhom4.nhtsstore.ui.PanelManager;
 import com.nhom4.nhtsstore.utils.IconUtil;
 import com.nhom4.nhtsstore.utils.JavaFxSwing;

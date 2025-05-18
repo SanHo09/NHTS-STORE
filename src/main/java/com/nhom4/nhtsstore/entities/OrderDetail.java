@@ -31,6 +31,8 @@ public class OrderDetail {
     private BigDecimal unitPrice=BigDecimal.ZERO;
 
     @Column(nullable = true, precision = 19, scale = 2)
+    private BigDecimal unitCost=BigDecimal.ZERO;
+    @Column(nullable = true, precision = 19, scale = 2)
     private BigDecimal subtotal=BigDecimal.ZERO;
 
 

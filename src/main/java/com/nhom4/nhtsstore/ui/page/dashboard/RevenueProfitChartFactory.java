@@ -6,15 +6,9 @@ import com.nhom4.nhtsstore.utils.JavaFxSwing;
 import com.nhom4.nhtsstore.utils.UIUtils;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.chart.AreaChart;
-import javafx.scene.chart.BarChart;
-import javafx.scene.chart.CategoryAxis;
-import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.PieChart;
-import javafx.scene.chart.XYChart;
-import javafx.scene.control.Separator;
+import javafx.scene.Node;
+import javafx.scene.chart.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
@@ -22,23 +16,20 @@ import javafx.scene.text.Text;
 import lombok.SneakyThrows;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 /**
  * Factory for creating revenue-related charts used in the dashboard.
  */
-public class RevenueChartFactory {
+public class RevenueProfitChartFactory {
 
     private final IDashboardStatisticsService dashboardStatistics;
     private final LanguageManager languageManager;
     private final ChartUtility chartUtility;
 
-    public RevenueChartFactory(IDashboardStatisticsService dashboardStatistics, LanguageManager languageManager) {
+    public RevenueProfitChartFactory(IDashboardStatisticsService dashboardStatistics, LanguageManager languageManager) {
         this.dashboardStatistics = dashboardStatistics;
         this.languageManager = languageManager;
         this.chartUtility = new ChartUtility(languageManager);
@@ -164,66 +155,83 @@ public class RevenueChartFactory {
     }
 
     @SneakyThrows
-    public AreaChart<String, Number> createAverageOrderValueChart() {
+    public AreaChart<String, Number> createProfitMonthly() {
         return JavaFxSwing.runAndReturn(() -> {
             try {
                 final CategoryAxis xAxis = new CategoryAxis();
                 xAxis.setLabel(languageManager.getText("dashboard.chart.month"));
 
                 final NumberAxis yAxis = new NumberAxis();
-                yAxis.setLabel(languageManager.getText("dashboard.chart.order_value"));
+                yAxis.setLabel(languageManager.getText("dashboard.chart.profit"));
 
                 final AreaChart<String, Number> areaChart = new AreaChart<>(xAxis, yAxis);
-                areaChart.setTitle(languageManager.getText("dashboard.chart.average_order"));
-                areaChart.setCreateSymbols(true); // Show data points on the line
+                areaChart.setTitle(languageManager.getText("dashboard.chart.monthly_profit"));
+                areaChart.setCreateSymbols(true);
 
-                // Get data
-                Map<String, Double> data = dashboardStatistics.getAverageOrderValueByMonth();
-                Map<Integer, Map<String, Double>> valuesByYear = new HashMap<>();
+                // Add CSS styling directly to the chart
+                areaChart.setStyle("-fx-stroke-width: 2;");
 
-                // Process the data to separate by year
+                // Get profit data
+                Map<String, Double> data = dashboardStatistics.getMonthlyProfitData();
+                Map<Integer, Map<String, Double>> profitsByYear = new HashMap<>();
+
+                // Process data by year and month
                 for (Map.Entry<String, Double> entry : data.entrySet()) {
-                    String key = entry.getKey();
-
-                    // Parse the key to extract year and month (format "MM/YYYY")
-                    String[] parts = key.split("/");
+                    String[] parts = entry.getKey().split("/");
                     if (parts.length == 2) {
                         String month = parts[0];
                         int year = Integer.parseInt(parts[1]);
-
-                        // Create year entry if it doesn't exist
-                        valuesByYear.putIfAbsent(year, new HashMap<>());
-
-                        // Add data to appropriate year
-                        valuesByYear.get(year).put(month, entry.getValue());
+                        profitsByYear.putIfAbsent(year, new HashMap<>());
+                        profitsByYear.get(year).put(month, entry.getValue());
                     }
                 }
 
-                // Create a series for each year
-                for (Map.Entry<Integer, Map<String, Double>> yearEntry : valuesByYear.entrySet()) {
-                    int year = yearEntry.getKey();
-                    Map<String, Double> monthData = yearEntry.getValue();
+                // Create series for each year with complete month sets
+                String[] monthNames = chartUtility.getLocalizedMonthNames();
 
+                // Sort years in reverse order (newer years first)
+                Integer[] years = profitsByYear.keySet().toArray(new Integer[0]);
+                java.util.Arrays.sort(years, java.util.Collections.reverseOrder());
+
+                for (Integer year : years) {
+                    Map<String, Double> yearData = profitsByYear.get(year);
                     XYChart.Series<String, Number> series = new XYChart.Series<>();
-                    series.setName(languageManager.getText("dashboard.chart.avg_value") + " " + year);
+                    series.setName(languageManager.getText("dashboard.chart.profit") + " " + year);
 
-                    // Sort months and add data points
-                    List<Map.Entry<String, Double>> sortedMonths = new ArrayList<>(monthData.entrySet());
-                    sortedMonths.sort(Comparator.comparingInt(e -> Integer.parseInt(e.getKey())));
+                    // Ensure all months have entries
+                    for (int i = 1; i <= 12; i++) {
+                        String monthKey = String.format("%02d", i);
+                        String monthName = monthNames[i-1];
 
-                    for (Map.Entry<String, Double> monthEntry : sortedMonths) {
-                        series.getData().add(new XYChart.Data<>(monthEntry.getKey(), monthEntry.getValue()));
+                        // Get actual value or use 0 if month has no data
+                        Double value = yearData.getOrDefault(monthKey, 0.0);
+                        series.getData().add(new XYChart.Data<>(monthName, value));
                     }
 
                     areaChart.getData().add(series);
                 }
 
-                // Add tooltips
+                // Add tooltips using ChartUtility
                 chartUtility.addLineChartTooltips(areaChart);
+
+                // Apply post-processing to make data points visible on top of areas
+                javafx.application.Platform.runLater(() -> {
+                    for (XYChart.Series<String, Number> series : areaChart.getData()) {
+                        for (XYChart.Data<String, Number> dataPoint : series.getData()) {
+                            Node node = dataPoint.getNode();
+                            if (node != null) {
+                                // Make symbols always on top
+                                node.setViewOrder(-1);
+                                // Increase size and visibility
+                                node.setStyle("-fx-background-radius: 5px; -fx-padding: 5px;");
+                            }
+                        }
+                    }
+                });
 
                 return areaChart;
             } catch (Exception e) {
-                System.err.println("Error creating average order value chart: " + e.getMessage());
+                System.err.println("Error creating profit chart: " + e.getMessage());
                 e.printStackTrace();
                 return null;
             }

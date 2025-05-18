@@ -10,6 +10,7 @@ import com.nhom4.nhtsstore.ui.navigation.RoutablePanel;
 import com.nhom4.nhtsstore.ui.navigation.RouteParams;
 import com.nhom4.nhtsstore.utils.IconUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
@@ -23,6 +24,7 @@ import java.math.BigDecimal;
  * @author Sang
  */
 @Component
+@Scope("prototype")
 public class TransactionCompletedPanel extends JPanel implements RoutablePanel {
 
     @Autowired

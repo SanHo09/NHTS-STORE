@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import raven.modal.Toast;
 import raven.modal.toast.option.ToastLocation;
@@ -30,6 +31,7 @@ import raven.modal.toast.option.ToastLocation;
  * @author Sang
  */
 @Component
+@Scope("prototype")
 public class ProductDetailPanel extends javax.swing.JPanel implements RoutablePanel{
     private Product product;
 
@@ -94,6 +96,7 @@ public class ProductDetailPanel extends javax.swing.JPanel implements RoutablePa
                 .productName(product.getName())
                 .quantity(getQuantity())
                 .price(product.getSalePrice())
+                .cost(product.getPurchasePrice())
                 .manufacturer(product.getManufacturer())
                 .addedDate(new Date())
                 .build();
@@ -306,7 +309,7 @@ public class ProductDetailPanel extends javax.swing.JPanel implements RoutablePa
     }//GEN-LAST:event_btnAddToCartMouseClicked
 
     private void lblBackMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblBackMouseClicked
-        navigationService.navigateTo(AppView.POINT_OF_SALE);
+        navigationService.navigateTo(PointOfSalePanel.class, new RouteParams());
     }//GEN-LAST:event_lblBackMouseClicked
 
 

@@ -1,13 +1,13 @@
 package com.nhom4.nhtsstore.entities;
 
 import com.nhom4.nhtsstore.entities.rbac.User;
-import com.nhom4.nhtsstore.enums.OrderStatus;
+import com.nhom4.nhtsstore.enums.DeliveryStatus;
 import com.nhom4.nhtsstore.enums.PaymentMethod;
 import com.nhom4.nhtsstore.enums.PaymentStatus;
+import com.nhom4.nhtsstore.enums.FulfilmentMethod;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
-import java.text.DecimalFormat;
 import java.time.format.DateTimeFormatter;
 import lombok.Getter;
 import lombok.Setter;
@@ -32,10 +32,19 @@ public class Order extends GenericEntity {
     @Column(nullable = false,  precision = 19, scale = 2)
     private BigDecimal totalAmount= BigDecimal.ZERO;
 
-    @Column(nullable = false)
+    @Column(nullable = true,name = "delivery_status")
     @Enumerated(EnumType.STRING)
-    private OrderStatus status;
+    private DeliveryStatus deliveryStatus;
 
+    @Column(nullable = true, precision = 19, scale = 2)
+    private BigDecimal deliveryFee = BigDecimal.valueOf(5.0); // Default value for shipping cost
+
+    @Column
+    @Enumerated(EnumType.STRING)
+    private FulfilmentMethod fulfilmentMethod;
+
+    @Column(nullable = true,name = "delivery_address")
+    private String deliveryAddress;
     @Column
     @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;
@@ -74,11 +83,12 @@ public class Order extends GenericEntity {
             case 1: return customer.getName();
             case 2: return getLastModifiedOn() != null ? dateFormatter.format(createDate) : null;
             case 3: return totalAmount;
-            case 4: return status;
-            case 5: return paymentMethod;
-            case 6: return paymentStatus;
-            case 7: return lastModifiedOn != null ? lastModifiedOn.format(auditDateFormatter) : null;
-            case 8: return lastModifiedBy;
+            case 4: return fulfilmentMethod;
+            case 5: return deliveryStatus;
+            case 6: return paymentMethod;
+            case 7: return paymentStatus;
+            case 8: return lastModifiedOn != null ? lastModifiedOn.format(auditDateFormatter) : null;
+            case 9: return lastModifiedBy;
             default: return null;
         }
     }

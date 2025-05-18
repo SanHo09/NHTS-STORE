@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox fx:id="root" alignment="CENTER" prefHeight="663.0" prefWidth="597.0" spacing="20.0" styleClass="root" stylesheets="@../css/Global.css" xmlns="http://javafx.com/javafx/21.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.nhom4.nhtsstore.ui.page.login.LoginFxController">
+<VBox fx:id="root" alignment="CENTER" prefHeight="663.0" prefWidth="597.0" spacing="25.0" styleClass="root" stylesheets="@../css/Global.css" xmlns="http://javafx.com/javafx/21.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.nhom4.nhtsstore.ui.page.login.LoginFxController">
    <children>
       <ImageView fitHeight="168.0" fitWidth="179.0" pickOnBounds="true" preserveRatio="true">
          <image>
@@ -19,8 +19,8 @@
       </ImageView>
 
                                     
-                                            <MFXTextField fx:id="usernameField" floatMode="BORDER" floatingText="Email" graphicTextGap="1.0" prefHeight="50.0" prefWidth="402.0" text="phamduyhuy" />
-        <MFXPasswordField fx:id="passwordField" alignment="TOP_LEFT" borderGap="5.0" cache="true" floatMode="BORDER" floatingText="Password" graphicTextGap="1.0" measureUnitGap="1.0" prefHeight="50.0" prefWidth="402.0" text="123456">
+                                            <MFXTextField fx:id="usernameField" floatMode="ABOVE" floatingText="Email" floatingTextGap="1.0" graphicTextGap="1.0" prefHeight="50.0" prefWidth="402.0" text="phamduyhuy" />
+        <MFXPasswordField fx:id="passwordField" alignment="TOP_LEFT" borderGap="5.0" cache="true" floatMode="ABOVE" floatingText="Password" floatingTextGap="1.0" graphicTextGap="1.0" measureUnitGap="1.0" prefHeight="50.0" prefWidth="402.0" text="123456">
             <opaqueInsets>
                 <Insets />
             </opaqueInsets>

@@ -1,6 +1,7 @@
 package com.nhom4.nhtsstore.services.impl;
 
 import com.nhom4.nhtsstore.entities.Category;
+import com.nhom4.nhtsstore.enums.DeliveryStatus;
 import com.nhom4.nhtsstore.repositories.CategoryRepository;
 import com.nhom4.nhtsstore.repositories.OrderRepository;
 import com.nhom4.nhtsstore.repositories.ProductRepository;
@@ -107,6 +108,19 @@ public class DashboardStatisticsService implements IDashboardStatisticsService {
         Double total = orderRepository.getTotalCompletedRevenueForYear(year);
         return total != null ? total : 0.0;
     }
+
+    @Override
+    public double getTotalProfit() {
+        Double total = orderRepository.getTotalCompletedProfit();
+        return total != null ? total : 0.0;
+    }
+
+    @Override
+    public double getTotalProfitForYear(int year) {
+        Double total = orderRepository.getTotalCompletedProfitForYear(year);
+        return total != null ? total : 0.0;
+    }
+
     @Override
     public Map<String, Double> getRevenueByCategoryWithLimit(int topCategoriesLimit) {
         // Get total revenue by category
@@ -176,7 +190,7 @@ public class DashboardStatisticsService implements IDashboardStatisticsService {
 
         Map<String, Integer> result = new HashMap<>();
         for (Object[] row : statusCounts) {
-            String status = row[0].toString();
+            String status = DeliveryStatus.valueOf(row[0].toString()).getDisplayName();
             Integer count = ((Number) row[1]).intValue();
             result.put(status, count);
         }
@@ -210,31 +224,22 @@ public class DashboardStatisticsService implements IDashboardStatisticsService {
         return result;
     }
     @Override
-    public Map<String, Double> getAverageOrderValueByMonth() {
-        Map<String, Double> result = new LinkedHashMap<>();
+    public Map<String, Double> getMonthlyProfitData() {
+        Date endDate = new Date();
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.YEAR, -2); // Get 2 years of data
+        Date startDate = cal.getTime();
 
-        // Calculate start date (2 years ago)
-        LocalDate startDate = LocalDate.now().minusYears(2).withDayOfMonth(1);
-        Date sqlStartDate = Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        List<Object[]> results = orderRepository.getMonthlyProfitByTimeFrame(startDate, endDate);
+        Map<String, Double> profitData = new HashMap<>();
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/yyyy");
-        LocalDate current = startDate;
-        while (!current.isAfter(LocalDate.now())) {
-            result.put(current.format(formatter), 0.0);
-            current = current.plusMonths(1);
-        }
-
-        List<Object[]> data = orderRepository.getAverageOrderValueByMonth(
-                sqlStartDate, new java.sql.Date(System.currentTimeMillis()));
-
-        // Populate data
-        for (Object[] row : data) {
+        for (Object[] row : results) {
             String month = (String) row[0];
-            Double avgValue = ((Number) row[1]).doubleValue();
-            result.put(month, avgValue);
+            Double profit = ((Number) row[1]).doubleValue();
+            profitData.put(month, profit);
         }
 
-        return result;
+        return profitData;
     }
 
     @Override
@@ -246,7 +251,7 @@ public class DashboardStatisticsService implements IDashboardStatisticsService {
 
         for (Object[] row : data) {
             String productName = (String) row[0];
-            Double profit = ((Number) row[3]).doubleValue();
+            Double profit = ((Number) row[1]).doubleValue();
             result.add(new AbstractMap.SimpleEntry<>(productName, profit));
         }
 

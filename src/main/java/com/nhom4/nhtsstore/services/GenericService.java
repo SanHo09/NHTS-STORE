@@ -22,14 +22,18 @@ public interface GenericService<T extends GenericEntity, ID, R extends GenericRe
 
     // Get the repository instance
     R getRepository();
-
+    //default method to find all entities with pagination by fields and keyword
+    // you can override this method to add more conditions if needed
     default Page<T> search(String keyword, List<String> searchFields, Pageable pageable) {
         Specification<T> spec = Specification.where(null);
         if (keyword != null && !keyword.isEmpty() && searchFields != null) {
             Specification<T> keywordSpec = Specification.where(null);
             for (String field : searchFields) {
                 keywordSpec = keywordSpec.or((root, query, cb) ->
-                        cb.like(cb.lower(root.get(field)), "%" + keyword.toLowerCase() + "%"));
+                        cb.like(cb.lower(root.get(field)), "%" + keyword.toLowerCase() + "%"))
+                //add more conditions from here if you override this method
+                //example: .or((root, query, cb) -> cb.like(cb.lower(root.join("otherTable").get(field)), "%" + keyword.toLowerCase() + "%"))
+                ;
             }
             spec = spec.and(keywordSpec);
         }

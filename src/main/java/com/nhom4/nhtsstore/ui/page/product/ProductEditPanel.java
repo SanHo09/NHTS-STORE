@@ -49,7 +49,7 @@ public class ProductEditPanel extends JPanel implements RoutablePanel {
     private CategoryService categoryService;
     @Autowired
     private ProductImageService productImageService;
-    
+
     private Product product;
     private JButton uploadButton;
     private List<ProductImage> images = new ArrayList<>();
@@ -69,33 +69,33 @@ public class ProductEditPanel extends JPanel implements RoutablePanel {
         JPanel formPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
 //        formPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        
+
         int fieldWidth = 400;
         int row = 0;
         int column = 0;
-        
+
         // Product Name
         JTextField nameField = new JTextField(product != null ? product.getName() : "");
         addFieldToForm(formPanel, createLabeledField("Product Name:", nameField, fieldWidth), gbc, column, row++);
-        
+
         // Sale Price
         JSpinner salePriceField = new JSpinner(product != null 
-                            ? new SpinnerNumberModel(product.getSalePrice(), 0, 1000, 1)
-                            : new SpinnerNumberModel(0, 0, 1000, 1));
+                            ? new SpinnerNumberModel(product.getSalePrice().doubleValue(), 0.0, 1000.0, 1.0)
+                            : new SpinnerNumberModel(0.0, 0.0, 1000.0, 1.0));
         addFieldToForm(formPanel, createLabeledField("Sale Price:", salePriceField, fieldWidth), gbc, column, row++);
-        
+
         // Purchase Price
         JSpinner purchasePriceField = new JSpinner(product != null 
-                            ? new SpinnerNumberModel(product.getPurchasePrice(), 0, 1000, 1)
-                            : new SpinnerNumberModel(0, 0, 1000, 1));
+                            ? new SpinnerNumberModel(product.getPurchasePrice().doubleValue(), 0.0, 1000.0, 1.0)
+                            : new SpinnerNumberModel(0.0, 0.0, 1000.0, 1.0));
         addFieldToForm(formPanel, createLabeledField("Purchase Price:", purchasePriceField, fieldWidth), gbc, column, row++);
-        
+
         // Stock
         JSpinner quantityField = new JSpinner(product != null 
                             ? new SpinnerNumberModel(product.getQuantity(), 0, 1000, 1)
                             : new SpinnerNumberModel(0, 0, 1000, 1));
         addFieldToForm(formPanel, createLabeledField("Stock:", quantityField, fieldWidth), gbc, column, row++);
-        
+
         // Active
         ToggleSwitch activeToggle = new ToggleSwitch();
         activeToggle.setSelected(product != null && product.isActive());
@@ -106,7 +106,7 @@ public class ProductEditPanel extends JPanel implements RoutablePanel {
         gbc.weightx = 1.0;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         formPanel.add(Box.createHorizontalStrut(100), gbc);
-        
+
         column = 2;
         row = 0;
         // Manufacturer
@@ -119,20 +119,20 @@ public class ProductEditPanel extends JPanel implements RoutablePanel {
                 ? product.getManufactureDate()
                 : new Date());
         addFieldToForm(formPanel, createLabeledField("Manufacture Date:", manufactureDatePicker, fieldWidth), gbc, column, row++);
-        
+
         // Expiry Date
         DatePicker expiryDatePicker = new DatePicker();
         expiryDatePicker.setDate(product != null && product.getExpiryDate() != null
                 ? product.getExpiryDate()
                 : new Date());
         addFieldToForm(formPanel, createLabeledField("Expiry Date:", expiryDatePicker, fieldWidth), gbc, column, row++);
-        
+
         // Supplier
         List<Supplier> suppliers = supplierService.findAll();
         JComboBox<Supplier> supplierCombo = new JComboBox<>(suppliers.toArray(new Supplier[0]));
         if (product != null) supplierCombo.setSelectedItem(product.getSupplier());
         addFieldToForm(formPanel, createLabeledField("Supplier:", supplierCombo, fieldWidth), gbc, column, row++);
-        
+
         // Category
         List<Category> categories = categoryService.findAll();
         JComboBox<Category> categoryCombo = new JComboBox<>(categories.toArray(new Category[0]));
@@ -142,7 +142,7 @@ public class ProductEditPanel extends JPanel implements RoutablePanel {
         uploadButton = new JButton("Upload images");
         uploadButton.addActionListener(e -> uploadImages());
         addFieldToForm(formPanel, createLabeledField("", uploadButton, 140), gbc, column, row++);
-        
+
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton saveButton = new JButton("Save");
 //        saveButton.setFont(saveButton.getFont().deriveFont(Font.BOLD));
@@ -154,10 +154,10 @@ public class ProductEditPanel extends JPanel implements RoutablePanel {
         JButton cancelButton = new JButton("Cancel");
 
         JButton deleteButton = new JButton("Delete");
-        
+
         // Select all value when focus
         UIUtils.applySelectAllOnFocus(nameField, salePriceField, purchasePriceField, manufacturerField, quantityField);
-        
+
         saveButton.addActionListener(e -> {
             try {
                 Product updatedProduct = product != null ? product : new Product();
@@ -171,7 +171,7 @@ public class ProductEditPanel extends JPanel implements RoutablePanel {
                 updatedProduct.setCategory((Category) categoryCombo.getSelectedItem());
                 updatedProduct.setQuantity((Integer) quantityField.getValue());
                 updatedProduct.setActive(activeToggle.isSelected());
-                
+
                 for (ProductImage img : images) {
                     img.setProduct(updatedProduct);
                 }
@@ -229,16 +229,16 @@ public class ProductEditPanel extends JPanel implements RoutablePanel {
 
         add(buttonPanel);
         add(formPanel);
-        
+
         revalidate();
         repaint();
     }
-    
+
     private void returnToList() {
         JPanel listPanel = applicationState.getViewPanelByBean(ProductListPanel.class);
         panelManager.navigateTo(null, listPanel);
     }
-    
+
     private void delete() {
         int confirm = JOptionPane.showConfirmDialog(this,
                 "Are you sure you want to delete this product?",
@@ -259,7 +259,7 @@ public class ProductEditPanel extends JPanel implements RoutablePanel {
             }
         }
     }
-    
+
     private void uploadImages() {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setMultiSelectionEnabled(true);
@@ -286,7 +286,7 @@ public class ProductEditPanel extends JPanel implements RoutablePanel {
             repaint();
         }
     }
-    
+
     private void addFieldToForm(JPanel formPanel, JPanel fieldPanel, GridBagConstraints gbc, int column, int row) {
         gbc.gridx = column;
         gbc.gridy = row;
@@ -301,7 +301,7 @@ public class ProductEditPanel extends JPanel implements RoutablePanel {
         JPanel panel = new JPanel(new BorderLayout(10, 0)); // Giảm khoảng cách giữa label và field xuống 10px
         JLabel label = new JLabel(labelText);
         label.setPreferredSize(new Dimension(140, label.getPreferredSize().height)); // Đặt chiều rộng cố định cho label
-        
+
         JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0)); // Không có khoảng cách
         field.setPreferredSize(new Dimension(width, field.getPreferredSize().height));
         rightPanel.add(field);

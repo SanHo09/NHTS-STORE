@@ -5,6 +5,7 @@ import com.nhom4.nhtsstore.entities.GenericEntity;
 import com.nhom4.nhtsstore.entities.Invoice;
 import com.nhom4.nhtsstore.repositories.GenericRepository;
 import com.nhom4.nhtsstore.services.GenericService;
+import com.nhom4.nhtsstore.ui.AppView;
 import com.nhom4.nhtsstore.ui.ApplicationState;
 import com.nhom4.nhtsstore.ui.PanelManager;
 import com.nhom4.nhtsstore.ui.navigation.NavigationService;
@@ -1077,6 +1078,12 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel implement
         } else {
             RouteParams params = new RouteParams();
             params.set("entity", entity);
+            for (AppView view:AppView.values()){
+                if(view.getPanelClass().equals(editPanelClass)){
+                    this.navigationService.navigateTo(view, params);
+                    return;
+                }
+            }
             this.navigationService.navigateTo(editPanelClass, params);
         }
     }

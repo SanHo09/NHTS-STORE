@@ -36,31 +36,9 @@ public class MainPanel extends JPanel {
 		this.navigationService = navigationService;
 		setLayout(new BorderLayout());
 
-		// Add listener to detect when user logs in
-		applicationState.authenticatedProperty().addListener((obs, oldValue, newValue) -> {
-			if (newValue) {
-				// User just logged in - refresh menu
-				SwingUtilities.invokeLater(this::refreshMenu);
-			}
-		});
-		
-		// Listen for navigation events to highlight the correct menu item
-		navigationService.addNavigationListener(view -> {
-			if (sidebarController != null) {
-				SwingUtilities.invokeLater(() -> sidebarController.setSelectedView(view));
-			}
-		});
-	}
-	
-	private void refreshMenu() {
-		// Clear and rebuild the menu based on current user role
-		if (sidebarController != null) {
-			sidebarController.refreshMenuItems();
-		}
 
-		// Navigate to default view (typically dashboard)
-		navigationService.navigateTo(AppView.DASHBOARD, new RouteParams());
 	}
+
 
 	@PostConstruct
 	private void initializeComponents() {

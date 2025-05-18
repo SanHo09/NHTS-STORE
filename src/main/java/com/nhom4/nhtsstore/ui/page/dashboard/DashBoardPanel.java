@@ -14,12 +14,13 @@ import javax.swing.*;
 import java.awt.*;
 
 @Controller
+
 public class DashBoardPanel extends JPanel implements RoutablePanel {
     private final NavigationService navigationService;
     private final IDashboardStatisticsService dashboardStatistics;
     private final ThemeManager themeManager;
     private final LanguageManager languageManager;
-    private final DashBoardFxView dashBoardFxView;
+    private DashBoardFxView dashBoardFxView;
     private JPanel headerPanel;
     private JLabel titleLabel;
 
@@ -32,10 +33,7 @@ public class DashBoardPanel extends JPanel implements RoutablePanel {
         this.dashboardStatistics = dashboardStatistics;
         this.themeManager = themeManager;
         this.languageManager = languageManager;
-
-        // Create the JavaFX view for the dashboard
         this.dashBoardFxView = new DashBoardFxView(dashboardStatistics, themeManager, languageManager);
-        
         setLayout(new BorderLayout(5, 5));
         initComponents();
         setupLanguageListener();
@@ -48,6 +46,7 @@ public class DashBoardPanel extends JPanel implements RoutablePanel {
         titleLabel = new JLabel(languageManager.getText("dashboard.title"));
         titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
         headerPanel.add(titleLabel, BorderLayout.CENTER);
+
         add(headerPanel, BorderLayout.NORTH);
         add(dashBoardFxView, BorderLayout.CENTER);
     }
@@ -63,6 +62,7 @@ public class DashBoardPanel extends JPanel implements RoutablePanel {
 
     @Override
     public void onNavigate(RouteParams params) {
+
         Platform.runLater(dashBoardFxView::refreshData);
     }
 }

@@ -26,8 +26,12 @@ public class ApplicationState {
     private final ObjectProperty<UserSessionVm> currentUser = new SimpleObjectProperty<>();
     // Cart state
     private final ObjectProperty<CartVm> cart = new SimpleObjectProperty<>(new CartVm());
+
     //Order state
     private final SimpleMapProperty<String,String> orderQrCodeByTransactionId = new SimpleMapProperty<>(FXCollections.observableHashMap());
+    //Ui State
+    @Getter
+    private final ObjectProperty<AppView> currentView = new SimpleObjectProperty<>();
     public final ApplicationContext applicationContext;
     private final ThemeManager themeManager;
     private final CartConfig cartConfig;
@@ -49,6 +53,9 @@ public class ApplicationState {
     }
     public ObjectProperty<CartVm> cartProperty() {
         return cart;
+    }
+    public ObjectProperty<AppView> currentViewProperty() {
+        return currentView;
     }
     public CartVm getCart() {
         return cart.getValue();

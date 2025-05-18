@@ -1,5 +1,6 @@
 package com.nhom4.nhtsstore.ui.page.dashboard;
 
+import com.nhom4.nhtsstore.enums.DeliveryStatus;
 import com.nhom4.nhtsstore.services.IDashboardStatisticsService;
 import com.nhom4.nhtsstore.ui.shared.LanguageManager;
 import com.nhom4.nhtsstore.utils.NumberAnimationUtils;
@@ -31,57 +32,124 @@ public class StatisticsCardFactory {
     }
 
     @SneakyThrows
-    public Region createTotalRevenueCard() {
+    public Region createTotalRevenueProfit() {
         VBox card = new VBox(12);
         card.setPadding(new Insets(20));
         card.getStyleClass().add("dashboard-card");
-        Text titleText = new Text(languageManager.getText("dashboard.revenue_title"));
+
+        // Title
+        Text titleText = new Text(languageManager.getText("dashboard.revenue_profit_title"));
         titleText.getStyleClass().add("card-title");
+
+        // Get revenue data
         double totalRevenue = dashboardStatistics.getTotalRevenue();
         int currentYear = LocalDate.now().getYear();
         int previousYear = currentYear - 1;
         double currentYearRevenue = dashboardStatistics.getTotalRevenueForYear(currentYear);
         double previousYearRevenue = dashboardStatistics.getTotalRevenueForYear(previousYear);
+
+        // Get profit data - needs implementation in service
+        double totalProfit = dashboardStatistics.getTotalProfit();
+        double currentYearProfit = dashboardStatistics.getTotalProfitForYear(currentYear);
+        double previousYearProfit = dashboardStatistics.getTotalProfitForYear(previousYear);
+
+        // Revenue metrics
         HBox totalRevenueRow = createMetricRow(languageManager.getText("dashboard.total_revenue"),
                 UIUtils.formatCurrency(totalRevenue), "#1565C0");
 
-        HBox currentYearRow = createMetricRow(languageManager.getText("dashboard.revenue_year") + " " + currentYear,
+        HBox currentYearRevenueRow = createMetricRow(languageManager.getText("dashboard.revenue_year") + " " + currentYear,
                 UIUtils.formatCurrency(currentYearRevenue), "#2E7D32");
 
-        HBox previousYearRow = createMetricRow(languageManager.getText("dashboard.revenue_prev_year") + " " + previousYear,
+        HBox previousYearRevenueRow = createMetricRow(languageManager.getText("dashboard.revenue_prev_year") + " " + previousYear,
                 UIUtils.formatCurrency(previousYearRevenue), "#7B1FA2");
+
+        // Profit metrics
+        HBox totalProfitRow = createMetricRow(languageManager.getText("dashboard.total_profit"),
+                UIUtils.formatCurrency(totalProfit), "#1565C0");
+
+        HBox currentYearProfitRow = createMetricRow(languageManager.getText("dashboard.profit_year") + " " + currentYear,
+                UIUtils.formatCurrency(currentYearProfit), "#2E7D32");
+
+        HBox previousYearProfitRow = createMetricRow(languageManager.getText("dashboard.profit_prev_year") + " " + previousYear,
+                UIUtils.formatCurrency(previousYearProfit), "#7B1FA2");
+
+        // Get text nodes for animation
         Text totalRevenueText = (Text) totalRevenueRow.getChildren().get(2);
-        Text currentYearText = (Text) currentYearRow.getChildren().get(2);
-        Text previousYearText = (Text) previousYearRow.getChildren().get(2);
+        Text currentYearRevenueText = (Text) currentYearRevenueRow.getChildren().get(2);
+        Text previousYearRevenueText = (Text) previousYearRevenueRow.getChildren().get(2);
+        Text totalProfitText = (Text) totalProfitRow.getChildren().get(2);
+        Text currentYearProfitText = (Text) currentYearProfitRow.getChildren().get(2);
+        Text previousYearProfitText = (Text) previousYearProfitRow.getChildren().get(2);
 
         // Create and start animations
         NumberAnimationUtils.animateCurrency(totalRevenueText, totalRevenue);
-        NumberAnimationUtils.animateCurrency(currentYearText, currentYearRevenue);
-        NumberAnimationUtils.animateCurrency(previousYearText, previousYearRevenue);
-        HBox comparisonRow = new HBox(10);
-        comparisonRow.setAlignment(Pos.CENTER_LEFT);
+        NumberAnimationUtils.animateCurrency(currentYearRevenueText, currentYearRevenue);
+        NumberAnimationUtils.animateCurrency(previousYearRevenueText, previousYearRevenue);
+        NumberAnimationUtils.animateCurrency(totalProfitText, totalProfit);
+        NumberAnimationUtils.animateCurrency(currentYearProfitText, currentYearProfit);
+        NumberAnimationUtils.animateCurrency(previousYearProfitText, previousYearProfit);
 
-        String comparisonText = "";
-        String comparisonColor = "#757575";
+        // Comparison rows
+        HBox revenueComparisonRow = new HBox(10);
+        revenueComparisonRow.setAlignment(Pos.CENTER_LEFT);
+
+        HBox profitComparisonRow = new HBox(10);
+        profitComparisonRow.setAlignment(Pos.CENTER_LEFT);
+
+        // Revenue comparison percentage
+        String revenueComparisonText = "";
+        String revenueComparisonColor = "#757575";
 
         if (previousYearRevenue > 0) {
             double percentChange = ((currentYearRevenue - previousYearRevenue) / previousYearRevenue) * 100;
             String direction = percentChange >= 0 ? "↑" : "↓";
-            comparisonColor = percentChange >= 0 ? "#2E7D32" : "#C62828";
-            comparisonText = languageManager.getText("dashboard.compared_to_prev") + ": " + direction + " " + String.format("%.1f%%", Math.abs(percentChange));
+            revenueComparisonColor = percentChange >= 0 ? "#2E7D32" : "#C62828";
+            revenueComparisonText = languageManager.getText("dashboard.revenue_compared_to_prev") + ": " +
+                    direction + " " + String.format("%.1f%%", Math.abs(percentChange));
         }
 
-        Text comparisonLabel = new Text(comparisonText);
-        comparisonLabel.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-fill: " + comparisonColor);
-        comparisonRow.getChildren().add(comparisonLabel);
+        // Profit comparison percentage
+        String profitComparisonText = "";
+        String profitComparisonColor = "#757575";
 
+        if (previousYearProfit > 0) {
+            double percentChange = ((currentYearProfit - previousYearProfit) / previousYearProfit) * 100;
+            String direction = percentChange >= 0 ? "↑" : "↓";
+            profitComparisonColor = percentChange >= 0 ? "#2E7D32" : "#C62828";
+            profitComparisonText = languageManager.getText("dashboard.profit_compared_to_prev") + ": " +
+                    direction + " " + String.format("%.1f%%", Math.abs(percentChange));
+        }
+
+        Text revenueComparisonLabel = new Text(revenueComparisonText);
+        revenueComparisonLabel.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-fill: " + revenueComparisonColor);
+        revenueComparisonRow.getChildren().add(revenueComparisonLabel);
+
+        Text profitComparisonLabel = new Text(profitComparisonText);
+        profitComparisonLabel.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-fill: " + profitComparisonColor);
+        profitComparisonRow.getChildren().add(profitComparisonLabel);
+
+        // Section headers
+        Text revenueHeader = new Text(languageManager.getText("dashboard.revenue_section"));
+        revenueHeader.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-fill: #1565C0");
+
+        Text profitHeader = new Text(languageManager.getText("dashboard.profit_section"));
+        profitHeader.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-fill: #1565C0");
+
+        // Build the card
         card.getChildren().addAll(
                 titleText,
                 new Separator(),
+                revenueHeader,
                 totalRevenueRow,
-                currentYearRow,
-                previousYearRow,
-                comparisonRow
+                currentYearRevenueRow,
+                previousYearRevenueRow,
+                revenueComparisonRow,
+                new Separator(),
+                profitHeader,
+                totalProfitRow,
+                currentYearProfitRow,
+                previousYearProfitRow,
+                profitComparisonRow
         );
 
         return card;
@@ -98,9 +166,10 @@ public class StatisticsCardFactory {
         // Get order status data
         Map<String, Integer> orderStatusCounts = dashboardStatistics.getOrderStatusCounts();
         int totalOrders = orderStatusCounts.values().stream().mapToInt(Integer::intValue).sum();
-        int completedOrders = orderStatusCounts.getOrDefault("COMPLETED", 0);
-        int inProgressOrders = orderStatusCounts.getOrDefault("IN_PROGRESS", 0);
-
+        int completedOrders = orderStatusCounts.getOrDefault(DeliveryStatus.COMPLETED.getDisplayName(), 0);
+        int inProgressOrders = orderStatusCounts.getOrDefault(DeliveryStatus.IN_PROGRESS.getDisplayName(), 0);
+        int onDeliveryOrders = orderStatusCounts.getOrDefault(DeliveryStatus.ON_DELIVERY.getDisplayName(), 0);
+        int cancelledOrders = orderStatusCounts.getOrDefault(DeliveryStatus.CANCELLED.getDisplayName(), 0);
         // Calculate completion rate
         double completionRate = totalOrders > 0 ? (completedOrders * 100.0 / totalOrders) : 0;
 
@@ -113,19 +182,28 @@ public class StatisticsCardFactory {
 
         HBox inProgressOrdersRow = createMetricRow(languageManager.getText("dashboard.in_progress_orders"),
                 String.valueOf(inProgressOrders), "#FFA000");
+        HBox onDeliveryOrdersRow = createMetricRow(languageManager.getText("dashboard.on_delivery_orders"),
+                String.valueOf(onDeliveryOrders), "#FF6F00");
+        HBox cancelledOrdersRow = createMetricRow(languageManager.getText("dashboard.cancelled_orders"),
+                String.valueOf(cancelledOrders), "#C62828");
 
         HBox completionRateRow = createMetricRow(languageManager.getText("dashboard.completion_rate"),
                 String.format("%.1f%%", completionRate), "#7B1FA2");
+
 
         Text completionRateText = (Text) completionRateRow.getChildren().get(2);
         Text totalOrdersText = (Text) totalOrdersRow.getChildren().get(2);
         Text completedOrdersText = (Text) completedOrdersRow.getChildren().get(2);
         Text inProgressOrdersText = (Text) inProgressOrdersRow.getChildren().get(2);
+        Text onDeliveryOrdersText = (Text) onDeliveryOrdersRow.getChildren().get(2);
+        Text cancelledOrdersText = (Text) cancelledOrdersRow.getChildren().get(2);
         // Create and start animations
         NumberAnimationUtils.animateInteger(totalOrdersText, totalOrders);
         NumberAnimationUtils.animateInteger(completedOrdersText, completedOrders);
         NumberAnimationUtils.animateInteger(inProgressOrdersText, inProgressOrders);
         NumberAnimationUtils.animatePercentage(completionRateText, completionRate);
+        NumberAnimationUtils.animateInteger(onDeliveryOrdersText, onDeliveryOrders);
+        NumberAnimationUtils.animateInteger(cancelledOrdersText, cancelledOrders);
 
         card.getChildren().addAll(
                 titleText,
@@ -133,7 +211,10 @@ public class StatisticsCardFactory {
                 totalOrdersRow,
                 completedOrdersRow,
                 inProgressOrdersRow,
+                onDeliveryOrdersRow,
+                cancelledOrdersRow,
                 completionRateRow
+
         );
 
         return card;

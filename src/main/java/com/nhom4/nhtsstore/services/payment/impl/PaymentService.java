@@ -1,4 +1,4 @@
-package com.nhom4.nhtsstore.services.impl;
+package com.nhom4.nhtsstore.services.payment.impl;
 
 import com.nhom4.nhtsstore.entities.Order;
 import com.nhom4.nhtsstore.enums.PaymentStatus;
@@ -33,8 +33,8 @@ public class PaymentService implements IPaymentService {
 
     @Override
     public PaymentStatus checkPaymentStatus(Order order) {
-        if (order.getPaymentMethod() == null || order.getPaymentTransactionId() == null) {
-            return PaymentStatus.COMPLETED;
+        if (order == null || order.getPaymentStatus() == null || order.getPaymentTransactionId() == null) {
+            return PaymentStatus.FAILED;
         }
 
         PaymentStrategy strategy = strategyFactory.getStrategy(order.getPaymentMethod());
