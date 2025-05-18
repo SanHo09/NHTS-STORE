@@ -21,28 +21,28 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 public class ProductService implements IProductService {
-    
+
     @Autowired
     private ProductRepository repository;
-        
+
     @Autowired
     private ProductImageRepository productImageRepository;
-    
+
     @Override
     public List<Product> findAll() {
         return repository.findAll();
     }
-    
+
     @Override
     public Product findById(Long id) {
         return repository.findById(id).orElse(null);
     }
-    
+
     @Override
     public Product save(Product entity) {
         return repository.save(entity);
     }
-    
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteById(Long id) {
@@ -62,7 +62,7 @@ public class ProductService implements IProductService {
         }
 //        repository.deleteAll(entities);
     }
-    
+
     @Override
     public Page<Product> findAll(Pageable pageable) {
         pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("lastModifiedOn").descending());
@@ -87,5 +87,32 @@ public class ProductService implements IProductService {
         }
         pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("lastModifiedOn").descending());
         return repository.findAll(spec, pageable);
+    }
+
+    @Override
+    public Product findByBarcode(String barcode) {
+        return repository.findByBarcodeAndActiveIsTrue(barcode);
+    }
+
+    @Override
+    public Page<Product> searchWhereIsActive(String keyword, List<String> searchFields, Pageable pageable) {
+        Specification<Product> spec = Specification.where(null);
+        if (keyword != null && !keyword.isEmpty() && searchFields != null) {
+            Specification<Product> keywordSpec = Specification.where(null);
+            for (String field : searchFields) {
+                keywordSpec = keywordSpec.or((root, query, cb) ->
+                        cb.like(cb.lower(root.get(field)), "%" + keyword.toLowerCase() + "%"))
+                        .and((root, query, cb) -> cb.equal(root.get("active"), true));
+            }
+            spec = spec.and(keywordSpec);
+        }
+        pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("lastModifiedOn").descending());
+        return repository.findAll(spec, pageable);
+    }
+
+    @Override
+    public Page<Product> findAllByActiveIsTrue(Pageable pageable) {
+        pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("lastModifiedOn").descending());
+        return repository.findAllByActiveIsTrue(pageable);
     }
 }

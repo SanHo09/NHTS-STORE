@@ -12,6 +12,7 @@ import com.nhom4.nhtsstore.utils.JavaFxThemeUtil;
 import com.nhom4.nhtsstore.utils.MsgBox;
 import io.github.palexdev.materialfx.beans.Alignment;
 import io.github.palexdev.materialfx.controls.*;
+import io.github.palexdev.materialfx.enums.FloatMode;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -121,6 +122,7 @@ public class LoginFxController extends StackPane implements Initializable {
                 "/icons/MaterialSymbolsAccountBox.svg", 20, 20, color -> Color.decode("#0f156d")));
         passwordField.setLeadingIcon(IconUtil.createFxImageViewFromSvg(
                 "/icons/MaterialSymbolsLockOutline.svg", 20, 20, color ->  Color.decode("#0f156d")));
+
     }
 
     private void setupTooltips() {
@@ -183,7 +185,12 @@ public class LoginFxController extends StackPane implements Initializable {
                     Toast.show(loginPanel, Toast.Type.SUCCESS, successMessage);
                     resetFields();
                     stopLoadingState();
-                    navigationService.navigateTo(AppView.DASHBOARD);
+                    String role=applicationState.getCurrentUser().getRole();
+                    if (role.equals("SALE")) {
+                        navigationService.navigateTo(AppView.POINT_OF_SALE);
+                    } else {
+                        navigationService.navigateTo(AppView.DASHBOARD);
+                    }
                 });
             } catch (AuthenticationException e) {
                 Platform.runLater(() -> {
@@ -191,7 +198,7 @@ public class LoginFxController extends StackPane implements Initializable {
                     if (e.getMessage().equals("User is disabled")) {
                         errorMessage = languageManager != null ?
                                 languageManager.getText("login.error.disabled") :
-                                "Your account is disabled. Please contact the administrator.";
+                                "Your account is deactivated. Please contact the administrator.";
                     } else if (e.getMessage().equals("User account is locked")) {
                         errorMessage = languageManager != null ?
                                 languageManager.getText("login.error.locked") :

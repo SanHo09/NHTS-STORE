@@ -16,14 +16,10 @@ public class PanelManager {
     }
 
     public void navigateTo(AppView appView, JPanel panel) {
-        if (appView == null) {
-            contentContainer.showPanel(panel);
-        } else {
-            if(panel == null) {
-                return;
-            }
-            contentContainer.showPanel(panel);
-            }
+        if (panel == null) {
+            return;
+        }
+        contentContainer.showPanel(appView, panel);
     }
 
 

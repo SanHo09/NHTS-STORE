@@ -4,7 +4,10 @@ import com.nhom4.nhtsstore.entities.Customer;
 import com.nhom4.nhtsstore.entities.Order;
 import com.nhom4.nhtsstore.entities.OrderDetail;
 import com.nhom4.nhtsstore.entities.Product;
-import com.nhom4.nhtsstore.enums.OrderStatus;
+import com.nhom4.nhtsstore.enums.DeliveryStatus;
+import com.nhom4.nhtsstore.enums.FulfilmentMethod;
+import com.nhom4.nhtsstore.enums.PaymentMethod;
+import com.nhom4.nhtsstore.enums.PaymentStatus;
 import com.nhom4.nhtsstore.services.impl.CustomerService;
 import com.nhom4.nhtsstore.services.EventBus;
 import com.nhom4.nhtsstore.services.impl.OrderService;
@@ -22,6 +25,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -59,7 +63,11 @@ public class OrderEditPanel extends JPanel implements RoutablePanel {
 
     private Order order;
     private JComboBox<Customer> customerCombo;
-    private JComboBox<OrderStatus> statusCombo;
+    private JComboBox<DeliveryStatus> statusCombo;
+    private JComboBox<PaymentStatus> paymentStatusCombo;
+    private JComboBox<PaymentMethod> paymentMethodCombo;
+    private JComboBox<FulfilmentMethod> fulfilmentMethodCombo;
+
     private JSpinner totalAmountField;
     private OrderDetailTableModel orderDetailTableModel;
     private JTable orderDetailTable;
@@ -87,11 +95,18 @@ public class OrderEditPanel extends JPanel implements RoutablePanel {
         List<Customer> customers = customerService.findAll();
         customerCombo = new JComboBox<>(customers.toArray(new Customer[0]));
         
-        List<OrderStatus> statusList = new ArrayList<>();
-        statusList.add(OrderStatus.IN_PROGRESS);
-        statusList.add(OrderStatus.COMPLETED);
-        statusCombo = new JComboBox<>(statusList.toArray(new OrderStatus[0]));
-        
+        List<DeliveryStatus> statusList = new ArrayList<>(Arrays.asList(DeliveryStatus.values()));
+        statusCombo = new JComboBox<>(statusList.toArray(new DeliveryStatus[0]));
+
+        List<PaymentMethod> paymentMethods = new ArrayList<>(Arrays.asList(PaymentMethod.values()));
+        paymentMethodCombo = new JComboBox<>(paymentMethods.toArray(new PaymentMethod[0]));
+
+        List<PaymentStatus> paymentStatuses = new ArrayList<>(Arrays.asList(PaymentStatus.values()));
+        paymentStatusCombo = new JComboBox<>(paymentStatuses.toArray(new PaymentStatus[0]));
+
+        List<FulfilmentMethod> fulfilmentMethods = new ArrayList<>(Arrays.asList(FulfilmentMethod.values()));
+        fulfilmentMethodCombo = new JComboBox<>(fulfilmentMethods.toArray(new FulfilmentMethod[0]));
+
         totalAmountField = new JSpinner(new SpinnerNumberModel(0.0, 0.0, Double.MAX_VALUE, 1.0));
         totalAmountField.setEnabled(false);
 
@@ -101,9 +116,12 @@ public class OrderEditPanel extends JPanel implements RoutablePanel {
         // Initialize order details list
         if (order != null) {
             customerCombo.setSelectedItem(order.getCustomer());
-            statusCombo.setSelectedItem(order.getStatus());
+            statusCombo.setSelectedItem(order.getDeliveryStatus());
             totalAmountField.setValue(order.getTotalAmount());
-            
+            paymentMethodCombo.setSelectedItem(order.getPaymentMethod());
+            paymentStatusCombo.setSelectedItem(order.getPaymentStatus());
+            fulfilmentMethodCombo.setSelectedItem(order.getFulfilmentMethod());
+
             if (order.getOrderDetails() != null) {
                 orderDetails = new ArrayList<>(order.getOrderDetails());
             }
@@ -113,6 +131,10 @@ public class OrderEditPanel extends JPanel implements RoutablePanel {
         addFieldToForm(formPanel, createLabeledField("Customer:", customerCombo, fieldWidth), gbc, column, row++);
         addFieldToForm(formPanel, createLabeledField("Status:", statusCombo, fieldWidth), gbc, column, row++);
         addFieldToForm(formPanel, createLabeledField("Total amount:", totalAmountField, fieldWidth), gbc, column, row++);
+        addFieldToForm(formPanel, createLabeledField("Payment Method:", paymentMethodCombo, fieldWidth), gbc, column, row++);
+        addFieldToForm(formPanel, createLabeledField("Payment Status:", paymentStatusCombo, fieldWidth), gbc, column, row++);
+        addFieldToForm(formPanel, createLabeledField("Create Date:", new JLabel(new Date().toString()), fieldWidth), gbc, column, row++);
+        addFieldToForm(formPanel, createLabeledField("Fulfillment Method:", fulfilmentMethodCombo, fieldWidth), gbc, column, row++);
 
         // Create order detail table
         orderDetailTableModel = new OrderDetailTableModel();
@@ -235,24 +257,27 @@ public class OrderEditPanel extends JPanel implements RoutablePanel {
         try {
             Order updatedOrder = order != null ? order : new Order();
             updatedOrder.setCustomer((Customer) customerCombo.getSelectedItem());
-            updatedOrder.setStatus((OrderStatus) statusCombo.getSelectedItem());
+            updatedOrder.setDeliveryStatus((DeliveryStatus) statusCombo.getSelectedItem());
             updatedOrder.setTotalAmount(BigDecimal.valueOf(((Number) totalAmountField.getValue()).doubleValue()));
-            updatedOrder.setCreateDate(new Date());
+            updatedOrder.setPaymentMethod((PaymentMethod) paymentMethodCombo.getSelectedItem());
+            updatedOrder.setPaymentStatus((PaymentStatus) paymentStatusCombo.getSelectedItem());
+            updatedOrder.setFulfilmentMethod((FulfilmentMethod) fulfilmentMethodCombo.getSelectedItem());
+
             for (OrderDetail od: orderDetails) {
                 od.setOrder(updatedOrder);
             }
             updatedOrder.setOrderDetails(orderDetails);
-            
+
             orderService.save(updatedOrder);
             JOptionPane.showMessageDialog(this,
-                   "Save successfully",
-                   "Save Success", JOptionPane.INFORMATION_MESSAGE);
+                    "Save successfully",
+                    "Save Success", JOptionPane.INFORMATION_MESSAGE);
             EventBus.postReload(true);
             this.returnToList();
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, 
-                   "Error saving order: " + ex.getMessage(),
-                   "Save Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                    "Error saving order: " + ex.getMessage(),
+                    "Save Error", JOptionPane.ERROR_MESSAGE);
             ex.printStackTrace();
         }
     }

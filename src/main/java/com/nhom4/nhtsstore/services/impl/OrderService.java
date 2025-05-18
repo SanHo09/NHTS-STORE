@@ -4,6 +4,8 @@ import com.nhom4.nhtsstore.entities.Order;
 import com.nhom4.nhtsstore.entities.OrderDetail;
 import com.nhom4.nhtsstore.repositories.OrderDetailRepository;
 import com.nhom4.nhtsstore.repositories.OrderRepository;
+
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -53,6 +55,7 @@ public class OrderService implements IOrderService {
     public Order save(Order entity) {
         if (entity.getId() == null) {
             log.info("Creating new order for user id: {}", entity.getUser().getId());
+            entity.setCreateDate(new Date());
         } else {
             log.info("Updating order with id: {}", entity.getId());
         }

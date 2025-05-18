@@ -87,9 +87,9 @@ public class InvoiceExportService implements IInvoiceExportService {
 
             //invoice number and date
             document.add(new Paragraph("Số hóa đơn: " + invoice.getId(), HEADER_FONT));
-            document.add(new Paragraph("Ngày: " + (invoice.getLastModifiedOn() != null ? 
-                invoice.getLastModifiedOn().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")) : 
-                (invoice.getCreateDate() != null ? DATE_FORMAT.format(invoice.getCreateDate()) : "")), HEADER_FONT));
+            document.add(new Paragraph("Ngày: " + (invoice.getLastModifiedOn() != null ?
+                    invoice.getLastModifiedOn().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")) :
+                    (invoice.getCreateDate() != null ? DATE_FORMAT.format(invoice.getCreateDate()) : "")), HEADER_FONT));
             document.add(Chunk.NEWLINE);
 
             //seller information
@@ -101,13 +101,31 @@ public class InvoiceExportService implements IInvoiceExportService {
 
             //buyer information
             document.add(new Paragraph("THÔNG TIN NGƯỜI MUA:", HEADER_FONT));
-            document.add(new Paragraph("Tên khách hàng: " + invoice.getCustomer().getName(), NORMAL_FONT));
+
+            // Handle null customer safely
+            if (invoice.getCustomer() != null) {
+                document.add(new Paragraph("Tên khách hàng: " + invoice.getCustomer().getName(), NORMAL_FONT));
+            } else {
+                document.add(new Paragraph("Tên khách hàng: [Không có thông tin]", NORMAL_FONT));
+            }
+
             if (invoice.getPhoneNumber() != null && !invoice.getPhoneNumber().isEmpty()) {
                 document.add(new Paragraph("Số điện thoại: " + invoice.getPhoneNumber(), NORMAL_FONT));
             }
-            if (invoice.getShippingAddress() != null && !invoice.getShippingAddress().isEmpty()) {
-                document.add(new Paragraph("Địa chỉ: " + invoice.getShippingAddress(), NORMAL_FONT));
+
+            // Add fulfillment method info
+            if (invoice.getFulfilmentMethod() != null) {
+                document.add(new Paragraph("Phương thức nhận hàng: " + invoice.getFulfilmentMethod().getDisplayName(), NORMAL_FONT));
             }
+
+            // Only show delivery address for non-pickup orders
+            boolean isPickup = invoice.getFulfilmentMethod() != null &&
+                    invoice.getFulfilmentMethod().toString().equals("PICKUP");
+
+            if (!isPickup && invoice.getDeliveryAddress() != null && !invoice.getDeliveryAddress().isEmpty()) {
+                document.add(new Paragraph("Địa chỉ giao hàng: " + invoice.getDeliveryAddress(), NORMAL_FONT));
+            }
+
             document.add(Chunk.NEWLINE);
 
             // Add invoice details table
@@ -124,10 +142,32 @@ public class InvoiceExportService implements IInvoiceExportService {
             document.add(table);
             document.add(Chunk.NEWLINE);
 
-            // Add total amount
-            Paragraph totalAmount = new Paragraph("Tổng tiền: " + invoice.getTotalAmount() + " USD", BOLD_FONT);
-            totalAmount.setAlignment(Element.ALIGN_RIGHT);
-            document.add(totalAmount);
+            // Add subtotal, delivery fee and total amount
+            Paragraph subtotal = new Paragraph("Tổng tiền hàng: " +
+                    CURRENCY_FORMAT.format(invoice.getTotalAmount()) + " USD", NORMAL_FONT);
+            subtotal.setAlignment(Element.ALIGN_RIGHT);
+            document.add(subtotal);
+
+            // Add delivery fee if not pickup
+            if (!isPickup && invoice.getDeliveryFee() != null) {
+                Paragraph deliveryFee = new Paragraph("Phí vận chuyển: " +
+                        CURRENCY_FORMAT.format(invoice.getDeliveryFee()) + " USD", NORMAL_FONT);
+                deliveryFee.setAlignment(Element.ALIGN_RIGHT);
+                document.add(deliveryFee);
+
+                // Calculate and display grand total
+                BigDecimal grandTotal = invoice.getTotalAmount().add(invoice.getDeliveryFee());
+                Paragraph totalAmount = new Paragraph("Tổng cộng: " +
+                        CURRENCY_FORMAT.format(grandTotal) + " USD", BOLD_FONT);
+                totalAmount.setAlignment(Element.ALIGN_RIGHT);
+                document.add(totalAmount);
+            } else {
+                // For pickup, just show the total amount as grand total
+                Paragraph totalAmount = new Paragraph("Tổng cộng: " +
+                        CURRENCY_FORMAT.format(invoice.getTotalAmount()) + " USD", BOLD_FONT);
+                totalAmount.setAlignment(Element.ALIGN_RIGHT);
+                document.add(totalAmount);
+            }
 
             // Add payment information
             if (invoice.getPaymentMethod() != null) {

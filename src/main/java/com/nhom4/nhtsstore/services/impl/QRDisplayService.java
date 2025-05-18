@@ -124,7 +124,13 @@ public class QRDisplayService {
         qrDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
         qrDialog.setPreferredSize(new Dimension(450, 400));
-
+        qrDialog.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                log.debug("Dialog closed, invoking onCancel callback");
+                onCancel.accept(null);
+            }
+        });
         log.debug("Adding QR code image to dialog");
         // Add QR code image
         JLabel qrLabel = new JLabel(new ImageIcon(qrImage));

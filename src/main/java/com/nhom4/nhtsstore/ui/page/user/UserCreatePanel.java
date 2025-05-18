@@ -34,7 +34,7 @@ public class UserCreatePanel extends JPanel implements RoutablePanel {
     private JTextField txtFullName;
     private JTextField txtUsername;
     private JTextField txtEmail;
-    private JPasswordField txtPassword;
+    private JTextField txtPassword;
     private JComboBox<RoleVmWrapper> cmbRoles;
     private JPanel boxRoles;
     private JButton btnSave;
@@ -187,7 +187,7 @@ public class UserCreatePanel extends JPanel implements RoutablePanel {
         RoleVm role = wrapper.getRoleVm();
 
         // Get password
-        String password = new String(txtPassword.getPassword());
+        String password = txtPassword.getText();
 
         if (password.isEmpty()) {
             Toast.show(this, Toast.Type.ERROR, "Password is required", ToastLocation.TOP_CENTER);

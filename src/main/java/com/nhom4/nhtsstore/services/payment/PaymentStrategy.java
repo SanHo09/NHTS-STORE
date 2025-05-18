@@ -11,7 +11,7 @@ public interface PaymentStrategy {
     boolean processPayment(Order order, BigDecimal amount);
     PaymentStatus checkPaymentStatus(String transactionId);
     Optional<String> getQRCodeUrl(Order order);
-    String getQRCodeFieldName(); // Returns field name like "order_url" or "qrCodeUrl"
+    String getQRCodeFieldName(); // Returns field name like "order_url" or "qrCodeUrl" based on the payment method
     Map<String, Object> getPaymentDetails(String transactionId);
 
 }

@@ -38,10 +38,10 @@ public class DashBoardFxView extends JFXPanel {
     private MFXProgressSpinner loadingSpinner;
     
     // Chart factories
-    private final StatisticsCardFactory statisticsCardFactory;
-    private final RevenueChartFactory revenueChartFactory;
-    private final ProductChartFactory productChartFactory;
-    private final OrderChartFactory orderChartFactory;
+    private StatisticsCardFactory statisticsCardFactory;
+    private RevenueProfitChartFactory revenueProfitChartFactory;
+    private ProductChartFactory productChartFactory;
+    private OrderChartFactory orderChartFactory;
 
     public DashBoardFxView(
             IDashboardStatisticsService dashboardStatistics,
@@ -50,13 +50,7 @@ public class DashBoardFxView extends JFXPanel {
         this.dashboardStatistics = dashboardStatistics;
         this.themeManager = themeManager;
         this.languageManager = languageManager;
-        
-        // Initialize chart factories
-        this.statisticsCardFactory = new StatisticsCardFactory(dashboardStatistics, languageManager);
-        this.revenueChartFactory = new RevenueChartFactory(dashboardStatistics, languageManager);
-        this.productChartFactory = new ProductChartFactory(dashboardStatistics, languageManager);
-        this.orderChartFactory = new OrderChartFactory(dashboardStatistics, languageManager);
-        
+
         SwingUtilities.invokeLater(() -> {
             Platform.runLater(this::initComponents);
         });
@@ -73,6 +67,10 @@ public class DashBoardFxView extends JFXPanel {
                 // Update UI on JavaFX thread when ready
                 Platform.runLater(() -> {
                     try {
+                        this.statisticsCardFactory = new StatisticsCardFactory(dashboardStatistics, languageManager);
+                        this.revenueProfitChartFactory = new RevenueProfitChartFactory(dashboardStatistics, languageManager);
+                        this.productChartFactory = new ProductChartFactory(dashboardStatistics, languageManager);
+                        this.orderChartFactory = new OrderChartFactory(dashboardStatistics, languageManager);
                         rebuildCharts();
                         hideLoadingSpinner();
                         scrollToTop();
@@ -136,9 +134,7 @@ public class DashBoardFxView extends JFXPanel {
         
         // Listen for language changes
         languageManager.addLanguageChangeListener(this::updateTexts);
-        
-        // Build charts
-        rebuildCharts();
+
     }
     
     /**
@@ -171,13 +167,13 @@ public class DashBoardFxView extends JFXPanel {
         chartsContainer.setPadding(new Insets(0));
 
         // Add statistics cards at the top
-        Region revenueCards = createRevenueStatisticsCards();
+        Region revenueCards = createRevenueProfitStatisticsCards();
         chartsContainer.getChildren().add(revenueCards);
 
         // Revenue charts row
         createAndAddChartRow(chartsContainer, 1,
-                "dashboard.chart.revenue_comparison", revenueChartFactory::createRevenueComparisonChart,
-                "dashboard.chart.average_order", revenueChartFactory::createAverageOrderValueChart);
+                "dashboard.chart.revenue_comparison", revenueProfitChartFactory::createRevenueComparisonChart,
+                "dashboard.chart.monthly_profit", revenueProfitChartFactory::createProfitMonthly);
 
         // Product and order status charts row
         createAndAddChartRow(chartsContainer, 2,
@@ -186,13 +182,13 @@ public class DashBoardFxView extends JFXPanel {
 
         // Revenue categories and inventory charts row
         createAndAddChartRow(chartsContainer, 3,
-                "dashboard.chart.revenue_by_category", revenueChartFactory::createRevenueByCategoryChart,
+                "dashboard.chart.revenue_by_category", revenueProfitChartFactory::createRevenueByCategoryChart,
                 "dashboard.chart.inventory_by_category", productChartFactory::createInventoryByCategoryChart);
 
         // Profitability and supplier charts row
         createAndAddChartRow(chartsContainer, 4,
                 "dashboard.chart.product_profit", productChartFactory::createProductProfitabilityChart,
-                "dashboard.chart.revenue_by_supplier", revenueChartFactory::createSalesBySupplierChart);
+                "dashboard.chart.revenue_by_supplier", revenueProfitChartFactory::createSalesBySupplierChart);
 
         grid.add(chartsContainer, 0, 0, 2, 1);
         
@@ -226,28 +222,28 @@ public class DashBoardFxView extends JFXPanel {
 
         container.getChildren().add(row);
     }
-    
-    private Region createRevenueStatisticsCards() {
-        HBox cardsRow = new HBox(20);
-        cardsRow.setPrefHeight(220);
 
-        StackPane revenueCardContainer = ChartContainerFactory.createLazyLoadingCardContainer(
-                languageManager.getText("dashboard.revenue_stats"), 
-                statisticsCardFactory::createTotalRevenueCard);
-                
+    private Region createRevenueProfitStatisticsCards() {
+        HBox cardsRow = new HBox(20);
+        cardsRow.setPrefHeight(280);  // Increased height to accommodate more profit data
+
+        StackPane revenueProfitCardContainer = ChartContainerFactory.createLazyLoadingCardContainer(
+                languageManager.getText("dashboard.revenue_profit_stats"),
+                statisticsCardFactory::createTotalRevenueProfit);
+
         StackPane orderStatsContainer = ChartContainerFactory.createLazyLoadingCardContainer(
-                languageManager.getText("dashboard.order_stats"), 
+                languageManager.getText("dashboard.order_stats"),
                 statisticsCardFactory::createOrderStatisticsCard);
-                
+
         StackPane productStatsContainer = ChartContainerFactory.createLazyLoadingCardContainer(
-                languageManager.getText("dashboard.product_stats"), 
+                languageManager.getText("dashboard.product_stats"),
                 statisticsCardFactory::createProductStatisticsCard);
 
-        HBox.setHgrow(revenueCardContainer, Priority.ALWAYS);
+        HBox.setHgrow(revenueProfitCardContainer, Priority.ALWAYS);
         HBox.setHgrow(orderStatsContainer, Priority.ALWAYS);
         HBox.setHgrow(productStatsContainer, Priority.ALWAYS);
 
-        cardsRow.getChildren().addAll(revenueCardContainer, orderStatsContainer, productStatsContainer);
+        cardsRow.getChildren().addAll(revenueProfitCardContainer, orderStatsContainer, productStatsContainer);
         return cardsRow;
     }
 } 

@@ -51,6 +51,9 @@ public class Product extends GenericEntity {
     @Column(nullable = true)
     private int quantity;
 
+    @Column(nullable = true, unique = true)
+    private String barcode;
+
     @ManyToOne
     @JoinColumn(name = "supplier_id", nullable = false)
     private Supplier supplier;
@@ -58,23 +61,23 @@ public class Product extends GenericEntity {
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
-    
+
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @BatchSize(size = 10)
     private List<ProductImage> images = new ArrayList<>();
-    
+
     public ProductImage getThumbnail() {
         return images.stream()
                 .filter(ProductImage::isThumbnail)
                 .findFirst()
                 .orElse(null);
     }
-    
+
     @Override
     public String toString() {
         return this.name;
     }
-    
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -82,12 +85,12 @@ public class Product extends GenericEntity {
         Product product = (Product) o;
         return id != null && id.equals(product.id);
     }
-            
+
     @Override
     public Long getId() {
         return id;
     }
-    
+
     @Override
     public Object getFieldValueByIndex(int index) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");

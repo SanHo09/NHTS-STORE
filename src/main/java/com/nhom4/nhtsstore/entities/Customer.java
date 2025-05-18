@@ -2,8 +2,8 @@ package com.nhom4.nhtsstore.entities;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import java.time.format.DateTimeFormatter;
-import lombok.Getter;
-import lombok.Setter;
+
+import lombok.*;
 import org.hibernate.annotations.Nationalized;
 
 import java.util.List;
@@ -12,6 +12,9 @@ import java.util.List;
 @Table
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Customer extends GenericEntity {
     @Id
     @Column

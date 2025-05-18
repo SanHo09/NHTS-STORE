@@ -45,7 +45,7 @@ public class UserProfileUpdatePanel extends JPanel implements RoutablePanel {
     private JTextField txtFullName;
     private JTextField txtUsername;
     private JTextField txtEmail;
-    private JPasswordField txtPassword;
+    private JTextField txtPassword;
     private JComboBox<RoleVmWrapper> cmbRoles;
     private JPanel boxRoles;
     private JButton btnSave;
@@ -67,8 +67,7 @@ public class UserProfileUpdatePanel extends JPanel implements RoutablePanel {
 
         setLayout(new BorderLayout());
         initComponents();
-        setPreferredSize(new Dimension(491, getPreferredSize().height));
-        setMinimumSize(new Dimension(491, 350)); // Minimum height for scrolling
+
     }
 
     private void initComponents() {
@@ -164,7 +163,7 @@ public class UserProfileUpdatePanel extends JPanel implements RoutablePanel {
                 .build();
 
         // Get password if provided
-        String password = new String(txtPassword.getPassword());
+        String password = txtPassword.getText();
         if (!password.isBlank()) {
             updateVm.setPassword(password);
         }
@@ -235,7 +234,6 @@ public class UserProfileUpdatePanel extends JPanel implements RoutablePanel {
                 (userDetailVm.getRole() != null || isSuperAdmin);
         boolean showPassword = isSuperAdmin && !isSelf && !targetHasSuperAdminRole;
         boolean enableEditing = isSuperAdmin || isSelf;
-
         formPanel.removeAll();
 
         formPanel.add(new JLabel("Full name:"), "");
@@ -296,16 +294,20 @@ public class UserProfileUpdatePanel extends JPanel implements RoutablePanel {
         }
         
         // Add active status toggle
-        JPanel togglePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        togglePanel.add(toggleActive);
-        togglePanel.add(new JLabel("  Active"));
-        toggleActive.setEnabled(enableEditing);
-        
-        formPanel.add(new JLabel("Status:"), "");
-        formPanel.add(togglePanel, "growx, wrap");
+        //super admin can edit active status of other users but not their own
+       boolean showActiveStatus = (isSuperAdmin && !isSelf) ;
+        if (showActiveStatus) {
+            JPanel togglePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+            togglePanel.add(toggleActive);
+            togglePanel.add(new JLabel("  Active"));
+            toggleActive.setEnabled(enableEditing);
 
+            formPanel.add(new JLabel("Status:"), "");
+            formPanel.add(togglePanel, "growx, wrap");
+
+
+        }
         formPanel.add(buttonPanel, "span 2, growx, wrap");
-
         formPanel.revalidate();
         formPanel.repaint();
     }

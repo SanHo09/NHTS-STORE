@@ -21,6 +21,7 @@ public class CartItemVm {
     private String manufacturer;
     private int quantity;
     private BigDecimal price;
+    private BigDecimal cost;
     private Date addedDate;
 
     public static OrderDetail toOrderDetail(CartItemVm cartItemVm) {
@@ -28,6 +29,7 @@ public class CartItemVm {
         orderDetail.setProduct(Product.builder().id(cartItemVm.getProductId()).build());
         orderDetail.setQuantity(cartItemVm.getQuantity());
         orderDetail.setUnitPrice(cartItemVm.getPrice());
+        orderDetail.setUnitCost(cartItemVm.getCost());
         orderDetail.setSubtotal(cartItemVm.getPrice().multiply(BigDecimal.valueOf(cartItemVm.getQuantity())));
         return orderDetail;
     }

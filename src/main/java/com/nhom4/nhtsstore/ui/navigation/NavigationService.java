@@ -3,7 +3,6 @@ package com.nhom4.nhtsstore.ui.navigation;
 import com.nhom4.nhtsstore.ui.AppView;
 import com.nhom4.nhtsstore.ui.ApplicationState;
 import com.nhom4.nhtsstore.ui.PanelManager;
-import com.nhom4.nhtsstore.ui.shared.components.sidebar.SidebarManager;
 import lombok.Getter;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +16,6 @@ import java.util.function.Consumer;
 public class NavigationService {
     private final PanelManager panelManager;
     private final ApplicationState applicationState;
-    private final SidebarManager sidebarManager;
     private final List<Consumer<AppView>> navigationListeners = new ArrayList<>();
 
     @Getter
@@ -28,11 +26,10 @@ public class NavigationService {
     private RouteParams currentParams = new RouteParams();
 
     public NavigationService(PanelManager panelManager,
-                             ApplicationState applicationState,
-                             SidebarManager sidebarManager) {
+                             ApplicationState applicationState) {
         this.panelManager = panelManager;
         this.applicationState = applicationState;
-        this.sidebarManager = sidebarManager;
+
     }
 
     /**
@@ -60,16 +57,12 @@ public class NavigationService {
             // Navigate to the panel
             panelManager.navigateTo(view, panel);
 
-            // Update sidebar selection
-            sidebarManager.selectMenuItem(view);
-
-            // Notify navigation listeners
             for (Consumer<AppView> listener : navigationListeners) {
                 listener.accept(view);
             }
         } catch (Exception e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(panelManager.getContentContainer(), e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            showErrorDialog(e.getMessage());
         }
 
     }
@@ -85,7 +78,7 @@ public class NavigationService {
             panelManager.navigateTo(null, panel);
         } catch (Exception e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(panelManager.getContentContainer(), e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            showErrorDialog(e.getMessage());
         }
 
     }

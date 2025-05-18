@@ -30,18 +30,17 @@ import raven.modal.toast.option.ToastLocation;
  */
 @Scope("prototype")
 @Component
-public class CartPanel extends javax.swing.JPanel implements RoutablePanel{
+public class CartPanel extends javax.swing.JPanel implements RoutablePanel {
 
-    /**
-     * Creates new form CartPanel
-     */
     private final NavigationService navigationService;
     private final OrderService orderService;
     private final ApplicationState applicationState;
     private final IProductImageService productImageService;
     private UserSessionVm currentUser;
     private CartVm cart;
-    public CartPanel(NavigationService navigationService, OrderService orderService, ApplicationState applicationState, IProductImageService productImageService) {
+
+    public CartPanel(NavigationService navigationService, OrderService orderService,
+                     ApplicationState applicationState, IProductImageService productImageService) {
         this.navigationService = navigationService;
         this.orderService = orderService;
         this.applicationState = applicationState;
@@ -55,17 +54,15 @@ public class CartPanel extends javax.swing.JPanel implements RoutablePanel{
         pnlTableContent.setLayout(new BoxLayout(pnlTableContent, BoxLayout.Y_AXIS));
         currentUser = applicationState.getCurrentUser();
         loadCart();
+
         jScrollPane1.setViewportView(pnlTableContent);
         jScrollPane1.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         jScrollPane1.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         jScrollPane1.getVerticalScrollBar().setUnitIncrement(16);
-
     }
 
     private void loadCart() {
         pnlTableContent.removeAll();
-
-        // Get latest cart from application state
         cart = applicationState.getCart();
 
         for (CartItemVm item : cart.getItems()) {
@@ -76,38 +73,30 @@ public class CartPanel extends javax.swing.JPanel implements RoutablePanel{
         }
 
         updateDisplayTotals();
-
         pnlTableContent.revalidate();
         pnlTableContent.repaint();
     }
+
     private void updateDisplayTotals() {
         int totalItems = cart.getItems().size();
         lblTotalNumber.setText("Total (" + totalItems + " products): ");
         lblTotalPrice.setText(String.format("%.2f$", cart.getTotalAmount()));
     }
 
-
-
-
     private void removeCartItem(CartItemVm item) {
         cart.getItems().removeIf(i -> i.getProductId().equals(item.getProductId()));
-
-        // Update total amount
         updateCartTotal();
-
-        // Update cart in application state which will trigger the listener to save to file
         applicationState.setCart(cart);
-
         loadCart();
     }
+
     private void updateCartTotal() {
         BigDecimal total = cart.getItems().stream()
-                .map(item -> item.getPrice().multiply(BigDecimal.valueOf( item.getQuantity())))
+                .map(item -> item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         cart.setTotalAmount(total);
         cart.setLastModifiedDate(new Date());
     }
-
 
     private void updateCartItemQuantity(Long productId, int newQuantity) {
         cart.getItems().stream()
@@ -115,17 +104,11 @@ public class CartPanel extends javax.swing.JPanel implements RoutablePanel{
                 .findFirst()
                 .ifPresent(item -> {
                     item.setQuantity(newQuantity);
-
-                    // Update total amount
                     updateCartTotal();
-
-                    // Update cart in application state which will trigger the listener to save to file
                     applicationState.setCart(cart);
                 });
-
         loadCart();
     }
-
 
 
     /**
@@ -212,7 +195,7 @@ public class CartPanel extends javax.swing.JPanel implements RoutablePanel{
                 .addContainerGap(48, Short.MAX_VALUE))
         );
 
-//        pnlTableHeader1.setBackground(new java.awt.Color(255, 255, 255));
+        pnlTableHeader1.setBackground(new java.awt.Color(255, 255, 255));
 
         lblTotalNumber.setText("Total (0 products): ");
 
@@ -223,7 +206,7 @@ public class CartPanel extends javax.swing.JPanel implements RoutablePanel{
         btnBuyNow.setBackground(new java.awt.Color(246, 127, 26));
         btnBuyNow.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         btnBuyNow.setForeground(new java.awt.Color(255, 255, 255));
-        btnBuyNow.setText("Buy Now");
+        btnBuyNow.setText("Continue");
         btnBuyNow.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 btnBuyNowMouseClicked(evt);
@@ -299,17 +282,15 @@ public class CartPanel extends javax.swing.JPanel implements RoutablePanel{
 
     }//GEN-LAST:event_btnBuyNowMouseClicked
 
-    private void btnBuyNowActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuyNowActionPerformed
+    private void btnBuyNowActionPerformed(java.awt.event.ActionEvent evt) {
         if (cart.getItems().isEmpty()) {
-            Toast.show(CartPanel.this, Toast.Type.ERROR,
+            Toast.show(this, Toast.Type.ERROR,
                     "Cart is empty!",
                     ToastLocation.TOP_CENTER);
             return;
         }
-
-        RouteParams params = new RouteParams();
-        navigationService.navigateTo(InvoicePanel.class, params);
-    }//GEN-LAST:event_btnBuyNowActionPerformed
+        navigationService.navigateTo(InvoicePanel.class, new RouteParams());
+    }                                         
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
