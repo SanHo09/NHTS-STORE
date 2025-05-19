@@ -1,6 +1,12 @@
 package com.nhom4.nhtsstore.ui.pointOfSale;
 
+import com.github.sarxos.webcam.Webcam;
+import com.github.sarxos.webcam.WebcamPanel;
+import com.google.zxing.*;
+import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
+import com.google.zxing.common.HybridBinarizer;
 import com.nhom4.nhtsstore.entities.Product;
+import com.nhom4.nhtsstore.services.impl.BarcodeScannerService;
 import com.nhom4.nhtsstore.services.impl.ProductService;
 import com.nhom4.nhtsstore.ui.AppView;
 import com.nhom4.nhtsstore.ui.ApplicationState;
@@ -18,12 +24,17 @@ import raven.modal.Toast;
 import raven.modal.toast.option.ToastLocation;
 
 import javax.swing.*;
+import javax.swing.Timer;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
+import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.image.BufferedImage;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.List;
@@ -34,6 +45,7 @@ public class BarcodeScannerPanel extends JPanel implements RoutablePanel {
     private final NavigationService navigationService;
     private final ProductService productService;
     private final ApplicationState applicationState;
+    private final BarcodeScannerService barcodeScannerService;
     private CartVm cart;
 
     private JTextField searchField;
@@ -45,10 +57,11 @@ public class BarcodeScannerPanel extends JPanel implements RoutablePanel {
     private final Map<Long, Integer> productQuantities = new HashMap<>();
 
     public BarcodeScannerPanel(NavigationService navigationService, ProductService productService,
-                               ApplicationState applicationState) {
+                               ApplicationState applicationState, BarcodeScannerService barcodeScannerService) {
         this.navigationService = navigationService;
         this.productService = productService;
         this.applicationState = applicationState;
+        this.barcodeScannerService = barcodeScannerService;
         initComponents();
     }
 
@@ -88,19 +101,29 @@ public class BarcodeScannerPanel extends JPanel implements RoutablePanel {
         JPanel searchSection = new JPanel(new BorderLayout(0, 10));
         searchSection.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
 
-        // Search bar panel
+        // Search bar panel with text field
         JPanel searchBarPanel = new JPanel(new BorderLayout(10, 0));
         JLabel searchLabel = new JLabel("Product Name/Barcode: ");
         searchField = new JTextField();
         searchField.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-
-        JButton scanButton = new JButton("Scan Barcode");
-        scanButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        scanButton.addActionListener(e -> openBarcodeScanner());
-
         searchBarPanel.add(searchLabel, BorderLayout.WEST);
         searchBarPanel.add(searchField, BorderLayout.CENTER);
-        searchBarPanel.add(scanButton, BorderLayout.EAST);
+
+        // Scan buttons panel (horizontal layout)
+        JPanel scanButtonsPanel = new JPanel(new GridLayout(1, 2, 5, 0));
+        scanButtonsPanel.setBorder(BorderFactory.createTitledBorder("Scan Barcode"));
+        JButton scanButton = new JButton("Scan By WebCam");
+        scanButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        scanButton.addActionListener(e -> barcodeScannerService.scanWithWebcam(this::handleBarcodeDetected));
+        scanButtonsPanel.add(scanButton);
+
+        JButton phoneButton = new JButton("Scan By Phone");
+        phoneButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        phoneButton.addActionListener(e -> barcodeScannerService.scanWithPhoneCamera(this::handleBarcodeDetected));
+        scanButtonsPanel.add(phoneButton);
+
+        // Add scan buttons to search bar panel
+        searchBarPanel.add(scanButtonsPanel, BorderLayout.EAST);
 
         // Search results list
         searchResultsModel = new DefaultListModel<>();
@@ -170,21 +193,21 @@ public class BarcodeScannerPanel extends JPanel implements RoutablePanel {
         productsSection.add(productsScrollPane, BorderLayout.CENTER);
         contentPanel.add(productsSection);
 
-        // Bottom buttons panel
-        JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        // Bottom cart action buttons panel
+        JPanel cartButtonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton addToCartButton = new JButton("Add All to Cart");
         addToCartButton.setFont(new Font("Segoe UI", Font.BOLD, 16));
         addToCartButton.addActionListener(e -> addAllToCart());
+        cartButtonsPanel.add(addToCartButton);
 
         JButton viewCartButton = new JButton("View Cart");
         viewCartButton.setFont(new Font("Segoe UI", Font.BOLD, 16));
         viewCartButton.addActionListener(e -> navigationService.navigateTo(AppView.CART, new RouteParams()));
+        cartButtonsPanel.add(viewCartButton);
 
-        buttonsPanel.add(addToCartButton);
-        buttonsPanel.add(viewCartButton);
-
+        // Add content panel to main layout
         add(contentPanel, BorderLayout.CENTER);
-        add(buttonsPanel, BorderLayout.SOUTH);
+        add(cartButtonsPanel, BorderLayout.SOUTH);
     }
 
     private void searchProducts() {
@@ -305,44 +328,15 @@ public class BarcodeScannerPanel extends JPanel implements RoutablePanel {
         productsPanel.repaint();
     }
 
-    private void openBarcodeScanner() {
-        JDialog dialog = new JDialog((Frame)SwingUtilities.getWindowAncestor(this), "Barcode Scanner", true);
-        dialog.setLayout(new BorderLayout());
-        dialog.setSize(640, 480);
-        dialog.setLocationRelativeTo(this);
-
-        JPanel cameraPanel = new JPanel();
-        cameraPanel.setPreferredSize(new Dimension(600, 400));
-        cameraPanel.setBorder(BorderFactory.createEtchedBorder());
-        cameraPanel.add(new JLabel("In progress ... (Simulated)"));
-
-        JButton captureButton = new JButton("Capture");
-        captureButton.addActionListener(e -> {
-            // Simulate barcode scanning
-            String barcode = JOptionPane.showInputDialog(dialog,
-                    "Enter barcode for testing:", "123456789");
-            if (barcode != null && !barcode.isEmpty()) {
-                dialog.dispose();
-
-                Product product = productService.findByBarcode(barcode);
-                if (product != null) {
-                    addToSelectedProducts(product);
-                } else {
-                    Toast.show(this, Toast.Type.ERROR,
-                            "Product not found with barcode: " + barcode,
-                            ToastLocation.TOP_CENTER);
-                }
-            }
-        });
-
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.add(captureButton);
-
-        dialog.add(cameraPanel, BorderLayout.CENTER);
-        dialog.add(buttonPanel, BorderLayout.SOUTH);
-        dialog.setVisible(true);
+    private void handleBarcodeDetected(String barcode) {
+        Product product = productService.findByBarcode(barcode);
+        if (product != null) {
+            addToSelectedProducts(product);
+            Toast.show(this, Toast.Type.SUCCESS, "Product found: " + product.getName(), ToastLocation.TOP_CENTER);
+        } else {
+            Toast.show(this, Toast.Type.ERROR, "Product not found with barcode: " + barcode, ToastLocation.TOP_CENTER);
+        }
     }
-
     private void addAllToCart() {
         if (selectedProducts.isEmpty()) {
             Toast.show(this, Toast.Type.ERROR,
