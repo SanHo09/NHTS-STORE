@@ -127,8 +127,23 @@ public class QRDisplayService {
         qrDialog.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
             public void windowClosing(java.awt.event.WindowEvent windowEvent) {
-                log.debug("Dialog closed, invoking onCancel callback");
-                onCancel.accept(null);
+                int result = JOptionPane.showConfirmDialog(
+                        qrDialog,
+                        "Are you sure you want to cancel the payment?\n" +
+                                "If the customer is processing payment, this may cause issues if they have already paid.",
+                        "Confirm Cancel Payment",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.WARNING_MESSAGE
+                );
+                if (result == JOptionPane.YES_OPTION) {
+                    log.debug("Dialog closed with confirmation, invoking onCancel callback");
+                    if (onCancel != null) {
+                        onCancel.accept(null);
+                    }
+                } else {
+                    // Prevent the dialog from closing if user selects "No"
+                    qrDialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+                }
             }
         });
         log.debug("Adding QR code image to dialog");
@@ -154,9 +169,20 @@ public class QRDisplayService {
         cancelButton.setForeground(java.awt.Color.WHITE);
         cancelButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         cancelButton.addActionListener(e -> {
-            log.debug("Cancel button clicked, disposing dialog");
-            qrDialog.dispose();
-            onCancel.accept(null);
+            int result = JOptionPane.showConfirmDialog(
+                    qrDialog,
+                    "Are you sure you want to cancel the payment?\n" +
+                            "Make sure the customer has not completed the payment.",
+                    "Confirm Cancel Payment",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.WARNING_MESSAGE
+            );
+            if (result == JOptionPane.YES_OPTION) {
+                closeQRCodeDialog();
+                if (onCancel != null) {
+                    onCancel.accept(null);
+                }
+            }
         });
 
         JPanel buttonPanel = new JPanel();

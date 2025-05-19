@@ -4,17 +4,15 @@ import com.nhom4.nhtsstore.entities.Category;
 import com.nhom4.nhtsstore.entities.Product;
 import com.nhom4.nhtsstore.entities.ProductImage;
 import com.nhom4.nhtsstore.entities.Supplier;
-import com.nhom4.nhtsstore.services.impl.CategoryService;
+import com.nhom4.nhtsstore.services.impl.*;
 import com.nhom4.nhtsstore.services.EventBus;
-import com.nhom4.nhtsstore.services.impl.ProductImageService;
-import com.nhom4.nhtsstore.services.impl.ProductService;
-import com.nhom4.nhtsstore.services.impl.SupplierService;
 import com.nhom4.nhtsstore.ui.ApplicationState;
 import com.nhom4.nhtsstore.ui.PanelManager;
 import com.nhom4.nhtsstore.ui.navigation.RoutablePanel;
 import com.nhom4.nhtsstore.ui.navigation.RouteParams;
 import com.nhom4.nhtsstore.ui.shared.components.DatePicker;
 import com.nhom4.nhtsstore.ui.shared.components.ToggleSwitch;
+import com.nhom4.nhtsstore.utils.IconUtil;
 import com.nhom4.nhtsstore.utils.UIUtils;
 import javax.swing.*;
 import java.awt.*;
@@ -26,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.nhom4.nhtsstore.viewmodel.product.ProductInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -49,7 +48,10 @@ public class ProductEditPanel extends JPanel implements RoutablePanel {
     private CategoryService categoryService;
     @Autowired
     private ProductImageService productImageService;
-
+    @Autowired
+    private BarcodeScannerService barcodeScannerService;
+    @Autowired
+    private FindProductInformationService findProductInformationService;
     private Product product;
     private JButton uploadButton;
     private List<ProductImage> images = new ArrayList<>();
@@ -70,14 +72,15 @@ public class ProductEditPanel extends JPanel implements RoutablePanel {
         GridBagConstraints gbc = new GridBagConstraints();
 //        formPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        int fieldWidth = 400;
+        int fieldWidth = 300;
         int row = 0;
         int column = 0;
 
         // Product Name
         JTextField nameField = new JTextField(product != null ? product.getName() : "");
         addFieldToForm(formPanel, createLabeledField("Product Name:", nameField, fieldWidth), gbc, column, row++);
-
+        JTextField barcodeField= new JTextField(product != null ? product.getBarcode() : "");
+        addFieldToForm(formPanel, createLabeledField("Barcode",barcodeField,fieldWidth), gbc, column, row++);
         // Sale Price
         JSpinner salePriceField = new JSpinner(product != null 
                             ? new SpinnerNumberModel(product.getSalePrice().doubleValue(), 0.0, 1000.0, 1.0)
@@ -162,6 +165,7 @@ public class ProductEditPanel extends JPanel implements RoutablePanel {
             try {
                 Product updatedProduct = product != null ? product : new Product();
                 updatedProduct.setName(nameField.getText());
+                updatedProduct.setBarcode(barcodeField.getText());
                 updatedProduct.setSalePrice(BigDecimal.valueOf(((Number) salePriceField.getValue()).doubleValue()));
                 updatedProduct.setPurchasePrice(BigDecimal.valueOf(((Number) purchasePriceField.getValue()).doubleValue()));
                 updatedProduct.setManufacturer(manufacturerField.getText());
@@ -300,7 +304,7 @@ public class ProductEditPanel extends JPanel implements RoutablePanel {
     private JPanel createLabeledField(String labelText, JComponent field, int width) {
         JPanel panel = new JPanel(new BorderLayout(10, 0)); // Giảm khoảng cách giữa label và field xuống 10px
         JLabel label = new JLabel(labelText);
-        label.setPreferredSize(new Dimension(140, label.getPreferredSize().height)); // Đặt chiều rộng cố định cho label
+        label.setPreferredSize(new Dimension(100, label.getPreferredSize().height)); // Đặt chiều rộng cố định cho label
 
         JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0)); // Không có khoảng cách
         field.setPreferredSize(new Dimension(width, field.getPreferredSize().height));
@@ -311,4 +315,5 @@ public class ProductEditPanel extends JPanel implements RoutablePanel {
 
         return panel;
     }
+
 }

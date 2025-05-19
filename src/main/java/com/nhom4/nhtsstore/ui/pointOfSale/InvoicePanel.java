@@ -452,6 +452,8 @@ public class InvoicePanel extends javax.swing.JPanel implements RoutablePanel {
 
     private void completeTransaction(Long orderId) {
         stopTransactionTimeout();
+        qrDisplayService.closeQRCodeDialog();
+
         Order order = orderService.findById(orderId);
 
         try {
