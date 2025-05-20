@@ -21,7 +21,7 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class ProductListPanel extends GenericTablePanel<Product> {
     private static final String[] PRODUCT_COLUMNS = {
-        "Name", "Sale Price", "Category", "Availability", "Expiry Date", "Status", "Updated At ↓", "Updated By"
+        "Id", "Name", "Sale Price", "Category", "Availability", "Expiry Date", "Status", "Updated At ↓", "Updated By"
     };
     private static final List<String> SEARCH_FIELDS = Arrays.asList("name");
     private static String placeHolderMessage = "Search by Name";
@@ -32,7 +32,8 @@ public class ProductListPanel extends GenericTablePanel<Product> {
         // Cấu hình độ rộng cột cho ProductPanel
         int[] productColumnWidths = {
             40,    // checkbox
-            250,   // Name
+            40,    // Id
+            200,   // Name
             100,   // Sale Price
             150,   // Category
             100,   // Availability
@@ -41,7 +42,11 @@ public class ProductListPanel extends GenericTablePanel<Product> {
             150,   // Updated At
             150    // Updated By
         };
-        configureColumnWidths(productColumnWidths);
+        table.addComponentListener(new java.awt.event.ComponentAdapter() {
+            public void componentResized(java.awt.event.ComponentEvent evt) {
+                configureColumnWidths(productColumnWidths);
+            }
+        });
         
         setHeaderAlignment(SwingConstants.LEFT);
         

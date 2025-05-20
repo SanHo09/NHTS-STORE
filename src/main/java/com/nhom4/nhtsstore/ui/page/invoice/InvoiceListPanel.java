@@ -25,12 +25,16 @@ public class InvoiceListPanel extends GenericTablePanel<Invoice> {
         
         // Cấu hình độ rộng cột
         int[] columnWidths = {
-            250,   // Id
+            40,   // Id
             250,   // Create Date
             250,   // Total Amount
             250    // Customer
         };
-        configureColumnWidths(columnWidths);
+        table.addComponentListener(new java.awt.event.ComponentAdapter() {
+            public void componentResized(java.awt.event.ComponentEvent evt) {
+                configureColumnWidths(columnWidths);
+            }
+        });
         
         setHeaderAlignment(SwingConstants.LEFT);
         

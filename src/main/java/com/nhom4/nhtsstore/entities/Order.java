@@ -83,12 +83,11 @@ public class Order extends GenericEntity {
             case 1: return customer.getName();
             case 2: return getLastModifiedOn() != null ? dateFormatter.format(createDate) : null;
             case 3: return totalAmount;
-            case 4: return fulfilmentMethod;
-            case 5: return deliveryStatus;
-            case 6: return paymentMethod;
-            case 7: return paymentStatus;
-            case 8: return lastModifiedOn != null ? lastModifiedOn.format(auditDateFormatter) : null;
-            case 9: return lastModifiedBy;
+            case 4: return deliveryStatus;
+            case 5: return paymentMethod;
+            case 6: return paymentStatus;
+            case 7: return lastModifiedOn != null ? lastModifiedOn.format(auditDateFormatter) : null;
+            case 8: return lastModifiedBy;
             default: return null;
         }
     }

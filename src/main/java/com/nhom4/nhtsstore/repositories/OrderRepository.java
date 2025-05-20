@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public interface OrderRepository extends GenericRepository<Order,Long>{
 
@@ -82,4 +83,10 @@ public interface OrderRepository extends GenericRepository<Order,Long>{
     WHERE o.user.id = :userId
     """)
     List<Order> findByUserId(@Param("userId") Long userId);
+
+    @Query("SELECT o FROM Order o WHERE o.createdBy = :createdBy AND o.id = :id")
+    Optional<Order> findByIdAndCreatedBy(Long id, String createdBy);
+
+    @Query("SELECT o FROM Order o WHERE o.createdBy = :createdBy")
+    Page<Order> findAllByCreatedBy(String createdBy, Pageable pageable);
 }

@@ -15,7 +15,7 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class OrderListPanel extends GenericTablePanel<Order> {
     private static final String[] ORDER_COLUMNS = {
-        "Id", "Customer", "Create Date", "Total Amount","Fulfilment method", "Shipping status","Payment method","Payment status", "Updated At ↓", "Updated By"
+        "Id", "Customer", "Create Date", "Total Amount", "Shipping status","Payment method","Payment status", "Updated At ↓", "Updated By"
     };
     private static final List<String> SEARCH_FIELDS = Arrays.asList("id", "deliveryStatus");
     private static String placeHolderMessage = "Search in Id/Status";
@@ -26,18 +26,22 @@ public class OrderListPanel extends GenericTablePanel<Order> {
         // Cấu hình độ rộng cột
         int[] columnWidths = {
             40,    // checkbox
-            20,   // Id
+            40,   // Id
             150,   // Customer
             100,   // Create Date
             100,   // Total Amount
-            100,   // Fulfilment Method
-            100,   // Status
+            120,   // Shipping Status
             100,   // Payment Method
             100,   // Payment Status
-            200,   // Updated At
-            200    // Updated By
+            150,   // Updated At
+            150    // Updated By
         };
-        configureColumnWidths(columnWidths);
+        
+        table.addComponentListener(new java.awt.event.ComponentAdapter() {
+            public void componentResized(java.awt.event.ComponentEvent evt) {
+                configureColumnWidths(columnWidths);
+            }
+        });
         
         setHeaderAlignment(SwingConstants.LEFT);
         

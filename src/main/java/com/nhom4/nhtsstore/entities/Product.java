@@ -95,14 +95,15 @@ public class Product extends GenericEntity {
     public Object getFieldValueByIndex(int index) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
         switch (index) {
-            case 0: return name;
-            case 1: return salePrice;
-            case 2: return category.getName();
-            case 3: return quantity > 0 ? "In stock" : "Out of stock";
-            case 4: return expiryDate;
-            case 5: return isActive() ? "Visible" : "Hidden";
-            case 6: return lastModifiedOn != null ? lastModifiedOn.format(formatter) : null;
-            case 7: return lastModifiedBy;
+            case 0: return id;
+            case 1: return name;
+            case 2: return salePrice;
+            case 3: return category.getName();
+            case 4: return quantity > 0 ? "In stock" : "Out of stock";
+            case 5: return expiryDate;
+            case 6: return isActive() ? "Visible" : "Hidden";
+            case 7: return lastModifiedOn != null ? lastModifiedOn.format(formatter) : null;
+            case 8: return lastModifiedBy;
             default: return null;
         }
     }

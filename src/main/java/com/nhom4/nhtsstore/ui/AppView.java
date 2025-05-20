@@ -27,7 +27,7 @@ public enum AppView {
     CATEGORY("Category", "", PRODUCT, ProductCategoryListPanel.class, Set.of("SUPER_ADMIN")),
     SUPPLIER("Supplier", "Truck.svg", null, SupplierListPanel.class, Set.of("SUPER_ADMIN", "MANAGER")),
     SUPPLIER_CATEGORY("Supplier Category", "", SUPPLIER, SupplierCategoryListPanel.class, Set.of("SUPER_ADMIN", "MANAGER")),
-    ORDER("Order", "FileTextFill.svg", null, OrderListPanel.class, Set.of("SUPER_ADMIN", "MANAGER")),
+    ORDER("Order", "FileTextFill.svg", null, OrderListPanel.class, Set.of("SUPER_ADMIN", "MANAGER", "SALE")),
     INVOICE("Invoice", "Coin.svg", null, InvoiceListPanel.class, Set.of("SUPER_ADMIN", "MANAGER")),
     USER("User", "PersonFill.svg", null, UserListPanel.class, Set.of("SUPER_ADMIN")),
     USER_PROFILE("User Profile", "", USER, UserProfilePanel.class, Set.of()),

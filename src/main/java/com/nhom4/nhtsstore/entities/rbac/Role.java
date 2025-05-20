@@ -42,7 +42,7 @@ public class Role extends GenericEntity {
         switch (index) {
             case 0: return roleName;
             case 1: return description;
-            case 2: return isActive() ? "Active" : "Inactive";
+            case 2: return isActive() ? "Visible" : "Hidden";
             case 3: return lastModifiedOn != null ? lastModifiedOn.format(formatter) : null;
             case 4: return lastModifiedBy;
             default: return null;

@@ -10,6 +10,7 @@ import java.util.Set;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
 public class UserSessionVm {
     Long userId;
     String username;

@@ -26,17 +26,21 @@ public class SupplierListPanel extends GenericTablePanel<Supplier> {
        // Cấu hình độ rộng cột
        int[] columnWidths = {
            40,    // checkbox
-           150,   // Name
-           150,   // Category
+           130,   // Name
+           140,   // Category
            150,   // Email
-           200,   // Address
-           120,   // Phone Number
-           80,   // Status
-           150,   // Updated At
-           120    // Updated By
+           170,   // Address
+           100,   // Phone Number
+           60,   // Status
+           140,   // Updated At
+           100    // Updated By
        };
-       configureColumnWidths(columnWidths);
-       
+        table.addComponentListener(new java.awt.event.ComponentAdapter() {
+            public void componentResized(java.awt.event.ComponentEvent evt) {
+                configureColumnWidths(columnWidths);
+            }
+        });
+        
        setHeaderAlignment(SwingConstants.LEFT);
        
        EventBus.getReloadSubject().subscribe(isReload -> {

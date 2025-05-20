@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.nhom4.nhtsstore.services.IOrderService;
+import com.nhom4.nhtsstore.ui.ApplicationState;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,9 @@ public class OrderService implements IOrderService {
 
     @Autowired
     private OrderDetailRepository orderDetailRepository;
+    
+    @Autowired
+    private ApplicationState applicationState;
 
     @Override
     public List<Order> findAll() {
@@ -41,8 +45,17 @@ public class OrderService implements IOrderService {
 
     @Override
     public Order findById(Long id) {
+        String role = applicationState.getCurrentUser().getRole();
+        String username = applicationState.getCurrentUser().getUsername();
+        
         log.debug("Finding order with id: {}", id);
-        Order order = repository.findById(id).orElse(null);
+
+        Order order = null;
+        if (role.equals("SALE")) {
+            order = repository.findByIdAndCreatedBy(id, username).orElse(null);
+        } else {
+            order = repository.findById(id).orElse(null);
+        }
         if (order != null) {
             log.debug("Found order with id: {}, total items: {}", id, order.getOrderDetails().size());
         } else {
@@ -98,9 +111,18 @@ public class OrderService implements IOrderService {
 
     @Override
     public Page<Order> findAll(Pageable pageable) {
+        String role = applicationState.getCurrentUser().getRole();
+        String username = applicationState.getCurrentUser().getUsername();
+        
         log.debug("Finding orders with pagination: page={}, size={}", pageable.getPageNumber(), pageable.getPageSize());
         pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("lastModifiedOn").descending());
-        Page<Order> result = repository.findAll(pageable);
+        Page<Order> result;
+
+        if (role.equals("SALE")) {
+            result = repository.findAllByCreatedBy(username, pageable);
+        } else {
+            result = repository.findAll(pageable);
+        }
         log.debug("Found {} orders (page {} of {})", result.getNumberOfElements(), result.getNumber() + 1, result.getTotalPages());
         return result;
     }
@@ -113,6 +135,9 @@ public class OrderService implements IOrderService {
 
     @Override
     public Page<Order> search(String keyword, List<String> searchFields, Pageable pageable) {
+        String role = applicationState.getCurrentUser().getRole();
+        String username = applicationState.getCurrentUser().getUsername();
+        
         log.debug("Searching orders with keyword: '{}', fields: {}", keyword, searchFields);
         Specification<Order> spec = Specification.where(null);
 
@@ -140,7 +165,11 @@ public class OrderService implements IOrderService {
 
             spec = spec.and(keywordSpec);
         }
-
+        
+        if (role.equals("SALE")) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("createdBy"), username));
+        }
+        
         pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("createDate").descending());
         Page<Order> result = repository.findAll(spec, pageable);
         log.debug("Search found {} orders", result.getTotalElements());
