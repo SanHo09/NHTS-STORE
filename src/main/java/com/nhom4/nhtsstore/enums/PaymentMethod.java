@@ -1,7 +1,7 @@
 package com.nhom4.nhtsstore.enums;
 
 public enum PaymentMethod {
-    CASH("Cash"),
+    CASH("Tiền mặt"),
     ZALOPAY("ZaloPay");
     
     private final String displayName;

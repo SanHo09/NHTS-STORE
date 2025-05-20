@@ -23,6 +23,7 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 @Service
@@ -104,8 +105,9 @@ public class BarcodeScannerService implements IBarcodeScannerService {
                         if (image != null) {
                             String barcode = scanBarcode(image);
                             if (barcode != null) {
-                                stopScanning();
+                                // Notifying without stopping the scanner
                                 onBarcodeDetected.accept(barcode);
+                                statusLabel.setText("Detected: " + barcode + " - Scan another or Cancel to close");
                             }
                         }
                     });
@@ -116,8 +118,9 @@ public class BarcodeScannerService implements IBarcodeScannerService {
                         if (image != null) {
                             String barcode = scanBarcode(image);
                             if (barcode != null) {
-                                stopScanning();
+                                // Notifying without stopping the scanner
                                 onBarcodeDetected.accept(barcode);
+                                statusLabel.setText("Detected: " + barcode + " - Scan another or Cancel to close");
                             } else {
                                 statusLabel.setText("No barcode detected. Try again.");
                             }
@@ -185,8 +188,9 @@ public class BarcodeScannerService implements IBarcodeScannerService {
 
         PhoneCameraPanel phoneCameraPanel = new PhoneCameraPanel(ipAddress, barcode -> {
             SwingUtilities.invokeLater(() -> {
-                stopScanning();
+                // Notifying without stopping the scanner
                 onBarcodeDetected.accept(barcode);
+                statusLabel.setText("Detected: " + barcode + " - Scan another or Cancel to close");
             });
         });
 
@@ -198,8 +202,9 @@ public class BarcodeScannerService implements IBarcodeScannerService {
             if (image != null) {
                 String barcode = scanBarcode(image);
                 if (barcode != null) {
-                    stopScanning();
+                    // Notifying without stopping the scanner
                     onBarcodeDetected.accept(barcode);
+                    statusLabel.setText("Detected: " + barcode + " - Scan another or Cancel to close");
                 } else {
                     statusLabel.setText("No barcode detected. Try again.");
                 }
@@ -215,6 +220,193 @@ public class BarcodeScannerService implements IBarcodeScannerService {
             }
         });
 
+        scannerDialog.setVisible(true);
+    }
+
+    @Override
+    public void scanWithWebcam(Consumer<String> onBarcodeDetected, BiConsumer<String, JLabel> onStatusUpdate) {
+        Component parent = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
+        if (parent == null) {
+            parent = new JFrame();
+        }
+        Frame parentFrame = (parent instanceof Frame) ?
+                (Frame) parent : (Frame) SwingUtilities.getAncestorOfClass(Frame.class, parent);
+
+        scannerDialog = new JDialog(parentFrame, "Barcode Scanner", true);
+        scannerDialog.setLayout(new BorderLayout());
+        scannerDialog.setSize(640, 480);
+        scannerDialog.setLocationRelativeTo(parent);
+
+        JPanel cameraPanel = new JPanel(new BorderLayout());
+        JLabel statusLabel = new JLabel("Initializing camera...");
+        statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
+        JButton captureButton = new JButton("Capture");
+        JButton cancelButton = new JButton("Cancel");
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.add(captureButton);
+        buttonPanel.add(cancelButton);
+
+        scannerDialog.add(cameraPanel, BorderLayout.CENTER);
+        scannerDialog.add(statusLabel, BorderLayout.NORTH);
+        scannerDialog.add(buttonPanel, BorderLayout.SOUTH);
+
+        SwingWorker<Webcam, Void> worker = new SwingWorker<>() {
+            @Override
+            protected Webcam doInBackground() throws Exception {
+                Webcam webcam = Webcam.getDefault();
+                if (webcam != null) {
+                    Dimension[] sizes = webcam.getViewSizes();
+                    Dimension size = sizes[sizes.length - 1];
+                    webcam.setViewSize(size);
+                    webcam.open();
+                    activeWebcam = webcam;
+                }
+                return webcam;
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    Webcam webcam = get();
+                    if (webcam == null) {
+                        statusLabel.setText("No camera detected");
+                        captureButton.setEnabled(false);
+                        return;
+                    }
+
+                    WebcamPanel webcamPanel = new WebcamPanel(webcam);
+                    webcamPanel.setFPSDisplayed(true);
+                    webcamPanel.setMirrored(false);
+
+                    cameraPanel.removeAll();
+                    cameraPanel.add(webcamPanel, BorderLayout.CENTER);
+                    cameraPanel.revalidate();
+
+                    statusLabel.setText("Camera ready - aim at barcode");
+                    isRunning = true;
+
+                    detectionTimer = new Timer(200, e -> {
+                        if (!isRunning || !webcam.isOpen()) return;
+
+                        BufferedImage image = webcam.getImage();
+                        if (image != null) {
+                            String barcode = scanBarcode(image);
+                            if (barcode != null) {
+                                // Thông báo với status tùy chỉnh
+                                onBarcodeDetected.accept(barcode);
+                                if (onStatusUpdate != null) {
+                                    onStatusUpdate.accept(barcode, statusLabel);
+                                } else {
+                                    statusLabel.setText("Detected: " + barcode + " - Scan another or Cancel to close");
+                                }
+                            }
+                        }
+                    });
+                    detectionTimer.start();
+
+                    captureButton.addActionListener(e -> {
+                        BufferedImage image = webcam.getImage();
+                        if (image != null) {
+                            String barcode = scanBarcode(image);
+                            if (barcode != null) {
+                                // Thông báo với status tùy chỉnh
+                                onBarcodeDetected.accept(barcode);
+                                if (onStatusUpdate != null) {
+                                    onStatusUpdate.accept(barcode, statusLabel);
+                                } else {
+                                    statusLabel.setText("Detected: " + barcode + " - Scan another or Cancel to close");
+                                }
+                            } else {
+                                statusLabel.setText("No barcode detected. Try again.");
+                            }
+                        }
+                    });
+
+                    cancelButton.addActionListener(e -> stopScanning());
+
+                } catch (Exception e) {
+                    log.error("Error initializing camera", e);
+                    statusLabel.setText("Error initializing camera: " + e.getMessage());
+                    captureButton.setEnabled(false);
+                }
+            }
+        };
+        worker.execute();
+
+        scannerDialog.setVisible(true);
+    }
+
+    @Override
+    public void scanWithPhoneCamera(Consumer<String> onBarcodeDetected, BiConsumer<String, JLabel> onStatusUpdate) {
+        // Tương tự như scanWithWebcam nhưng dành cho camera điện thoại
+        // Code tương tự như scanWithPhoneCamera hiện tại, nhưng thêm onStatusUpdate
+        Component parent = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
+        if (parent == null) {
+            parent = new JFrame();
+        }
+        Frame parentFrame = (parent instanceof Frame) ?
+                (Frame) parent : (Frame) SwingUtilities.getAncestorOfClass(Frame.class, parent);
+
+        String ipAddress = JOptionPane.showInputDialog(parent,
+                "Enter IP Camera address (e.g., http://192.168.1.100:8080/video)",
+                "http://192.168.1.29:8080/video");
+
+        if (ipAddress == null || ipAddress.trim().isEmpty()) {
+            return;
+        }
+
+        scannerDialog = new JDialog(parentFrame, "Phone Camera Scanner", true);
+        scannerDialog.setLayout(new BorderLayout());
+        scannerDialog.setSize(640, 480);
+        scannerDialog.setLocationRelativeTo(parent);
+
+        JPanel cameraPanel = new JPanel(new BorderLayout());
+        JLabel statusLabel = new JLabel("Connecting to phone camera...");
+        statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
+        JButton captureButton = new JButton("Capture");
+        JButton cancelButton = new JButton("Cancel");
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.add(captureButton);
+        buttonPanel.add(cancelButton);
+
+        scannerDialog.add(cameraPanel, BorderLayout.CENTER);
+        scannerDialog.add(statusLabel, BorderLayout.NORTH);
+        scannerDialog.add(buttonPanel, BorderLayout.SOUTH);
+
+        PhoneCameraPanel phoneCameraPanel = new PhoneCameraPanel(ipAddress, barcode -> {
+            SwingUtilities.invokeLater(() -> {
+                onBarcodeDetected.accept(barcode);
+                if (onStatusUpdate != null) {
+                    onStatusUpdate.accept(barcode, statusLabel);
+                } else {
+                    statusLabel.setText("Detected: " + barcode + " - Scan another or Cancel to close");
+                }
+            });
+        });
+
+        cameraPanel.add(phoneCameraPanel, BorderLayout.CENTER);
+        isRunning = true;
+
+        captureButton.addActionListener(e -> {
+            BufferedImage image = phoneCameraPanel.getCurrentFrame();
+            if (image != null) {
+                String barcode = scanBarcode(image);
+                if (barcode != null) {
+                    onBarcodeDetected.accept(barcode);
+                    if (onStatusUpdate != null) {
+                        onStatusUpdate.accept(barcode, statusLabel);
+                    } else {
+                        statusLabel.setText("Detected: " + barcode + " - Scan another or Cancel to close");
+                    }
+                } else {
+                    statusLabel.setText("No barcode detected. Try again.");
+                }
+            }
+        });
+
+        cancelButton.addActionListener(e -> stopScanning());
         scannerDialog.setVisible(true);
     }
 
@@ -367,7 +559,7 @@ public class BarcodeScannerService implements IBarcodeScannerService {
                                                     if (barcode != null && isRunning) {
                                                         SwingUtilities.invokeLater(() ->
                                                                 onBarcodeDetected.accept(barcode));
-                                                        return;
+                                                        // Continue scanning - don't return
                                                     }
                                                 }
                                             } catch (Exception e) {
@@ -447,7 +639,7 @@ public class BarcodeScannerService implements IBarcodeScannerService {
                                 String barcode = scanBarcode(currentFrame);
                                 if (barcode != null) {
                                     SwingUtilities.invokeLater(() -> onBarcodeDetected.accept(barcode));
-                                    return;
+                                    // Continue scanning - don't return
                                 }
                             }
                         }
