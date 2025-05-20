@@ -261,6 +261,7 @@ public class InvoiceViewPanel extends JPanel implements RoutablePanel {
             txtCustomerName.setText(invoice.getCustomer().getName());
             txtCustomerEmail.setText(invoice.getCustomer().getEmail());
             txtCustomerPhone.setText(invoice.getPhoneNumber());
+            txtShippingAddress.setText(invoice.getDeliveryAddress());
         }
         txtPaymentMethod.setText(invoice.getPaymentMethod() != null ?
                 invoice.getPaymentMethod().getDisplayName() : "");
