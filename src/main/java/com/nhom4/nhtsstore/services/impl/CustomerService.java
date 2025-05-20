@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import com.nhom4.nhtsstore.services.ICustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -37,7 +38,37 @@ public class CustomerService implements ICustomerService {
 
     @Override
     public Customer findByEmailOrPhoneNumber(String email, String phoneNumber) {
-        return repository.findByEmailOrPhoneNumber(email, phoneNumber);
+        try {
+            List<Customer> customers = null;
+
+            if (!email.isEmpty() && !phoneNumber.isEmpty()) {
+                customers = repository.findByEmailOrPhoneNumberOrderByLastModifiedOnDesc(email, phoneNumber);
+            }
+            else if (!email.isEmpty()) {
+                customers = repository.findByEmailOrderByLastModifiedOnDesc(email);
+            }
+            else if (!phoneNumber.isEmpty()) {
+                customers = repository.findByPhoneNumberOrderByLastModifiedOnDesc(phoneNumber);
+            }
+
+            return customers != null && !customers.isEmpty() ? customers.get(0) : null;
+
+        } catch (IncorrectResultSizeDataAccessException e) {
+            System.out.println("Multiple customers found with email: " + email + " or phone: " + phoneNumber +
+                    " - using the first one found");
+
+            List<Customer> customers = repository.findByEmailOrderByLastModifiedOnDesc(email);
+            if (customers != null && !customers.isEmpty()) {
+                return customers.get(0);
+            }
+
+            customers = repository.findByPhoneNumberOrderByLastModifiedOnDesc(phoneNumber);
+            if (customers != null && !customers.isEmpty()) {
+                return customers.get(0);
+            }
+
+            return null;
+        }
     }
 
     @Override
