@@ -349,6 +349,7 @@ public class InvoicePanel extends javax.swing.JPanel implements RoutablePanel {
                     }
                 } else {
                     // For cash payments, complete immediately
+
                     completeTransaction(orderId);
                 }
             }
@@ -458,13 +459,7 @@ public class InvoicePanel extends javax.swing.JPanel implements RoutablePanel {
 
         try {
             // Create invoice
-            Invoice invoice = createInvoiceFromOrder(order);
-            invoice = invoiceService.save(invoice);
-
-            // Add invoice details
-            List<InvoiceDetail> invoiceDetails = mapCartItemsToInvoiceDetails(cart.getItems(), invoice);
-            invoice.setInvoiceDetail(invoiceDetails);
-            invoice = invoiceService.save(invoice);
+           Invoice invoice= createInvoiceFromOrder(order);
 
             // Export invoice to PDF if possible
             File pdfFile = null;
@@ -508,10 +503,12 @@ public class InvoicePanel extends javax.swing.JPanel implements RoutablePanel {
         invoice.setTotalAmount(order.getTotalAmount());
         invoice.setCreateDate(new Date());
         invoice.setPaymentMethod(order.getPaymentMethod());
-        invoice.setPaymentStatus(order.getPaymentStatus());
+        invoice.setPaymentStatus(PaymentStatus.COMPLETED);
         invoice.setPaymentTransactionId(order.getPaymentTransactionId());
+        List<InvoiceDetail> invoiceDetails = mapCartItemsToInvoiceDetails(cart.getItems(), invoice);
+        invoice.setInvoiceDetail(invoiceDetails);
 
-        return invoice;
+        return invoiceService.save(invoice);
     }
 
     private void navigateToCompletionScreen(Invoice invoice, Customer customer, File pdfFile) {
