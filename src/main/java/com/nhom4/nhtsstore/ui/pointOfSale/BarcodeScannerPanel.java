@@ -114,12 +114,18 @@ public class BarcodeScannerPanel extends JPanel implements RoutablePanel {
         scanButtonsPanel.setBorder(BorderFactory.createTitledBorder("Scan Barcode"));
         JButton scanButton = new JButton("Scan By WebCam");
         scanButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        scanButton.addActionListener(e -> barcodeScannerService.scanWithWebcam(this::handleBarcodeDetected));
+        scanButton.addActionListener(e -> barcodeScannerService.scanWithWebcam(
+                this::handleBarcodeDetected,
+                this::handleScanStatus
+        ));
         scanButtonsPanel.add(scanButton);
 
         JButton phoneButton = new JButton("Scan By Phone");
         phoneButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        phoneButton.addActionListener(e -> barcodeScannerService.scanWithPhoneCamera(this::handleBarcodeDetected));
+        phoneButton.addActionListener(e -> barcodeScannerService.scanWithPhoneCamera(
+                this::handleBarcodeDetected,
+                this::handleScanStatus
+        ));
         scanButtonsPanel.add(phoneButton);
 
         // Add scan buttons to search bar panel
@@ -327,14 +333,38 @@ public class BarcodeScannerPanel extends JPanel implements RoutablePanel {
         productsPanel.revalidate();
         productsPanel.repaint();
     }
+    private void handleScanStatus(String barcode, JLabel statusLabel) {
+        Product product = productService.findByBarcode(barcode);
+        if (product != null) {
+            boolean productExists = selectedProducts.stream()
+                    .anyMatch(p -> p.getId().equals(product.getId()));
 
+            if (productExists) {
+                statusLabel.setText("Sản phẩm " + product.getName() + " đã có trong danh sách");
+            } else {
+                statusLabel.setText("Đã thêm " + product.getName() + " vào danh sách");
+            }
+        } else {
+            statusLabel.setText("Không tìm thấy sản phẩm với mã: " + barcode);
+        }
+    }
     private void handleBarcodeDetected(String barcode) {
         Product product = productService.findByBarcode(barcode);
         if (product != null) {
-            addToSelectedProducts(product);
-            Toast.show(this, Toast.Type.SUCCESS, "Product found: " + product.getName(), ToastLocation.TOP_CENTER);
+            boolean productExists = selectedProducts.stream()
+                    .anyMatch(p -> p.getId().equals(product.getId()));
+
+            if (productExists) {
+                Toast.show(this, Toast.Type.WARNING,
+                        "Sản phẩm đã có trong danh sách", ToastLocation.TOP_CENTER);
+            } else {
+                addToSelectedProducts(product);
+                Toast.show(this, Toast.Type.SUCCESS,
+                        "Đã thêm sản phẩm: " + product.getName(), ToastLocation.TOP_CENTER);
+            }
         } else {
-            Toast.show(this, Toast.Type.ERROR, "Product not found with barcode: " + barcode, ToastLocation.TOP_CENTER);
+            Toast.show(this, Toast.Type.ERROR,
+                    "Không tìm thấy sản phẩm với mã: " + barcode, ToastLocation.TOP_CENTER);
         }
     }
     private void addAllToCart() {
