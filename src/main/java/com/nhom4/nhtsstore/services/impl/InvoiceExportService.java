@@ -5,6 +5,7 @@ import com.itextpdf.text.pdf.*;
 import com.nhom4.nhtsstore.entities.Invoice;
 import com.nhom4.nhtsstore.entities.InvoiceDetail;
 import com.nhom4.nhtsstore.services.IInvoiceExportService;
+import com.nhom4.nhtsstore.services.IInvoiceService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
@@ -20,7 +21,7 @@ import java.util.UUID;
 
 @Service
 public class InvoiceExportService implements IInvoiceExportService {
-
+    private final IInvoiceService invoiceService;
     private static Font TITLE_FONT;
     private static Font HEADER_FONT;
     private static Font NORMAL_FONT;
@@ -58,12 +59,17 @@ public class InvoiceExportService implements IInvoiceExportService {
             System.err.println("Error loading Vietnamese fonts: " + e.getMessage());
         }
     }
-
+    public InvoiceExportService(IInvoiceService invoiceService) {
+        this.invoiceService = invoiceService;
+    }
     @Value("${app.invoice.export.directory}")
     private String invoiceExportDirectory;
 
+
+
     @Override
     public void exportInvoiceToPdf(Invoice invoice, File outputFile) throws IOException {
+        invoice = invoiceService.findById(invoice.getId());
         Document document = new Document(PageSize.A4);
 
         try {
@@ -144,27 +150,27 @@ public class InvoiceExportService implements IInvoiceExportService {
 
             // Add subtotal, delivery fee and total amount
             Paragraph subtotal = new Paragraph("Tổng tiền hàng: " +
-                    CURRENCY_FORMAT.format(invoice.getTotalAmount()) + " USD", NORMAL_FONT);
+                    invoice.getTotalAmount() + " USD", NORMAL_FONT);
             subtotal.setAlignment(Element.ALIGN_RIGHT);
             document.add(subtotal);
 
             // Add delivery fee if not pickup
             if (!isPickup && invoice.getDeliveryFee() != null) {
                 Paragraph deliveryFee = new Paragraph("Phí vận chuyển: " +
-                        CURRENCY_FORMAT.format(invoice.getDeliveryFee()) + " USD", NORMAL_FONT);
+                        invoice.getDeliveryFee() + " USD", NORMAL_FONT);
                 deliveryFee.setAlignment(Element.ALIGN_RIGHT);
                 document.add(deliveryFee);
 
                 // Calculate and display grand total
                 BigDecimal grandTotal = invoice.getTotalAmount().add(invoice.getDeliveryFee());
                 Paragraph totalAmount = new Paragraph("Tổng cộng: " +
-                        CURRENCY_FORMAT.format(grandTotal) + " USD", BOLD_FONT);
+                        grandTotal+ " USD", BOLD_FONT);
                 totalAmount.setAlignment(Element.ALIGN_RIGHT);
                 document.add(totalAmount);
             } else {
                 // For pickup, just show the total amount as grand total
                 Paragraph totalAmount = new Paragraph("Tổng cộng: " +
-                        CURRENCY_FORMAT.format(invoice.getTotalAmount()) + " USD", BOLD_FONT);
+                        invoice.getTotalAmount() + " USD", BOLD_FONT);
                 totalAmount.setAlignment(Element.ALIGN_RIGHT);
                 document.add(totalAmount);
             }
@@ -217,16 +223,7 @@ public class InvoiceExportService implements IInvoiceExportService {
         }
     }
 
-    @Override
-    public File exportInvoiceToPdf(Invoice invoice) throws IOException {
-        // Create a temporary file
-        String fileName = "invoice_" + invoice.getId() + "_" + UUID.randomUUID().toString() + ".pdf";
-        File tempFile = new File(System.getProperty("java.io.tmpdir"), fileName);
 
-        exportInvoiceToPdf(invoice, tempFile);
-
-        return tempFile;
-    }
 
     @Override
     public File exportInvoiceToPdfInInvoicesDir(Invoice invoice) throws IOException {
