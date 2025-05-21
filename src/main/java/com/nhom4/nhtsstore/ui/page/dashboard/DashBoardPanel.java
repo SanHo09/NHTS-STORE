@@ -44,6 +44,7 @@ public class DashBoardPanel extends JPanel implements RoutablePanel {
     private void initComponents() {
         headerPanel = new JPanel(new BorderLayout());
         titleLabel = new JLabel(languageManager.getText("dashboard.title"));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
         titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
         headerPanel.add(titleLabel, BorderLayout.CENTER);
 
