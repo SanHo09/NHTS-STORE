@@ -19,14 +19,7 @@ public interface IInvoiceExportService {
      */
     void exportInvoiceToPdf(Invoice invoice, File outputFile) throws IOException;
 
-    /**
-     * Exports an invoice to a PDF file in the temporary directory and returns the file
-     * 
-     * @param invoice The invoice to export
-     * @return The generated PDF file
-     * @throws IOException If there is an error creating the file
-     */
-    File exportInvoiceToPdf(Invoice invoice) throws IOException;
+
 
     /**
      * Exports an invoice to a PDF file in the configured invoices directory

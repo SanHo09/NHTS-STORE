@@ -424,7 +424,7 @@ public class InvoicePanel extends javax.swing.JPanel implements RoutablePanel {
         if (statusCheckTimer != null && statusCheckTimer.isRunning()) {
             statusCheckTimer.stop();
         }
-        statusCheckTimer = new Timer(5000, e -> checkOrderStatus(orderId));
+        statusCheckTimer = new Timer(4000, e -> checkOrderStatus(orderId));
         statusCheckTimer.start();
     }
 
@@ -464,7 +464,7 @@ public class InvoicePanel extends javax.swing.JPanel implements RoutablePanel {
             // Export invoice to PDF if possible
             File pdfFile = null;
             try {
-                pdfFile = invoiceExportService.exportInvoiceToPdf(invoice);            } catch (Exception ex) {
+                pdfFile = invoiceExportService.exportInvoiceToPdfInInvoicesDir(invoice);            } catch (Exception ex) {
                 log.error("Error exporting invoice to PDF", ex);
             }
 
