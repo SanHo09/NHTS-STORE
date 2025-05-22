@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.nhom4.nhtsstore.services.IInvoiceService;
+import com.nhom4.nhtsstore.ui.ApplicationState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,6 +26,9 @@ public class InvoiceService implements IInvoiceService {
     @Autowired
     private InvoiceRepository repository;
     
+    @Autowired
+    private ApplicationState applicationState;
+    
     @Override
     public List<Invoice> findAll() {
         return repository.findAll();
@@ -32,7 +36,17 @@ public class InvoiceService implements IInvoiceService {
     
     @Override
     public Invoice findById(Long id) {
-        return repository.findById(id).orElse(null);
+        String role = applicationState.getCurrentUser().getRole();
+        String username = applicationState.getCurrentUser().getUsername();
+        
+        Invoice invoice = null;
+        
+        if (role.equals("SALE")) {
+            invoice = repository.findByIdAndCreatedBy(id, username).orElse(null);
+        } else {
+            invoice = repository.findById(id).orElse(null);
+        }
+        return invoice;
     }
     
     @Override
@@ -60,12 +74,25 @@ public class InvoiceService implements IInvoiceService {
     
     @Override
     public Page<Invoice> findAll(Pageable pageable) {
+        String role = applicationState.getCurrentUser().getRole();
+        String username = applicationState.getCurrentUser().getUsername();
+        
         pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("createDate").descending());
-        return repository.findAll(pageable);
+        Page<Invoice> result;
+        
+        if (role.equals("SALE")) {
+            result = repository.findAllByCreatedBy(username, pageable);
+        } else {
+            result = repository.findAll(pageable);
+        }
+        return result;
     }
     
     @Override
     public Page<Invoice> search(String keyword, List<String> searchFields, Pageable pageable) {
+        String role = applicationState.getCurrentUser().getRole();
+        String username = applicationState.getCurrentUser().getUsername();
+        
         Specification<Invoice> spec = Specification.where(null);
 
         if (keyword != null && !keyword.isEmpty() && searchFields != null) {
@@ -90,7 +117,9 @@ public class InvoiceService implements IInvoiceService {
 
             spec = spec.and(keywordSpec);
         }
-
+        if (role.equals("SALE")) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("createdBy"), username));
+        }
         pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("createDate").descending());
         return repository.findAll(spec, pageable);
     }

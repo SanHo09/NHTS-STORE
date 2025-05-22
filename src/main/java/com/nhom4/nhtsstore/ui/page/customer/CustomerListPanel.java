@@ -28,14 +28,19 @@ public class CustomerListPanel extends GenericTablePanel<Customer> {
         int[] columnWidths = {
             40,    // checkbox
             150,   // Name
-            150,   // Email
-            120,   // Phone Number
+            180,   // Email
+            100,   // Phone Number
             100,   // Address
-            80,   // Status
-            150,   // Updated At
-            150    // Updated By
+            60,   // Status
+            120,   // Updated At
+            120    // Updated By
         };
-        configureColumnWidths(columnWidths);
+        
+        table.addComponentListener(new java.awt.event.ComponentAdapter() {
+            public void componentResized(java.awt.event.ComponentEvent evt) {
+                configureColumnWidths(columnWidths);
+            }
+        });
         
         setHeaderAlignment(SwingConstants.LEFT);
         

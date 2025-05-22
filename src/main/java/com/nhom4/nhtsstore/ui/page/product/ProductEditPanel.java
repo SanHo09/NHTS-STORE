@@ -85,13 +85,13 @@ public class ProductEditPanel extends JPanel implements RoutablePanel {
         JSpinner salePriceField = new JSpinner(product != null 
                             ? new SpinnerNumberModel(product.getSalePrice().doubleValue(), 0.0, 1000.0, 1.0)
                             : new SpinnerNumberModel(0.0, 0.0, 1000.0, 1.0));
-        addFieldToForm(formPanel, createLabeledField("Sale Price:", salePriceField, fieldWidth), gbc, column, row++);
+        addFieldToForm(formPanel, createLabeledField("Sale Price ($):", salePriceField, fieldWidth), gbc, column, row++);
 
         // Purchase Price
         JSpinner purchasePriceField = new JSpinner(product != null 
                             ? new SpinnerNumberModel(product.getPurchasePrice().doubleValue(), 0.0, 1000.0, 1.0)
                             : new SpinnerNumberModel(0.0, 0.0, 1000.0, 1.0));
-        addFieldToForm(formPanel, createLabeledField("Purchase Price:", purchasePriceField, fieldWidth), gbc, column, row++);
+        addFieldToForm(formPanel, createLabeledField("Purchase Price ($):", purchasePriceField, fieldWidth), gbc, column, row++);
 
         // Stock
         JSpinner quantityField = new JSpinner(product != null 
@@ -304,7 +304,7 @@ public class ProductEditPanel extends JPanel implements RoutablePanel {
     private JPanel createLabeledField(String labelText, JComponent field, int width) {
         JPanel panel = new JPanel(new BorderLayout(10, 0)); // Giảm khoảng cách giữa label và field xuống 10px
         JLabel label = new JLabel(labelText);
-        label.setPreferredSize(new Dimension(100, label.getPreferredSize().height)); // Đặt chiều rộng cố định cho label
+        label.setPreferredSize(new Dimension(140, label.getPreferredSize().height)); // Đặt chiều rộng cố định cho label
 
         JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0)); // Không có khoảng cách
         field.setPreferredSize(new Dimension(width, field.getPreferredSize().height));

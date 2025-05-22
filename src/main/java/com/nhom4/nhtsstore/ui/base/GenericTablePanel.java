@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 import javax.swing.Timer;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -45,8 +46,8 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel implement
     private NavigationService navigationService;
     @Autowired
     private LanguageManager languageManager;
-    
-    private JTable table;
+    @Getter
+    protected JTable table;
     private GenericTableModel<T> tableModel;
     private JPopupMenu tableRowMenu;
     private JPopupMenu headerMenu;
@@ -256,7 +257,7 @@ public class GenericTablePanel<T extends GenericEntity> extends JPanel implement
         titleLabel.setFont(AppFont.DEFAULT_FONT.deriveFont(24f));
         // Title nằm bên trái header
         titlePanel.add(titleLabel, BorderLayout.WEST);
-        titlePanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0)); // add padding
+        titlePanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0)); // add padding
         
         // Panel chứa các nút điều khiển
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));

@@ -4,6 +4,7 @@
  */
 package com.nhom4.nhtsstore.ui.pointOfSale;
 
+import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.nhom4.nhtsstore.entities.Product;
 import com.nhom4.nhtsstore.services.impl.ProductService;
 import com.nhom4.nhtsstore.ui.navigation.NavigationService;
@@ -73,10 +74,10 @@ public class PointOfSalePanel extends JPanel implements RoutablePanel {
 
         // Create pagination controls
         JPanel paginationPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        firstPageBtn = new JButton("<<");
-        prevPageBtn = new JButton("<");
-        nextPageBtn = new JButton(">");
-        lastPageBtn = new JButton(">>");
+        firstPageBtn = new JButton(new FlatSVGIcon("icons/SkipStartFill.svg", 1.1f));
+        prevPageBtn = new JButton(new FlatSVGIcon("icons/CaretLeftFill.svg", 1.1f));
+        nextPageBtn = new JButton(new FlatSVGIcon("icons/CaretRightFill.svg", 1.1f));
+        lastPageBtn = new JButton(new FlatSVGIcon("icons/SkipEndFill.svg", 1.1f));
 
         firstPageBtn.addActionListener(e -> goToPage(0));
         prevPageBtn.addActionListener(e -> goToPage(currentPage - 1));
