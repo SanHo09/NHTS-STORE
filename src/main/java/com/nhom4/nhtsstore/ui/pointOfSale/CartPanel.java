@@ -59,22 +59,28 @@ public class CartPanel extends javax.swing.JPanel implements RoutablePanel {
         jScrollPane1.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         jScrollPane1.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         jScrollPane1.getVerticalScrollBar().setUnitIncrement(16);
+        applicationState.getCartProperty().addListener((observable, oldValue, newValue) -> {
+
+            loadCart();
+        });
     }
 
     private void loadCart() {
-        pnlTableContent.removeAll();
-        cart = applicationState.getCart();
+        SwingUtilities.invokeLater(() -> {
+            pnlTableContent.removeAll();
+            cart = applicationState.getCart();
 
-        for (CartItemVm item : cart.getItems()) {
-            var images = productImageService.findByProductId(item.getProductId());
-            CartBody cartBody = new CartBody(item, images, this::removeCartItem, this::updateCartItemQuantity);
-            pnlTableContent.add(cartBody);
-            pnlTableContent.add(Box.createVerticalStrut(10));
-        }
+            for (CartItemVm item : cart.getItems()) {
+                var images = productImageService.findByProductId(item.getProductId());
+                CartBody cartBody = new CartBody(item, images, this::removeCartItem, this::updateCartItemQuantity);
+                pnlTableContent.add(cartBody);
+                pnlTableContent.add(Box.createVerticalStrut(10));
+            }
 
-        updateDisplayTotals();
-        pnlTableContent.revalidate();
-        pnlTableContent.repaint();
+            updateDisplayTotals();
+            pnlTableContent.revalidate();
+            pnlTableContent.repaint();
+        });
     }
 
     private void updateDisplayTotals() {

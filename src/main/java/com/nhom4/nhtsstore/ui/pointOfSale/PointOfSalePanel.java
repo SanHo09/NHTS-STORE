@@ -94,51 +94,27 @@ public class PointOfSalePanel extends JPanel implements RoutablePanel {
 
 
     private void loadData() {
-//        SwingWorker<Page<Product>, Void> worker = new SwingWorker<>() {
-//            @Override
-//            protected Page<Product> doInBackground() {
-//                Pageable pageable = PageRequest.of(currentPage, pageSize);
-//                return productService.findAllByActiveIsTrue(pageable);
-//            }
-//
-//            @Override
-//            protected void done() {
-//                try {
-//                    productData = get();
-//                    contentPanel.removeAll();
-//
-//                    for (Product product : productData) {
-//                        ProductItemPanel productItemPanel = new ProductItemPanel(product, navigationService);
-//                        contentPanel.add(productItemPanel);
-//                    }
-//                    totalPages = productData.getTotalPages();
-//                    revalidate();
-//                    repaint();
-//                } catch (Exception ex) {
-//                    ex.printStackTrace();
-//                    JOptionPane.showMessageDialog(PointOfSalePanel.this, "Failed to load products.", "Error", JOptionPane.ERROR_MESSAGE);
-//                }
-//            }
-//        };
-//        worker.execute();
-        Thread.startVirtualThread(() -> {
-            try {
-                Pageable pageable = PageRequest.of(currentPage, pageSize);
-                productData = productService.findAllByActiveIsTrue(pageable);
+
+        try {
+            Pageable pageable = PageRequest.of(currentPage, pageSize);
+            productData = productService.findAllByActiveIsTrue(pageable);
+            SwingUtilities.invokeLater(() -> {
                 contentPanel.removeAll();
 
                 for (Product product : productData) {
-                    ProductItemPanel productItemPanel = new ProductItemPanel(product, navigationService);
-                    contentPanel.add(productItemPanel);
+                    Thread.startVirtualThread(() -> {
+                        ProductItemPanel productItemPanel = new ProductItemPanel(product, navigationService);
+                        contentPanel.add(productItemPanel);
+                    });
                 }
-                totalPages = productData.getTotalPages();
-                revalidate();
-                repaint();
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                JOptionPane.showMessageDialog(this, "Failed to load products.", "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        });
+            });
+            totalPages = productData.getTotalPages();
+            revalidate();
+            repaint();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Failed to load products.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void goToPage(int page) {

@@ -6,10 +6,8 @@ import com.formdev.flatlaf.icons.FlatCheckBoxIcon;
 import com.formdev.flatlaf.ui.FlatComboBoxUI;
 import com.formdev.flatlaf.ui.FlatUIUtils;
 import com.formdev.flatlaf.util.UIScale;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
+
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +22,7 @@ import javax.swing.plaf.basic.BasicComboBoxEditor;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
 import javax.swing.plaf.basic.ComboPopup;
 
+import com.nhom4.nhtsstore.utils.IconUtil;
 import lombok.Getter;
 import net.miginfocom.swing.MigLayout;
 
@@ -226,7 +225,7 @@ public class ComboBoxMultiSelection<E> extends JComboBox<E> {
             putClientProperty(FlatClientProperties.STYLE, ""
                     + "border:0,5,0,20;"
                     + "background:darken($ComboBox.background,10%)");
-            JButton cmd = new JButton(new FlatSVGIcon("/icons/MaterialSymbolsCloseSmall.svg", 0.6f));
+            JButton cmd = new JButton(IconUtil.createSwingIconFromSvg("/icons/MaterialSymbolsCloseSmall.svg",12,12,color -> Color.BLACK));
             cmd.putClientProperty(FlatClientProperties.STYLE, ""
                     + "arc:999;"
                     + "margin:1,1,1,1;"

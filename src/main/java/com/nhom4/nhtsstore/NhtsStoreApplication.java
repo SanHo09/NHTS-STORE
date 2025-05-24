@@ -79,8 +79,9 @@ public class NhtsStoreApplication {
                 JOptionPane.showMessageDialog(null,
                         "An unknown error occurred while starting the application.",
                         "Error",  JOptionPane.ERROR_MESSAGE);
-                System.exit(1);
+
             });
+            System.exit(1);
         }
     }
 
