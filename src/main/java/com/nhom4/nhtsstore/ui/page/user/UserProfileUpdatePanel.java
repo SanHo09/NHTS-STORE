@@ -76,7 +76,7 @@ public class UserProfileUpdatePanel extends JPanel implements RoutablePanel {
         txtUsername = new JTextField();
         txtEmail = new JTextField();
         txtUsername.setEditable(false);
-        txtPassword = new JPasswordField();
+        txtPassword = new JTextField();
         
         // Setup active status toggle
         toggleActive = new ToggleSwitch();
