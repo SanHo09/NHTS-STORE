@@ -15,6 +15,7 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.util.List;
 import javax.swing.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,23 +95,55 @@ public class PointOfSalePanel extends JPanel implements RoutablePanel {
 
 
     private void loadData() {
-
         try {
             Pageable pageable = PageRequest.of(currentPage, pageSize);
-            productData = productService.findAllByActiveIsTrue(pageable);
-            SwingUtilities.invokeLater(() -> {
-                contentPanel.removeAll();
-
-                for (Product product : productData) {
-                    Thread.startVirtualThread(() -> {
-                        ProductItemPanel productItemPanel = new ProductItemPanel(product, navigationService);
-                        contentPanel.add(productItemPanel);
-                    });
+            contentPanel.removeAll();
+            new SwingWorker<Page<Product>, ProductItemPanel>() {
+                @Override
+                protected Page<Product> doInBackground() {
+                    return productService.findAllByActiveIsTrue(pageable);
                 }
-            });
-            totalPages = productData.getTotalPages();
-            revalidate();
-            repaint();
+
+                @Override
+                protected void process(List<ProductItemPanel> chunks) {
+                    // Add product panels as they become available
+                    for (ProductItemPanel panel : chunks) {
+                        contentPanel.add(panel);
+                    }
+                    contentPanel.revalidate();
+                    contentPanel.repaint();
+                }
+
+                @Override
+                protected void done() {
+                    try {
+                        productData = get();
+                        totalPages = productData.getTotalPages();
+
+                        // Clear panel and add all products
+                        contentPanel.removeAll();
+                        for (Product product : productData) {
+                            ProductItemPanel panel = new ProductItemPanel(product, navigationService);
+                            contentPanel.add(panel);
+                        }
+
+                        // Update pagination buttons
+                        firstPageBtn.setEnabled(currentPage > 0);
+                        prevPageBtn.setEnabled(currentPage > 0);
+                        nextPageBtn.setEnabled(currentPage < totalPages - 1);
+                        lastPageBtn.setEnabled(currentPage < totalPages - 1);
+
+                        contentPanel.revalidate();
+                        contentPanel.repaint();
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        JOptionPane.showMessageDialog(PointOfSalePanel.this,
+                                "Failed to load products: " + ex.getMessage(),
+                                "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            }.execute();
+
         } catch (Exception ex) {
             ex.printStackTrace();
             JOptionPane.showMessageDialog(this, "Failed to load products.", "Error", JOptionPane.ERROR_MESSAGE);

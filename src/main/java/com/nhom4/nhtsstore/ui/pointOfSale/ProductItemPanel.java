@@ -8,34 +8,71 @@ import com.nhom4.nhtsstore.entities.Product;
 import com.nhom4.nhtsstore.ui.navigation.NavigationService;
 import com.nhom4.nhtsstore.ui.navigation.RouteParams;
 
+import javax.swing.*;
+
 /**
  *
  * @author Sang
  */
 public class ProductItemPanel extends javax.swing.JPanel {
-        private final NavigationService navigationService;
-        /**
-         * Creates new form ProductItem
-         * @param product
-         */
-        private Product product; 
-        
-        public ProductItemPanel(Product product, NavigationService navigationService) {
-            this.navigationService = navigationService;
-            this.product = product;
-            initComponents();
-            lblProductImage.setAlignmentX(0);
-            lblProductImage.setSize(this.getWidth(), 175);
-            lblProductName.setText(product.getName());
-            lblSalePrice.setText(product.getSalePrice() + "$");
-            lblQuantity.setText("Quantity: " + product.getQuantity() + "");
-            if (!product.getImages().isEmpty()) {
-                byte[] image = product.getImages().getFirst().getImageData();
-                ImageHelper.SetLabelImage(lblProductImage, 250, 100, image);
-            } else {
-                ImageHelper.SetLabelImage(lblProductImage, 250, 100, null);
-            }
+    private final NavigationService navigationService;
+    private Product product;
+    private SwingWorker<byte[], Void> imageLoader;
+
+    public ProductItemPanel(Product product, NavigationService navigationService) {
+        this.navigationService = navigationService;
+        this.product = product;
+        initComponents();
+
+        // Set initial text content immediately
+        lblProductName.setText(product.getName());
+        lblSalePrice.setText(product.getSalePrice() + "$");
+        lblQuantity.setText("Quantity: " + product.getQuantity() + "");
+        lblProductImage.setIcon(new ImageIcon(getClass().getResource("/images/spinner.gif")));
+        loadProductImageAsync();
+    }
+
+    private void loadProductImageAsync() {
+        if (imageLoader != null && !imageLoader.isDone()) {
+            imageLoader.cancel(true);
         }
+
+        imageLoader = new SwingWorker<byte[], Void>() {
+            @Override
+            protected byte[] doInBackground() {
+                if (!product.getImages().isEmpty()) {
+                    return product.getImages().getFirst().getImageData();
+                }
+                return null;
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    byte[] imageData = get();
+                    if (!isCancelled()) {
+                        ImageHelper.SetLabelImage(lblProductImage, 250, 100, imageData);
+                    }
+                } catch (Exception e) {
+                    // Set default image on error
+                    lblProductImage.setIcon(new ImageIcon(getClass().getResource("/images/No_Image_Available.jpg")));
+                    e.printStackTrace();
+                }
+            }
+        };
+
+        imageLoader.execute();
+    }
+
+    // Cancel background tasks when panel is removed
+    @Override
+    public void removeNotify() {
+        if (imageLoader != null && !imageLoader.isDone()) {
+            imageLoader.cancel(true);
+        }
+        super.removeNotify();
+    }
+
 
     /**
      * This method is called from within the constructor to initialize the form.
