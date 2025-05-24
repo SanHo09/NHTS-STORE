@@ -4,6 +4,7 @@ import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
 import com.nhom4.nhtsstore.entities.Invoice;
 import com.nhom4.nhtsstore.entities.InvoiceDetail;
+import com.nhom4.nhtsstore.enums.FulfilmentMethod;
 import com.nhom4.nhtsstore.services.IInvoiceExportService;
 import com.nhom4.nhtsstore.services.IInvoiceService;
 import org.springframework.beans.factory.annotation.Value;
@@ -108,7 +109,7 @@ public class InvoiceExportService implements IInvoiceExportService {
             //buyer information
             document.add(new Paragraph("THÔNG TIN NGƯỜI MUA:", HEADER_FONT));
 
-            // Handle null customer safely
+            // Handle null customer
             if (invoice.getCustomer() != null) {
                 document.add(new Paragraph("Tên khách hàng: " + invoice.getCustomer().getName(), NORMAL_FONT));
             } else {
@@ -126,7 +127,7 @@ public class InvoiceExportService implements IInvoiceExportService {
 
             // Only show delivery address for non-pickup orders
             boolean isPickup = invoice.getFulfilmentMethod() != null &&
-                    invoice.getFulfilmentMethod().toString().equals("PICKUP");
+                    invoice.getFulfilmentMethod().equals(FulfilmentMethod.CUSTOMER_TAKEAWAY);
 
             if (!isPickup && invoice.getDeliveryAddress() != null && !invoice.getDeliveryAddress().isEmpty()) {
                 document.add(new Paragraph("Địa chỉ giao hàng: " + invoice.getDeliveryAddress(), NORMAL_FONT));

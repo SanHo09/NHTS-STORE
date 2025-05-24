@@ -57,6 +57,9 @@ public class ApplicationState {
     public ObjectProperty<AppView> currentViewProperty() {
         return currentView;
     }
+    public ObjectProperty<CartVm> getCartProperty() {
+        return cart;
+    }
     public CartVm getCart() {
         return cart.getValue();
     }
@@ -83,8 +86,17 @@ public class ApplicationState {
 
 
     public void setCart(CartVm cart) {
-        this.cart.set(cart);
-        cartConfig.saveCart(currentUser.getValue().getUserId(), cart);
+        CartVm newCart = new CartVm();
+        newCart.setUserId(cart.getUserId());
+        newCart.setCreatedDate(cart.getCreatedDate());
+        newCart.setLastModifiedDate(new Date());
+        newCart.setTotalAmount(cart.getTotalAmount());
+        newCart.setItems(new ArrayList<>(cart.getItems())); // Copy all items
+
+        this.cart.set(newCart);
+
+        // Save to cart config
+        cartConfig.saveCart(currentUser.getValue().getUserId(), newCart);
     }
     public void login(UserSessionVm user) {
         currentUser.set(user);

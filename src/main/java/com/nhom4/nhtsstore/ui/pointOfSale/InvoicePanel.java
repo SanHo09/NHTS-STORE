@@ -624,7 +624,7 @@ public class InvoicePanel extends javax.swing.JPanel implements RoutablePanel {
             newOrder.setDeliveryAddress(txtAddress.getText().trim());
             newOrder.setDeliveryStatus(DeliveryStatus.IN_PROGRESS);
             newOrder.setDeliveryFee(BigDecimal.valueOf(5.00));
-            newOrder.setTotalAmount(cart.getTotalAmount().add(newOrder.getDeliveryFee()));
+            newOrder.setTotalAmount(cart.getTotalAmount());
         }
 
         // Set payment details

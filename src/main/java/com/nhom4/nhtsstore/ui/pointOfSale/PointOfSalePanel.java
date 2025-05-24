@@ -15,6 +15,7 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.util.List;
 import javax.swing.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,51 +95,59 @@ public class PointOfSalePanel extends JPanel implements RoutablePanel {
 
 
     private void loadData() {
-//        SwingWorker<Page<Product>, Void> worker = new SwingWorker<>() {
-//            @Override
-//            protected Page<Product> doInBackground() {
-//                Pageable pageable = PageRequest.of(currentPage, pageSize);
-//                return productService.findAllByActiveIsTrue(pageable);
-//            }
-//
-//            @Override
-//            protected void done() {
-//                try {
-//                    productData = get();
-//                    contentPanel.removeAll();
-//
-//                    for (Product product : productData) {
-//                        ProductItemPanel productItemPanel = new ProductItemPanel(product, navigationService);
-//                        contentPanel.add(productItemPanel);
-//                    }
-//                    totalPages = productData.getTotalPages();
-//                    revalidate();
-//                    repaint();
-//                } catch (Exception ex) {
-//                    ex.printStackTrace();
-//                    JOptionPane.showMessageDialog(PointOfSalePanel.this, "Failed to load products.", "Error", JOptionPane.ERROR_MESSAGE);
-//                }
-//            }
-//        };
-//        worker.execute();
-        Thread.startVirtualThread(() -> {
-            try {
-                Pageable pageable = PageRequest.of(currentPage, pageSize);
-                productData = productService.findAllByActiveIsTrue(pageable);
-                contentPanel.removeAll();
-
-                for (Product product : productData) {
-                    ProductItemPanel productItemPanel = new ProductItemPanel(product, navigationService);
-                    contentPanel.add(productItemPanel);
+        try {
+            Pageable pageable = PageRequest.of(currentPage, pageSize);
+            contentPanel.removeAll();
+            new SwingWorker<Page<Product>, ProductItemPanel>() {
+                @Override
+                protected Page<Product> doInBackground() {
+                    return productService.findAllByActiveIsTrue(pageable);
                 }
-                totalPages = productData.getTotalPages();
-                revalidate();
-                repaint();
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                JOptionPane.showMessageDialog(this, "Failed to load products.", "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        });
+
+                @Override
+                protected void process(List<ProductItemPanel> chunks) {
+                    // Add product panels as they become available
+                    for (ProductItemPanel panel : chunks) {
+                        contentPanel.add(panel);
+                    }
+                    contentPanel.revalidate();
+                    contentPanel.repaint();
+                }
+
+                @Override
+                protected void done() {
+                    try {
+                        productData = get();
+                        totalPages = productData.getTotalPages();
+
+                        // Clear panel and add all products
+                        contentPanel.removeAll();
+                        for (Product product : productData) {
+                            ProductItemPanel panel = new ProductItemPanel(product, navigationService);
+                            contentPanel.add(panel);
+                        }
+
+                        // Update pagination buttons
+                        firstPageBtn.setEnabled(currentPage > 0);
+                        prevPageBtn.setEnabled(currentPage > 0);
+                        nextPageBtn.setEnabled(currentPage < totalPages - 1);
+                        lastPageBtn.setEnabled(currentPage < totalPages - 1);
+
+                        contentPanel.revalidate();
+                        contentPanel.repaint();
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        JOptionPane.showMessageDialog(PointOfSalePanel.this,
+                                "Failed to load products: " + ex.getMessage(),
+                                "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            }.execute();
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Failed to load products.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void goToPage(int page) {
